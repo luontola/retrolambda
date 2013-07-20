@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/end-to-end-tests/end-to-end-tests.iml" filepath="$PROJECT_DIR$/end-to-end-tests/end-to-end-tests.iml" />
+      <module fileurl="file://$PROJECT_DIR$/parent/parent.iml" filepath="$PROJECT_DIR$/parent/parent.iml" />
+      <module fileurl="file://$PROJECT_DIR$/project.iml" filepath="$PROJECT_DIR$/project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/retrolambda/retrolambda.iml" filepath="$PROJECT_DIR$/retrolambda/retrolambda.iml" />
+    </modules>
+  </component>
+</project>
+
