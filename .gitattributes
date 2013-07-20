@@ -1,0 +1,8 @@
+*.txt           eol=lf
+*.md            eol=lf
+*.java          eol=lf
+*.properties    eol=lf
+*.rb            eol=lf
+*.xml           eol=lf
+*.html          eol=lf
+*.iml           eol=lf
