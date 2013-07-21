@@ -10,7 +10,7 @@ import java.util.Properties;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) {
         System.out.println("Retrolambda " + getVersion());
 
         Path classesDir = Paths.get(args[0]);
@@ -19,19 +19,28 @@ public class Main {
             return;
         }
 
-        Files.walkFileTree(classesDir, new BytecodeTransformingFileVisitor() {
-            protected byte[] transform(byte[] bytecode) {
-                return LambdaBackporter.transform(bytecode);
-            }
-        });
+        try {
+            Files.walkFileTree(classesDir, new BytecodeTransformingFileVisitor() {
+                protected byte[] transform(byte[] bytecode) {
+                    return LambdaBackporter.transform(bytecode);
+                }
+            });
+
+        } catch (Throwable t) {
+            System.out.println("Error! Failed to transform some classes");
+            t.printStackTrace(System.out);
+            System.exit(1);
+        }
     }
 
-    private static String getVersion() throws IOException {
+    private static String getVersion() {
         Properties p = new Properties();
         try (InputStream in = ClassLoader.getSystemResourceAsStream("META-INF/maven/net.orfjackal.retrolambda/retrolambda/pom.properties")) {
             if (in != null) {
                 p.load(in);
             }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return p.getProperty("version", "DEVELOPMENT-VERSION");
     }
