@@ -46,6 +46,30 @@
                 </executions>
             </plugin>
 
+            <!-- Process our byte codes to make them run on Java 7 -->
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>process-test-classes</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
+                                    <arg value="-jar"/>
+                                    <arg value="../retrolambda/target/retrolambda-${project.version}.jar"/>
+                                    <arg value="${project.build.testOutputDirectory}"/>
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 

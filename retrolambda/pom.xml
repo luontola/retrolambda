@@ -13,6 +13,15 @@
     <artifactId>retrolambda</artifactId>
     <packaging>jar</packaging>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-debug-all</artifactId>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <plugins>
 
@@ -21,11 +30,28 @@
                 <artifactId>maven-jar-plugin</artifactId>
                 <configuration>
                     <archive>
+                        <manifest>
+                            <mainClass>net.orfjackal.retrolambda.Main</mainClass>
+                        </manifest>
                         <manifestEntries>
                             <Premain-Class>net.orfjackal.retrolambda.SpikeAgent</Premain-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
+            </plugin>
+
+            <!-- Create an uber jar containing all dependencies -->
+            <!-- XXX: we cannot relocate the classes or minimize the JAR, because the shade plugin doesn't yet support Java 8 -->
+
+            <plugin>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

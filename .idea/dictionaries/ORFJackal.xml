@@ -1,3 +1,10 @@
 <component name="ProjectDictionaryState">
-  <dictionary name="ORFJackal" />
+  <dictionary name="ORFJackal">
+    <words>
+      <w>backport</w>
+      <w>backporter</w>
+      <w>bytecode</w>
+      <w>retrolambda</w>
+    </words>
+  </dictionary>
 </component>
