@@ -152,6 +152,9 @@ public class LambdaUsageBackporter {
             } else if (handle.getTag() == Opcodes.H_INVOKESPECIAL) {
                 return lookup.findSpecial(owner, handle.getName(), type, owner);
 
+            } else if (handle.getTag() == Opcodes.H_INVOKEVIRTUAL) {
+                return lookup.findVirtual(owner, handle.getName(), type);
+
             } else {
                 throw new AssertionError("unexpected tag: " + handle.getTag());
             }

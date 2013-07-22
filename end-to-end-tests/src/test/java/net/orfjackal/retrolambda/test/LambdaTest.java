@@ -65,4 +65,12 @@ public class LambdaTest {
 
         assertThat(lambda.call(), is(36));
     }
+
+    @Test
+    public void method_references_to_virtual_methods() throws Exception {
+        String foo = "foo";
+        Callable<String> ref = foo::toUpperCase;
+
+        assertThat(ref.call(), is("FOO"));
+    }
 }
