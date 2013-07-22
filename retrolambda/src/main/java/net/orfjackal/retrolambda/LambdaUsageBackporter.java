@@ -43,6 +43,7 @@ public class LambdaUsageBackporter {
 
     private static class MyClassVisitor extends ClassVisitor {
         private String myClassName;
+        private final List<LambdaFactoryMethod> lambdaFactoryMethods = new ArrayList<>();
 
         public MyClassVisitor(ClassWriter cw) {
             super(Opcodes.ASM4, cw);
@@ -60,16 +61,26 @@ public class LambdaUsageBackporter {
                 access = Flags.makeNonPrivate(access);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, myClassName);
+            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, myClassName, lambdaFactoryMethods);
+        }
+
+        @Override
+        public void visitEnd() {
+            for (LambdaFactoryMethod factoryMethod : lambdaFactoryMethods) {
+                factoryMethod.generateMethod(cv);
+            }
+            super.visitEnd();
         }
     }
 
     private static class InvokeDynamicInsnConvertingMethodVisitor extends MethodVisitor {
         private final String myClassName;
+        private final List<LambdaFactoryMethod> lambdaFactoryMethods;
 
-        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName) {
+        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName, List<LambdaFactoryMethod> lambdaFactoryMethods) {
             super(api, mv);
             this.myClassName = myClassName;
+            this.lambdaFactoryMethods = lambdaFactoryMethods;
         }
 
         @Override
@@ -98,10 +109,9 @@ public class LambdaUsageBackporter {
                 callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
                 String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
 
-                // TODO: constructor parameters for lambda
-                super.visitTypeInsn(Opcodes.NEW, lambdaClass);
-                super.visitInsn(Opcodes.DUP);
-                super.visitMethodInsn(Opcodes.INVOKESPECIAL, lambdaClass, "<init>", "()V");
+                LambdaFactoryMethod factoryMethod = new LambdaFactoryMethod(invokedType, lambdaClass);
+                lambdaFactoryMethods.add(factoryMethod);
+                super.visitMethodInsn(Opcodes.INVOKESTATIC, myClassName, factoryMethod.getName(), invokedType.getDescriptor());
 
             } catch (Throwable t) {
                 throw new RuntimeException(t);
@@ -166,6 +176,40 @@ public class LambdaUsageBackporter {
 
         } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    private static class LambdaFactoryMethod {
+        private final Type invokedType;
+        private final String lambdaClass;
+
+        public LambdaFactoryMethod(Type invokedType, String lambdaClass) {
+            this.invokedType = invokedType;
+            this.lambdaClass = lambdaClass;
+        }
+
+        public void generateMethod(ClassVisitor cv) {
+            MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
+                    getName(), invokedType.getDescriptor(), null, null);
+            mv.visitCode();
+            mv.visitTypeInsn(Opcodes.NEW, lambdaClass);
+            mv.visitInsn(Opcodes.DUP);
+            Type[] argumentTypes = invokedType.getArgumentTypes();
+            for (int i = 0; i < argumentTypes.length; i++) {
+                mv.visitVarInsn(Opcodes.ALOAD, i);
+            }
+            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
+            mv.visitInsn(Opcodes.ARETURN);
+            mv.visitMaxs(0, 0); // rely on COMPUTE_MAXS
+            mv.visitEnd();
+        }
+
+        public String getName() {
+            return "lambdaFactory$" + lambdaClass.replaceFirst(".+\\$\\$Lambda\\$", "");
+        }
+
+        private static String withVoidReturnType(Type type) {
+            return Type.getMethodType(Type.VOID_TYPE, type.getArgumentTypes()).getDescriptor();
         }
     }
 }
