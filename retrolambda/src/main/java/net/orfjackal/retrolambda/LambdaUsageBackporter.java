@@ -146,21 +146,22 @@ public class LambdaUsageBackporter {
             MethodType type = MethodType.fromMethodDescriptorString(handle.getDesc(), classLoader);
             Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
 
-            if (handle.getTag() == Opcodes.H_INVOKESTATIC) {
-                return lookup.findStatic(owner, handle.getName(), type);
+            switch (handle.getTag()) {
+                case Opcodes.H_INVOKESTATIC:
+                    return lookup.findStatic(owner, handle.getName(), type);
 
-            } else if (handle.getTag() == Opcodes.H_INVOKESPECIAL) {
-                return lookup.findSpecial(owner, handle.getName(), type, owner);
+                case Opcodes.H_INVOKEVIRTUAL:
+                case Opcodes.H_INVOKEINTERFACE:
+                    return lookup.findVirtual(owner, handle.getName(), type);
 
-            } else if (handle.getTag() == Opcodes.H_NEWINVOKESPECIAL) {
-                return lookup.findConstructor(owner, type);
+                case Opcodes.H_INVOKESPECIAL:
+                    return lookup.findSpecial(owner, handle.getName(), type, owner);
 
-            } else if (handle.getTag() == Opcodes.H_INVOKEVIRTUAL
-                    || handle.getTag() == Opcodes.H_INVOKEINTERFACE) {
-                return lookup.findVirtual(owner, handle.getName(), type);
+                case Opcodes.H_NEWINVOKESPECIAL:
+                    return lookup.findConstructor(owner, type);
 
-            } else {
-                throw new AssertionError("unexpected tag: " + handle.getTag());
+                default:
+                    throw new AssertionError("Unexpected handle type: " + handle);
             }
         }
     }
