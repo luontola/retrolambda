@@ -18,10 +18,12 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
 
     private static final BlockingDeque<String> foundLambdaClasses = new LinkedBlockingDeque<>(1); // we expect only one at a time
     private final Path outputDir;
+    private final int targetVersion;
     private final List<ClassLoader> ignoredClassLoaders = new ArrayList<>();
 
-    public LambdaSavingClassFileTransformer(Path outputDir) {
+    public LambdaSavingClassFileTransformer(Path outputDir, int targetVersion) {
         this.outputDir = outputDir;
+        this.targetVersion = targetVersion;
         for (ClassLoader cl = ClassLoader.getSystemClassLoader(); cl != null; cl = cl.getParent()) {
             ignoredClassLoaders.add(cl);
         }
@@ -45,7 +47,7 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
         try {
             System.out.println("Saving lambda class: " + className);
             foundLambdaClasses.push(className);
-            byte[] transformedBytes = LambdaClassBackporter.transform(classfileBuffer);
+            byte[] transformedBytes = LambdaClassBackporter.transform(classfileBuffer,targetVersion);
             Path savePath = outputDir.resolve(className + ".class");
             Files.createDirectories(savePath.getParent());
             Files.write(savePath, transformedBytes);

@@ -43,6 +43,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <minimumMavenVersion>3.0.3</minimumMavenVersion>
+        <testBytecodeVersion>51</testBytecodeVersion>
     </properties>
 
     <prerequisites>
@@ -329,6 +330,46 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>java6</id>
+
+            <properties>
+                <testBytecodeVersion>50</testBytecodeVersion>
+            </properties>
+
+            <build>
+                <plugins>
+
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <jvm>${env.JAVA6_HOME}/bin/java</jvm>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-java6</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireEnvironmentVariable>
+                                            <variableName>JAVA6_HOME</variableName>
+                                        </requireEnvironmentVariable>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>coverage-report</id>
             <build>

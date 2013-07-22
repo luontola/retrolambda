@@ -4,12 +4,15 @@
 
 package net.orfjackal.retrolambda;
 
+import org.objectweb.asm.Opcodes;
+
 import java.nio.file.*;
 import java.util.Properties;
 
 public class Config {
 
     private static final String PREFIX = "retrolambda.";
+    private static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
     private static final String INPUT_DIR = PREFIX + "inputDir";
     private static final String OUTPUT_DIR = PREFIX + "outputDir";
     private static final String CLASSPATH = PREFIX + "classpath";
@@ -18,6 +21,10 @@ public class Config {
 
     public Config(Properties p) {
         this.p = p;
+    }
+
+    public int getBytecodeVersion() {
+        return Integer.parseInt(p.getProperty(BYTECODE_VERSION, "" + Opcodes.V1_7));
     }
 
     public Path getInputDir() {

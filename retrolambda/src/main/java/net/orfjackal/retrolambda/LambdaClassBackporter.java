@@ -11,20 +11,25 @@ public class LambdaClassBackporter {
     private static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
 
-    public static byte[] transform(byte[] bytecode) {
+    public static byte[] transform(byte[] bytecode, int targetVersion) {
         ClassWriter writer = new ClassWriter(0);
-        new ClassReader(bytecode).accept(new MyClassVisitor(writer), 0);
+        new ClassReader(bytecode).accept(new MyClassVisitor(writer, targetVersion), 0);
         return writer.toByteArray();
     }
 
     private static class MyClassVisitor extends ClassVisitor {
+        private final int targetVersion;
 
-        public MyClassVisitor(ClassWriter cw) {
+        public MyClassVisitor(ClassWriter cw, int targetVersion) {
             super(Opcodes.ASM4, cw);
+            this.targetVersion = targetVersion;
         }
 
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            if (version > targetVersion) {
+                version = targetVersion;
+            }
             if (superName.equals(MAGIC_LAMBDA_IMPL)) {
                 superName = JAVA_LANG_OBJECT;
             }

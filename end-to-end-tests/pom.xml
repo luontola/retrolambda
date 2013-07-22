@@ -61,6 +61,7 @@
                             <target>
                                 <property name="compile_classpath" refid="maven.compile.classpath"/>
                                 <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
+                                    <arg value="-Dretrolambda.bytecodeVersion=${testBytecodeVersion}"/>
                                     <arg value="-Dretrolambda.inputDir=${project.build.outputDirectory}"/>
                                     <arg value="-Dretrolambda.classpath=${compile_classpath}"/>
                                     <arg value="-javaagent:../retrolambda/target/retrolambda-${project.version}.jar"/>
@@ -80,6 +81,7 @@
                             <target>
                                 <property name="test_classpath" refid="maven.test.classpath"/>
                                 <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
+                                    <arg value="-Dretrolambda.bytecodeVersion=${testBytecodeVersion}"/>
                                     <arg value="-Dretrolambda.inputDir=${project.build.testOutputDirectory}"/>
                                     <arg value="-Dretrolambda.classpath=${test_classpath}"/>
                                     <arg value="-javaagent:../retrolambda/target/retrolambda-${project.version}.jar"/>

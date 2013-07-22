@@ -11,7 +11,8 @@ public class PreMain {
 
     public static void premain(String agentArgs, Instrumentation inst) {
         Config config = new Config(System.getProperties());
+        int bytecodeVersion = config.getBytecodeVersion();
         Path outputDir = config.getOutputDir();
-        inst.addTransformer(new LambdaSavingClassFileTransformer(outputDir));
+        inst.addTransformer(new LambdaSavingClassFileTransformer(outputDir,bytecodeVersion));
     }
 }

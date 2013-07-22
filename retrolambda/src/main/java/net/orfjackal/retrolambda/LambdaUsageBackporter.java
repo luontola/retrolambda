@@ -20,11 +20,11 @@ public class LambdaUsageBackporter {
     private static final String LAMBDA_METAFACTORY = "java/lang/invoke/LambdaMetafactory";
     private static final Pattern LAMBDA_IMPL_METHOD = Pattern.compile("^lambda\\$\\d+$");
 
-    public static byte[] transform(byte[] bytecode) {
+    public static byte[] transform(byte[] bytecode, int targetVersion) {
         asmJava8SupportWorkaround(bytecode);
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        new ClassReader(bytecode).accept(new MyClassVisitor(writer), 0);
-        return writer.toByteArray();
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        new ClassReader(bytecode).accept(new MyClassVisitor(cw, targetVersion), 0);
+        return cw.toByteArray();
     }
 
     private static void asmJava8SupportWorkaround(byte[] bytecode) {
@@ -43,14 +43,19 @@ public class LambdaUsageBackporter {
 
     private static class MyClassVisitor extends ClassVisitor {
         private final List<LambdaFactoryMethod> lambdaFactoryMethods = new ArrayList<>();
+        private final int targetVersion;
         private String className;
 
-        public MyClassVisitor(ClassWriter cw) {
+        public MyClassVisitor(ClassWriter cw, int targetVersion) {
             super(Opcodes.ASM4, cw);
+            this.targetVersion = targetVersion;
         }
 
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+            if (version > targetVersion) {
+                version = targetVersion;
+            }
             super.visit(version, access, name, signature, superName, interfaces);
             this.className = name;
         }
