@@ -194,9 +194,10 @@ public class LambdaUsageBackporter {
             mv.visitCode();
             mv.visitTypeInsn(Opcodes.NEW, lambdaClass);
             mv.visitInsn(Opcodes.DUP);
-            Type[] argumentTypes = invokedType.getArgumentTypes();
-            for (int i = 0; i < argumentTypes.length; i++) {
-                mv.visitVarInsn(Opcodes.ALOAD, i);
+            int varIndex = 0;
+            for (Type type : invokedType.getArgumentTypes()) {
+                mv.visitVarInsn(getLoadInsn(type), varIndex);
+                varIndex += type.getSize();
             }
             mv.visitMethodInsn(Opcodes.INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
             mv.visitInsn(Opcodes.ARETURN);
@@ -206,6 +207,25 @@ public class LambdaUsageBackporter {
 
         public String getName() {
             return "lambdaFactory$" + lambdaClass.replaceFirst(".+\\$\\$Lambda\\$", "");
+        }
+
+        private static int getLoadInsn(Type type) {
+            switch (type.getSort()) {
+                case Type.BOOLEAN:
+                case Type.CHAR:
+                case Type.BYTE:
+                case Type.SHORT:
+                case Type.INT:
+                    return Opcodes.ILOAD;
+                case Type.LONG:
+                    return Opcodes.LLOAD;
+                case Type.FLOAT:
+                    return Opcodes.FLOAD;
+                case Type.DOUBLE:
+                    return Opcodes.DLOAD;
+                default:
+                    return Opcodes.ALOAD;
+            }
         }
 
         private static String withVoidReturnType(Type type) {

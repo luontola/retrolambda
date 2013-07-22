@@ -50,4 +50,19 @@ public class LambdaTest {
 
         assertThat(localVar[0], is(42));
     }
+
+    @Test
+    public void lambda_using_local_variables_of_primitive_types() throws Exception {
+        boolean bool = true;
+        byte b = 2;
+        short s = 3;
+        int i = 4;
+        long l = 5;
+        float f = 6;
+        double d = 7;
+        char c = 8;
+        Callable<Integer> lambda = () -> (int) ((bool ? 1 : 0) + b + s + i + l + f + d + c);
+
+        assertThat(lambda.call(), is(36));
+    }
 }
