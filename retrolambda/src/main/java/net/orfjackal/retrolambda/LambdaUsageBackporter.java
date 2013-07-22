@@ -11,7 +11,7 @@ import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-public class LambdaBackporter {
+public class LambdaUsageBackporter {
 
     private static final int JAVA_8_BYTECODE_VERSION = 52;
     private static final int MAJOR_VERSION_OFFSET = 6;

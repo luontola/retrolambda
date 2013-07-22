@@ -25,7 +25,7 @@ public class Main {
         try {
             Files.walkFileTree(inputDir, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
                 protected byte[] transform(byte[] bytecode) {
-                    return LambdaBackporter.transform(bytecode);
+                    return LambdaUsageBackporter.transform(bytecode);
                 }
             });
 
