@@ -34,9 +34,10 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
         try {
             System.out.println("Saving lambda class: " + className);
             foundLambdaClasses.push(className);
+            byte[] transformedBytes = LambdaClassBackporter.transform(classfileBuffer);
             Path savePath = outputDir.resolve(className + ".class");
             Files.createDirectories(savePath.getParent());
-            Files.write(savePath, classfileBuffer);
+            Files.write(savePath, transformedBytes);
 
         } catch (IOException e) {
             e.printStackTrace();
