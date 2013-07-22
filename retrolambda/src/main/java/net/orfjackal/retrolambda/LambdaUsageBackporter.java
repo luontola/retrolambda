@@ -42,8 +42,8 @@ public class LambdaUsageBackporter {
     }
 
     private static class MyClassVisitor extends ClassVisitor {
-        private String myClassName;
         private final List<LambdaFactoryMethod> lambdaFactoryMethods = new ArrayList<>();
+        private String className;
 
         public MyClassVisitor(ClassWriter cw) {
             super(Opcodes.ASM4, cw);
@@ -52,7 +52,7 @@ public class LambdaUsageBackporter {
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             super.visit(version, access, name, signature, superName, interfaces);
-            this.myClassName = name;
+            this.className = name;
         }
 
         @Override
@@ -61,7 +61,7 @@ public class LambdaUsageBackporter {
                 access = Flags.makeNonPrivate(access);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, myClassName, lambdaFactoryMethods);
+            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className, lambdaFactoryMethods);
         }
 
         @Override
@@ -97,7 +97,8 @@ public class LambdaUsageBackporter {
         }
 
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
-            Class<?> invoker = Class.forName(myClassName.replace('/', '.'));
+            ClassLoader cl = Thread.currentThread().getContextClassLoader();
+            Class<?> invoker = cl.loadClass(myClassName.replace('/', '.'));
             callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
             String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
 

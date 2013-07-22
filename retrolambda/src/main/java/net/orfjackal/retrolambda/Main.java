@@ -5,8 +5,9 @@
 package net.orfjackal.retrolambda;
 
 import java.io.*;
+import java.net.*;
 import java.nio.file.*;
-import java.util.Properties;
+import java.util.*;
 
 public class Main {
 
@@ -16,8 +17,10 @@ public class Main {
         Config config = new Config(System.getProperties());
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
+        String classpath = config.getClasspath();
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
+        System.out.println("Classpath:        " + classpath);
 
         if (!Files.isDirectory(inputDir)) {
             System.out.println("Nothing to do; not a directory: " + inputDir);
@@ -25,6 +28,7 @@ public class Main {
         }
 
         try {
+            Thread.currentThread().setContextClassLoader(new URLClassLoader(asUrls(classpath)));
             Files.walkFileTree(inputDir, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
                 protected byte[] transform(byte[] bytecode) {
                     return LambdaUsageBackporter.transform(bytecode);
@@ -35,6 +39,22 @@ public class Main {
             System.out.println("Error! Failed to transform some classes");
             t.printStackTrace(System.out);
             System.exit(1);
+        }
+    }
+
+    private static URL[] asUrls(String classpath) {
+        String[] paths = classpath.split(System.getProperty("path.separator"));
+        return Arrays.asList(paths).stream()
+                .map(s -> Paths.get(s).toUri())
+                .map(Main::uriToUrl)
+                .toArray(URL[]::new);
+    }
+
+    private static URL uriToUrl(URI uri) {
+        try {
+            return uri.toURL();
+        } catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
     }
 

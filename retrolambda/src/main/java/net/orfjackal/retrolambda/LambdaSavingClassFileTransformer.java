@@ -8,18 +8,24 @@ import java.io.IOException;
 import java.lang.instrument.*;
 import java.nio.file.*;
 import java.security.ProtectionDomain;
+import java.util.*;
 import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
 
-    private static final Pattern LAMBDA_CLASS = Pattern.compile(".+\\$\\$Lambda\\$\\d+$");
+    private static final Pattern LAMBDA_CLASS = Pattern.compile("^.+\\$\\$Lambda\\$\\d+$");
 
     private static final BlockingDeque<String> foundLambdaClasses = new LinkedBlockingDeque<>(1); // we expect only one at a time
     private final Path outputDir;
+    private final List<ClassLoader> ignoredClassLoaders = new ArrayList<>();
 
     public LambdaSavingClassFileTransformer(Path outputDir) {
         this.outputDir = outputDir;
+        for (ClassLoader cl = ClassLoader.getSystemClassLoader(); cl != null; cl = cl.getParent()) {
+            ignoredClassLoaders.add(cl);
+        }
+        ignoredClassLoaders.add(null);
     }
 
     public static String getLastFoundLambdaClass() {
@@ -28,7 +34,12 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-        if (!LAMBDA_CLASS.matcher(className).matches()) {
+        if (ignoredClassLoaders.contains(loader)) {
+            // Avoid saving any classes from the JDK or Retrolambda itself.
+            // The transformed application classes have their own class loader.
+            return null;
+        }
+        if (!isLambdaClass(className)) {
             return null;
         }
         try {
@@ -43,5 +54,9 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private static boolean isLambdaClass(String className) {
+        return LAMBDA_CLASS.matcher(className).matches();
     }
 }

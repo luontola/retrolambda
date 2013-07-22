@@ -9,8 +9,10 @@ import java.util.Properties;
 
 public class Config {
 
-    private static final String INPUT_DIR = "retrolambda.inputDir";
-    private static final String OUTPUT_DIR = "retrolambda.outputDir";
+    private static final String PREFIX = "retrolambda.";
+    private static final String INPUT_DIR = PREFIX + "inputDir";
+    private static final String OUTPUT_DIR = PREFIX + "outputDir";
+    private static final String CLASSPATH = PREFIX + "classpath";
 
     private final Properties p;
 
@@ -19,11 +21,7 @@ public class Config {
     }
 
     public Path getInputDir() {
-        String inputDir = p.getProperty(INPUT_DIR);
-        if (inputDir == null) {
-            throw new IllegalArgumentException("Missing required property: " + INPUT_DIR);
-        }
-        return Paths.get(inputDir);
+        return Paths.get(getRequiredProperty(INPUT_DIR));
     }
 
     public Path getOutputDir() {
@@ -32,5 +30,17 @@ public class Config {
             return getInputDir();
         }
         return Paths.get(outputDir);
+    }
+
+    public String getClasspath() {
+        return getRequiredProperty(CLASSPATH);
+    }
+
+    private String getRequiredProperty(String key) {
+        String value = p.getProperty(key);
+        if (value == null) {
+            throw new IllegalArgumentException("Missing required property: " + key);
+        }
+        return value;
     }
 }
