@@ -19,4 +19,12 @@ public class LambdaTest {
 
         assertThat(lambda.call(), is("some value"));
     }
+
+    @Test
+    public void lambda_returning_nothing() {
+        Runnable lambda = () -> {
+        };
+
+        lambda.run();
+    }
 }

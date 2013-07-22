@@ -22,7 +22,7 @@ public class LambdaUsageBackporter {
 
     public static byte[] transform(byte[] bytecode) {
         asmJava8SupportWorkaround(bytecode);
-        ClassWriter writer = new ClassWriter(0);
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         new ClassReader(bytecode).accept(new MyClassVisitor(writer), 0);
         return writer.toByteArray();
     }
