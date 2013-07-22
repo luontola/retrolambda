@@ -21,7 +21,6 @@ public abstract class BytecodeTransformingFileVisitor extends SimpleFileVisitor<
     @Override
     public FileVisitResult visitFile(Path inputFile, BasicFileAttributes attrs) throws IOException {
         if (isJavaClass(inputFile)) {
-            System.out.println(inputFile); // TODO: remove debug printing
             byte[] originalBytes = Files.readAllBytes(inputFile);
             byte[] transformedBytes = transform(originalBytes);
 

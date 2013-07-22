@@ -85,17 +85,6 @@ public class LambdaUsageBackporter {
 
         @Override
         public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-            // TODO: remove debug code
-            System.out.println("visitInvokeDynamicInsn\n" +
-                    "\t" + name + "\n" +
-                    "\t" + desc + "\n" +
-                    "\t" + bsm + "\n" +
-                    "\t" + Arrays.toString(bsmArgs));
-            System.out.println("bsm.getDesc() = " + bsm.getDesc());
-            System.out.println("bsm.getName() = " + bsm.getName());
-            System.out.println("bsm.getOwner() = " + bsm.getOwner());
-            System.out.println("bsm.getTag() = " + bsm.getTag());
-
             if (bsm.getOwner().equals(LAMBDA_METAFACTORY)) {
                 backportLambda(name, Type.getType(desc), bsm, bsmArgs);
             } else {
