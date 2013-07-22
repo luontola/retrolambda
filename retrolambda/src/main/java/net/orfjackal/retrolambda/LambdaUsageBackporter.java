@@ -86,28 +86,27 @@ public class LambdaUsageBackporter {
         @Override
         public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
             if (bsm.getOwner().equals(LAMBDA_METAFACTORY)) {
-                backportLambda(name, Type.getType(desc), bsm, bsmArgs);
+                try {
+                    backportLambda(name, Type.getType(desc), bsm, bsmArgs);
+                } catch (Throwable t) {
+                    throw new RuntimeException(t);
+                }
             } else {
                 super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
             }
         }
 
-        private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
-            try {
-                Class<?> invoker = Class.forName(myClassName.replace('/', '.'));
-                callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
-                String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
+        private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
+            Class<?> invoker = Class.forName(myClassName.replace('/', '.'));
+            callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
+            String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
 
-                LambdaFactoryMethod factoryMethod = new LambdaFactoryMethod(invokedType, lambdaClass);
-                lambdaFactoryMethods.add(factoryMethod);
-                super.visitMethodInsn(Opcodes.INVOKESTATIC, myClassName, factoryMethod.getName(), invokedType.getDescriptor());
-
-            } catch (Throwable t) {
-                throw new RuntimeException(t);
-            }
+            LambdaFactoryMethod factoryMethod = new LambdaFactoryMethod(invokedType, lambdaClass);
+            lambdaFactoryMethods.add(factoryMethod);
+            super.visitMethodInsn(Opcodes.INVOKESTATIC, myClassName, factoryMethod.getName(), invokedType.getDescriptor());
         }
 
-        private CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
+        private static CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
             ClassLoader cl = invoker.getClassLoader();
             MethodHandles.Lookup caller = getLookup(invoker);
 
@@ -122,34 +121,28 @@ public class LambdaUsageBackporter {
             MethodHandle bootstrapMethod = toMethodHandle(bsm, cl, caller);
             return (CallSite) bootstrapMethod.invokeWithArguments(args);
         }
-    }
 
-    private static MethodHandles.Lookup getLookup(Class<?> targetClass) {
-        try {
+        private static MethodHandles.Lookup getLookup(Class<?> targetClass) throws Exception {
             Constructor<MethodHandles.Lookup> ctor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
             ctor.setAccessible(true);
             return ctor.newInstance(targetClass);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
-    }
 
-    private static Object asmToInvokerType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) {
-        if (arg instanceof Type) {
-            return toMethodType((Type) arg, classLoader);
-        } else if (arg instanceof Handle) {
-            return toMethodHandle((Handle) arg, classLoader, caller);
-        } else {
-            return arg;
+        private static Object asmToInvokerType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) throws Exception {
+            if (arg instanceof Type) {
+                return toMethodType((Type) arg, classLoader);
+            } else if (arg instanceof Handle) {
+                return toMethodHandle((Handle) arg, classLoader, caller);
+            } else {
+                return arg;
+            }
         }
-    }
 
-    private static MethodType toMethodType(Type type, ClassLoader classLoader) {
-        return MethodType.fromMethodDescriptorString(type.getInternalName(), classLoader);
-    }
+        private static MethodType toMethodType(Type type, ClassLoader classLoader) {
+            return MethodType.fromMethodDescriptorString(type.getInternalName(), classLoader);
+        }
 
-    private static MethodHandle toMethodHandle(Handle handle, ClassLoader classLoader, MethodHandles.Lookup lookup) {
-        try {
+        private static MethodHandle toMethodHandle(Handle handle, ClassLoader classLoader, MethodHandles.Lookup lookup) throws Exception {
             MethodType type = MethodType.fromMethodDescriptorString(handle.getDesc(), classLoader);
             Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
 
@@ -162,9 +155,6 @@ public class LambdaUsageBackporter {
             } else {
                 throw new AssertionError("unexpected tag: " + handle.getTag());
             }
-
-        } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException e) {
-            throw new RuntimeException(e);
         }
     }
 
