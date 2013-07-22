@@ -153,8 +153,13 @@ public class LambdaUsageBackporter {
         try {
             MethodType type = MethodType.fromMethodDescriptorString(handle.getDesc(), classLoader);
             Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
+
             if (handle.getTag() == Opcodes.H_INVOKESTATIC) {
                 return lookup.findStatic(owner, handle.getName(), type);
+
+            } else if (handle.getTag() == Opcodes.H_INVOKESPECIAL) {
+                return lookup.findSpecial(owner, handle.getName(), type, owner);
+
             } else {
                 throw new AssertionError("unexpected tag: " + handle.getTag());
             }

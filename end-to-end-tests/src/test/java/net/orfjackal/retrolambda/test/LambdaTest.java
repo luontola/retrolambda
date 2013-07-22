@@ -27,4 +27,16 @@ public class LambdaTest {
 
         lambda.run();
     }
+
+    private int instanceVar = 0;
+
+    @Test
+    public void lambda_using_instance_variables() {
+        Runnable lambda = () -> {
+            instanceVar = 42;
+        };
+        lambda.run();
+
+        assertThat(instanceVar, is(42));
+    }
 }
