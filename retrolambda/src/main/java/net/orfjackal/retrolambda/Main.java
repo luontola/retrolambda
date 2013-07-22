@@ -4,8 +4,6 @@
 
 package net.orfjackal.retrolambda;
 
-import org.objectweb.asm.Opcodes;
-
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
@@ -13,29 +11,19 @@ import java.util.*;
 
 public class Main {
 
-    private static Map<Integer, String> bytecodeVersionNames = new HashMap<>();
-
-    static {
-        bytecodeVersionNames.put(Opcodes.V1_1, "Java 1.1");
-        bytecodeVersionNames.put(Opcodes.V1_2, "Java 1.2");
-        bytecodeVersionNames.put(Opcodes.V1_3, "Java 1.3");
-        bytecodeVersionNames.put(Opcodes.V1_4, "Java 1.4");
-        bytecodeVersionNames.put(Opcodes.V1_5, "Java 5");
-        bytecodeVersionNames.put(Opcodes.V1_6, "Java 6");
-        bytecodeVersionNames.put(Opcodes.V1_7, "Java 7");
-        bytecodeVersionNames.put(Opcodes.V1_7 + 1, "Java 8");
-    }
-
     public static void main(String[] args) {
         System.out.println("Retrolambda " + getVersion());
 
         Config config = new Config(System.getProperties());
+        if (!config.isFullyConfigured()) {
+            System.out.print(config.getHelp());
+            return;
+        }
         int bytecodeVersion = config.getBytecodeVersion();
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
         String classpath = config.getClasspath();
-        System.out.println("Bytecode version: " + bytecodeVersion
-                + " (" + bytecodeVersionNames.getOrDefault(bytecodeVersion, "unknown version") + ")");
+        System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
