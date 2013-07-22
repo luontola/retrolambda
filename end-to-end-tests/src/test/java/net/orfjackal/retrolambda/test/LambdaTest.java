@@ -16,18 +16,18 @@ import static org.hamcrest.Matchers.*;
 public class LambdaTest {
 
     @Test
-    public void lambda_returning_value() throws Exception {
-        Callable<String> lambda = () -> "some value";
-
-        assertThat(lambda.call(), is("some value"));
-    }
-
-    @Test
-    public void lambda_returning_nothing() {
+    public void empty_lambda() {
         Runnable lambda = () -> {
         };
 
         lambda.run();
+    }
+
+    @Test
+    public void lambda_returning_a_value() throws Exception {
+        Callable<String> lambda = () -> "some value";
+
+        assertThat(lambda.call(), is("some value"));
     }
 
     private interface Function1<IN, OUT> {
@@ -39,6 +39,11 @@ public class LambdaTest {
         Function1<String, Integer> lambda = (String s) -> s.getBytes(StandardCharsets.UTF_16BE).length;
 
         assertThat(lambda.apply("foo"), is(6));
+    }
+
+    @Test
+    public void lambda_in_project_main_sources() throws Exception {
+        assertThat(InMainSources.callLambda(), is(42));
     }
 
     private int instanceVar = 0;
