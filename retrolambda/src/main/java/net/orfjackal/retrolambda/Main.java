@@ -16,6 +16,8 @@ public class Main {
         Config config = new Config(System.getProperties());
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
+        System.out.println("Input directory:  " + inputDir);
+        System.out.println("Output directory: " + outputDir);
 
         if (!Files.isDirectory(inputDir)) {
             System.out.println("Nothing to do; not a directory: " + inputDir);
