@@ -33,8 +33,8 @@ public class LambdaClassBackporter {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-            if (name.equals("<init>") && hasFlag(access, Opcodes.ACC_PRIVATE)) {
-                access = clearFlag(access, Opcodes.ACC_PRIVATE); // make package-private (i.e. no flag)
+            if (name.equals("<init>")) {
+                access = Flags.makeNonPrivate(access);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new MagicLambdaRemovingMethodVisitor(mv);
@@ -57,13 +57,5 @@ public class LambdaClassBackporter {
             }
             super.visitMethodInsn(opcode, owner, name, desc);
         }
-    }
-
-    private static boolean hasFlag(int subject, int flag) {
-        return (subject & flag) == flag;
-    }
-
-    private static int clearFlag(int subject, int flag) {
-        return subject & ~flag;
     }
 }

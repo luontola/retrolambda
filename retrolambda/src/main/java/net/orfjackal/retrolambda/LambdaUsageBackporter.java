@@ -10,11 +10,15 @@ import java.lang.invoke.*;
 import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class LambdaUsageBackporter {
 
     private static final int JAVA_8_BYTECODE_VERSION = 52;
     private static final int MAJOR_VERSION_OFFSET = 6;
+
+    private static final String LAMBDA_METAFACTORY = "java/lang/invoke/LambdaMetafactory";
+    private static final Pattern LAMBDA_IMPL_METHOD = Pattern.compile("^lambda\\$\\d+$");
 
     public static byte[] transform(byte[] bytecode) {
         asmJava8SupportWorkaround(bytecode);
@@ -52,6 +56,9 @@ public class LambdaUsageBackporter {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+            if (LAMBDA_IMPL_METHOD.matcher(name).matches()) {
+                access = Flags.makeNonPrivate(access);
+            }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, myClassName);
         }
@@ -78,7 +85,7 @@ public class LambdaUsageBackporter {
             System.out.println("bsm.getOwner() = " + bsm.getOwner());
             System.out.println("bsm.getTag() = " + bsm.getTag());
 
-            if (bsm.getOwner().equals("java/lang/invoke/LambdaMetafactory")) {
+            if (bsm.getOwner().equals(LAMBDA_METAFACTORY)) {
                 backportLambda(name, Type.getType(desc), bsm, bsmArgs);
             } else {
                 super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
