@@ -39,4 +39,15 @@ public class LambdaTest {
 
         assertThat(instanceVar, is(42));
     }
+
+    @Test
+    public void lambda_using_local_variables() {
+        int[] localVar = new int[1];
+        Runnable lambda = () -> {
+            localVar[0] = 42;
+        };
+        lambda.run();
+
+        assertThat(localVar[0], is(42));
+    }
 }
