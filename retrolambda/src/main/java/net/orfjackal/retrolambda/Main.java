@@ -13,14 +13,17 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Retrolambda " + getVersion());
 
-        Path classesDir = Paths.get(args[0]);
-        if (!Files.isDirectory(classesDir)) {
-            System.out.println("Nothing to do; not a directory: " + classesDir);
+        Config config = new Config(System.getProperties());
+        Path inputDir = config.getInputDir();
+        Path outputDir = config.getOutputDir();
+
+        if (!Files.isDirectory(inputDir)) {
+            System.out.println("Nothing to do; not a directory: " + inputDir);
             return;
         }
 
         try {
-            Files.walkFileTree(classesDir, new BytecodeTransformingFileVisitor() {
+            Files.walkFileTree(inputDir, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
                 protected byte[] transform(byte[] bytecode) {
                     return LambdaBackporter.transform(bytecode);
                 }

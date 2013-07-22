@@ -8,22 +8,26 @@ import java.io.IOException;
 import java.lang.instrument.*;
 import java.nio.file.*;
 import java.security.ProtectionDomain;
+import java.util.regex.Pattern;
 
-public class SpikeAgent {
-    public static void premain(String agentArgs, Instrumentation inst) {
-        inst.addTransformer(new MyClassFileTransformer());
+public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
+
+    private static final Pattern LAMBDA_CLASS = Pattern.compile(".+\\$\\$Lambda\\$\\d+$");
+
+    private final Path outputDir;
+
+    public LambdaSavingClassFileTransformer(Path outputDir) {
+        this.outputDir = outputDir;
     }
-}
 
-class MyClassFileTransformer implements ClassFileTransformer {
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
-        if (!className.contains("$$Lambda$")) {
+        if (!LAMBDA_CLASS.matcher(className).matches()) {
             return null;
         }
         try {
-            System.out.println(className);
-            Path savePath = Paths.get("generated", className + ".class");
+            System.out.println("Saving lambda class: " + className);
+            Path savePath = outputDir.resolve(className + ".class");
             Files.createDirectories(savePath.getParent());
             Files.write(savePath, classfileBuffer);
 

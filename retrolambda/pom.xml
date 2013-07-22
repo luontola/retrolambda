@@ -34,7 +34,7 @@
                             <mainClass>net.orfjackal.retrolambda.Main</mainClass>
                         </manifest>
                         <manifestEntries>
-                            <Premain-Class>net.orfjackal.retrolambda.SpikeAgent</Premain-Class>
+                            <Premain-Class>net.orfjackal.retrolambda.PreMain</Premain-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>

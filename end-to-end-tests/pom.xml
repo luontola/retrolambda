@@ -61,6 +61,8 @@
                             <target>
                                 <property name="test_classpath" refid="maven.test.classpath"/>
                                 <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
+                                    <arg value="-Dretrolambda.inputDir=${project.build.testOutputDirectory}"/>
+                                    <arg value="-javaagent:../retrolambda/target/retrolambda-${project.version}.jar"/>
                                     <arg value="-cp"/>
                                     <arg value="../retrolambda/target/retrolambda-${project.version}.jar${path.separator}${test_classpath}"/>
                                     <!-- XXX: using -jar overrides any -cp or CLASSPATH env var; try adding a custom property? -->

@@ -10,13 +10,24 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public abstract class BytecodeTransformingFileVisitor extends SimpleFileVisitor<Path> {
 
+    private final Path inputDir;
+    private final Path outputDir;
+
+    public BytecodeTransformingFileVisitor(Path inputDir, Path outputDir) {
+        this.inputDir = inputDir;
+        this.outputDir = outputDir;
+    }
+
     @Override
-    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        if (isJavaClass(file)) {
-            System.out.println(file);
-            byte[] originalBytes = Files.readAllBytes(file);
+    public FileVisitResult visitFile(Path inputFile, BasicFileAttributes attrs) throws IOException {
+        if (isJavaClass(inputFile)) {
+            System.out.println(inputFile); // TODO: remove debug printing
+            byte[] originalBytes = Files.readAllBytes(inputFile);
             byte[] transformedBytes = transform(originalBytes);
-            Files.write(file, transformedBytes);
+
+            Path outputFile = outputDir.resolve(inputDir.relativize(inputFile));
+            Files.createDirectories(outputFile.getParent());
+            Files.write(outputFile, transformedBytes);
         }
         return FileVisitResult.CONTINUE;
     }
