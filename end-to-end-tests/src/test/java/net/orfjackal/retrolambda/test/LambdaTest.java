@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.concurrent.Callable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class LambdaTest {
 
@@ -81,5 +81,20 @@ public class LambdaTest {
         Callable<Integer> ref = foos::size;
 
         assertThat(ref.call(), is(1));
+    }
+
+    @Test
+    public void method_references_to_static_methods() throws Exception {
+        long expected = System.currentTimeMillis();
+        Callable<Long> ref = System::currentTimeMillis;
+
+        assertThat(ref.call(), is(greaterThanOrEqualTo(expected)));
+    }
+
+    @Test
+    public void method_references_to_constructors() throws Exception {
+        Callable<ArrayList<?>> ref = ArrayList::new;
+
+        assertThat(ref.call(), is(instanceOf(ArrayList.class)));
     }
 }
