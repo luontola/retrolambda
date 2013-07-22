@@ -6,6 +6,7 @@ package net.orfjackal.retrolambda.test;
 
 import org.junit.Test;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.Callable;
 
@@ -27,6 +28,17 @@ public class LambdaTest {
         };
 
         lambda.run();
+    }
+
+    private interface Function1<IN, OUT> {
+        OUT apply(IN value);
+    }
+
+    @Test
+    public void lambda_taking_parameters() {
+        Function1<String, Integer> lambda = (String s) -> s.getBytes(StandardCharsets.UTF_16BE).length;
+
+        assertThat(lambda.apply("foo"), is(6));
     }
 
     private int instanceVar = 0;
