@@ -93,7 +93,7 @@ public class LambdaTest {
 
     @Test
     public void method_references_to_constructors() throws Exception {
-        Callable<ArrayList<?>> ref = ArrayList::new;
+        Callable<List<String>> ref = ArrayList<String>::new;
 
         assertThat(ref.call(), is(instanceOf(ArrayList.class)));
     }
