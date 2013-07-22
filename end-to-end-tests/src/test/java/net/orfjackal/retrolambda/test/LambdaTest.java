@@ -6,6 +6,7 @@ package net.orfjackal.retrolambda.test;
 
 import org.junit.Test;
 
+import java.util.*;
 import java.util.concurrent.Callable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -72,5 +73,13 @@ public class LambdaTest {
         Callable<String> ref = foo::toUpperCase;
 
         assertThat(ref.call(), is("FOO"));
+    }
+
+    @Test
+    public void method_references_to_interface_methods() throws Exception {
+        List<String> foos = Arrays.asList("foo");
+        Callable<Integer> ref = foos::size;
+
+        assertThat(ref.call(), is(1));
     }
 }
