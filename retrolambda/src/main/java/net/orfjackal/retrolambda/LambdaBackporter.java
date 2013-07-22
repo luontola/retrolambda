@@ -89,9 +89,12 @@ public class LambdaBackporter {
             try {
                 Class<?> invoker = Class.forName(myClassName.replace('/', '.'));
                 callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
+                String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
 
-                // TODO: find out the name of the generated class and call it here
-                super.visitMethodInsn(Opcodes.INVOKESPECIAL, "com/example/Placeholder", "<init>", "()V");
+                // TODO: constructor parameters for lambda
+                super.visitTypeInsn(Opcodes.NEW, lambdaClass);
+                super.visitInsn(Opcodes.DUP);
+                super.visitMethodInsn(Opcodes.INVOKESPECIAL, lambdaClass, "<init>", "()V");
 
             } catch (Throwable t) {
                 throw new RuntimeException(t);
