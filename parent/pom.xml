@@ -152,6 +152,8 @@
 
             <plugin>
                 <artifactId>maven-source-plugin</artifactId>
+                <!-- Overrides the version from oss-parent -->
+                <version>2.2</version>
                 <executions>
                     <execution>
                         <id>attach-sources</id>
@@ -163,7 +165,20 @@
             </plugin>
 
             <plugin>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <!-- Overrides the version from oss-parent -->
+                <version>2.9.1</version>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-release-plugin</artifactId>
+                <!-- Overrides the version from oss-parent -->
+                <version>2.4.1</version>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
+                <!-- Overrides the version from oss-parent -->
                 <version>1.3.1</version>
                 <executions>
                     <execution>
@@ -207,7 +222,7 @@
                              There appears to be some stale state from previous executions of the Shade plugin,
                              which manifest themselves as "We have a duplicate" warnings on build and also as
                              some classes not being updated on build. -->
-                        <id>delete-old-artifact</id>
+                        <id>shade-plugin-workaround</id>
                         <phase>prepare-package</phase>
                         <goals>
                             <goal>run</goal>
@@ -243,16 +258,6 @@
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>2.4</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-source-plugin</artifactId>
-                    <version>2.1.2</version>
-                </plugin>
-
-                <plugin>
-                    <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.9.1</version>
                 </plugin>
 
                 <plugin>
