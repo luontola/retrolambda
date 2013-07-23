@@ -208,12 +208,15 @@
                         <configuration>
                             <rules>
                                 <requireFilesExist>
-                                    <message>
-                                        Java installation directory not found. Set the necessary environment variable.
-                                    </message>
+                                    <message>Java installation directory not found: ${compileJavaHome}</message>
+                                    <files>
+                                        <file>${compileJavaHome}</file>
+                                    </files>
+                                </requireFilesExist>
+                                <requireFilesExist>
+                                    <message>Java installation directory not found: ${testJavaHome}</message>
                                     <files>
                                         <file>${testJavaHome}</file>
-                                        <file>${compileJavaHome}</file>
                                     </files>
                                 </requireFilesExist>
                             </rules>
