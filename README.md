@@ -22,31 +22,32 @@ the latest retrolambda.jar from Maven Central.
 
 Use JDK 8 to compile your source code.
 
-Run Retrolambda on the class files produced by JDK 8. Run `java -jar
-retrolambda.jar` without any additional options to see the instructions.
-For an example of how to do this with Maven, see how maven-dependency-plugin
-and maven-antrun-plugin are used in [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
+Run Retrolambda, using Java 8, on the class files produced by JDK 8. Run
+`java -jar retrolambda.jar` without any additional options to see the
+instructions. For an example of how to do this with Maven, see how
+maven-dependency-plugin and maven-antrun-plugin are used in
+[end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
 
-Your class files should now run on Java 7.
-
-Be sure to run comprehensive tests on Java 7, in case the code accidentally
-uses Java 8 APIs or language features that Retrolambda doesn't backport.
+Your class files should now run on Java 7. Be sure to run comprehensive tests on
+Java 7, in case the code accidentally uses Java 8 APIs or language features that
+Retrolambda doesn't backport.
 
 
 Compiling
 ---------
 
-Set the environment variables `JAVA8_HOME`, `JAVA7_HOME` and optionally
-also `JAVA6_HOME` point to the installation directories of those particular
-JDK versions.
+Set the environment variables `JAVA8_HOME` and `JAVA7_HOME` (optionally also
+`JAVA6_HOME` and `JAVA5_HOME`) point to the installation directories of those
+particular JDK versions.
 
 Compile the project with Maven using the command:
 
     mvn clean verify
 
-To run the tests using Java 6, use the command:
+To run the tests using Java 6 and Java 5, use the commands:
 
     mvn clean verify -P java6
+    mvn clean verify -P java5
 
 Finally copy the executable JAR from the `retrolambda/target/` directory.
 

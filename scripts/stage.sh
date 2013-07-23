@@ -10,6 +10,10 @@ mvn clean verify \
     --errors \
     -P java6
 
+mvn clean verify \
+    --errors \
+    -P java5
+
 mvn clean deploy \
     --errors \
     -P sonatype-oss-release \
