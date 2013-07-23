@@ -17,8 +17,8 @@ that may let you go down to Java 1.4.
 User Guide
 ----------
 
-[Download](https://oss.sonatype.org/content/repositories/releases/net/orfjackal/retrolambda/retrolambda/)
-the latest retrolambda.jar from Maven Central.
+[Download](http://repo.maven.apache.org/maven2/net/orfjackal/retrolambda/retrolambda/)
+the latest `retrolambda.jar` from Maven Central.
 
 Use JDK 8 to compile your source code.
 
