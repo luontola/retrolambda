@@ -17,17 +17,15 @@ that may let you go down to Java 1.4.
 User Guide
 ----------
 
-Until downloads are available, follow the instructions in
-[Compiling](#compiling) to build Retrolambda yourselves.
+[Download](https://oss.sonatype.org/content/repositories/releases/net/orfjackal/retrolambda/retrolambda/)
+the latest retrolambda.jar from Maven Central.
 
 Use JDK 8 to compile your source code.
 
 Run Retrolambda on the class files produced by JDK 8. Run `java -jar
 retrolambda.jar` without any additional options to see the instructions.
-
-For an example of how to do this with Maven AntRun Plugin, see [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
-Also Maven Dependency Plugin's [dependency:copy](http://maven.apache.org/plugins/maven-dependency-plugin/copy-mojo.html)
-may be useful for copying retrolambda.jar to a known location.
+For an example of how to do this with Maven, see how maven-dependency-plugin
+and maven-antrun-plugin are used in [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
 
 Your class files should now run on Java 7.
 
