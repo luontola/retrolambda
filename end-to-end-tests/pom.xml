@@ -49,10 +49,35 @@
             <!-- Process our byte codes to make them run on Java 7 -->
 
             <plugin>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-retrolambda</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>net.orfjackal.retrolambda</groupId>
+                                    <artifactId>retrolambda</artifactId>
+                                    <version>${project.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}</outputDirectory>
+                                    <destFileName>retrolambda.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-antrun-plugin</artifactId>
                 <executions>
                     <execution>
-                        <id>process-classes</id>
+                        <id>retrolambda-classes</id>
                         <phase>process-classes</phase>
                         <goals>
                             <goal>run</goal>
@@ -64,15 +89,15 @@
                                     <arg value="-Dretrolambda.bytecodeVersion=${testBytecodeVersion}"/>
                                     <arg value="-Dretrolambda.inputDir=${project.build.outputDirectory}"/>
                                     <arg value="-Dretrolambda.classpath=${compile_classpath}"/>
-                                    <arg value="-javaagent:../retrolambda/target/retrolambda-${project.version}.jar"/>
+                                    <arg value="-javaagent:${project.build.directory}/retrolambda.jar"/>
                                     <arg value="-jar"/>
-                                    <arg value="../retrolambda/target/retrolambda-${project.version}.jar"/>
+                                    <arg value="${project.build.directory}/retrolambda.jar"/>
                                 </exec>
                             </target>
                         </configuration>
                     </execution>
                     <execution>
-                        <id>process-test-classes</id>
+                        <id>retrolambda-test-classes</id>
                         <phase>process-test-classes</phase>
                         <goals>
                             <goal>run</goal>
@@ -84,9 +109,9 @@
                                     <arg value="-Dretrolambda.bytecodeVersion=${testBytecodeVersion}"/>
                                     <arg value="-Dretrolambda.inputDir=${project.build.testOutputDirectory}"/>
                                     <arg value="-Dretrolambda.classpath=${test_classpath}"/>
-                                    <arg value="-javaagent:../retrolambda/target/retrolambda-${project.version}.jar"/>
+                                    <arg value="-javaagent:${project.build.directory}/retrolambda.jar"/>
                                     <arg value="-jar"/>
-                                    <arg value="../retrolambda/target/retrolambda-${project.version}.jar"/>
+                                    <arg value="${project.build.directory}/retrolambda.jar"/>
                                 </exec>
                             </target>
                         </configuration>
