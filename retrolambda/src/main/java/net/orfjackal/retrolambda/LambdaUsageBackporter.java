@@ -12,6 +12,8 @@ import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static org.objectweb.asm.Opcodes.*;
+
 public class LambdaUsageBackporter {
 
     private static final int JAVA_8_BYTECODE_VERSION = 52;
@@ -47,7 +49,7 @@ public class LambdaUsageBackporter {
         private String className;
 
         public MyClassVisitor(ClassWriter cw, int targetVersion) {
-            super(Opcodes.ASM4, cw);
+            super(ASM4, cw);
             this.targetVersion = targetVersion;
         }
 
@@ -109,7 +111,7 @@ public class LambdaUsageBackporter {
 
             LambdaFactoryMethod factoryMethod = new LambdaFactoryMethod(invokedType, lambdaClass);
             lambdaFactoryMethods.add(factoryMethod);
-            super.visitMethodInsn(Opcodes.INVOKESTATIC, myClassName, factoryMethod.getName(), invokedType.getDescriptor());
+            super.visitMethodInsn(INVOKESTATIC, myClassName, factoryMethod.getName(), invokedType.getDescriptor());
         }
 
         private static CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
@@ -153,17 +155,17 @@ public class LambdaUsageBackporter {
             Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
 
             switch (handle.getTag()) {
-                case Opcodes.H_INVOKESTATIC:
+                case H_INVOKESTATIC:
                     return lookup.findStatic(owner, handle.getName(), type);
 
-                case Opcodes.H_INVOKEVIRTUAL:
-                case Opcodes.H_INVOKEINTERFACE:
+                case H_INVOKEVIRTUAL:
+                case H_INVOKEINTERFACE:
                     return lookup.findVirtual(owner, handle.getName(), type);
 
-                case Opcodes.H_INVOKESPECIAL:
+                case H_INVOKESPECIAL:
                     return lookup.findSpecial(owner, handle.getName(), type, owner);
 
-                case Opcodes.H_NEWINVOKESPECIAL:
+                case H_NEWINVOKESPECIAL:
                     return lookup.findConstructor(owner, type);
 
                 default:
@@ -182,43 +184,24 @@ public class LambdaUsageBackporter {
         }
 
         public void generateMethod(ClassVisitor cv) {
-            MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PRIVATE | Opcodes.ACC_STATIC | Opcodes.ACC_SYNTHETIC,
+            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC,
                     getName(), invokedType.getDescriptor(), null, null);
             mv.visitCode();
-            mv.visitTypeInsn(Opcodes.NEW, lambdaClass);
-            mv.visitInsn(Opcodes.DUP);
+            mv.visitTypeInsn(NEW, lambdaClass);
+            mv.visitInsn(DUP);
             int varIndex = 0;
             for (Type type : invokedType.getArgumentTypes()) {
-                mv.visitVarInsn(getLoadInsn(type), varIndex);
+                mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
                 varIndex += type.getSize();
             }
-            mv.visitMethodInsn(Opcodes.INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
-            mv.visitInsn(Opcodes.ARETURN);
-            mv.visitMaxs(0, 0); // rely on COMPUTE_MAXS
+            mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
+            mv.visitInsn(ARETURN);
+            mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
             mv.visitEnd();
         }
 
         public String getName() {
             return "lambdaFactory$" + lambdaClass.replaceFirst(".+\\$\\$Lambda\\$", "");
-        }
-
-        private static int getLoadInsn(Type type) {
-            switch (type.getSort()) {
-                case Type.BOOLEAN:
-                case Type.CHAR:
-                case Type.BYTE:
-                case Type.SHORT:
-                case Type.INT:
-                    return Opcodes.ILOAD;
-                case Type.LONG:
-                    return Opcodes.LLOAD;
-                case Type.FLOAT:
-                    return Opcodes.FLOAD;
-                case Type.DOUBLE:
-                    return Opcodes.DLOAD;
-                default:
-                    return Opcodes.ALOAD;
-            }
         }
 
         private static String withVoidReturnType(Type type) {

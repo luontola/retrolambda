@@ -6,6 +6,8 @@ package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.*;
 
+import static org.objectweb.asm.Opcodes.*;
+
 public class LambdaClassBackporter {
 
     private static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
@@ -21,7 +23,7 @@ public class LambdaClassBackporter {
         private final int targetVersion;
 
         public MyClassVisitor(ClassWriter cw, int targetVersion) {
-            super(Opcodes.ASM4, cw);
+            super(ASM4, cw);
             this.targetVersion = targetVersion;
         }
 
@@ -49,12 +51,12 @@ public class LambdaClassBackporter {
     private static class MagicLambdaRemovingMethodVisitor extends MethodVisitor {
 
         public MagicLambdaRemovingMethodVisitor(MethodVisitor mv) {
-            super(Opcodes.ASM4, mv);
+            super(ASM4, mv);
         }
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-            if (opcode == Opcodes.INVOKESPECIAL
+            if (opcode == INVOKESPECIAL
                     && owner.equals(MAGIC_LAMBDA_IMPL)
                     && name.equals("<init>")
                     && desc.equals("()V")) {

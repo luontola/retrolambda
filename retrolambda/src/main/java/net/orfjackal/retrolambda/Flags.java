@@ -4,13 +4,13 @@
 
 package net.orfjackal.retrolambda;
 
-import org.objectweb.asm.Opcodes;
+import static org.objectweb.asm.Opcodes.ACC_PRIVATE;
 
 public class Flags {
 
     public static int makeNonPrivate(int access) {
-        if (hasFlag(access, Opcodes.ACC_PRIVATE)) {
-            return clearFlag(access, Opcodes.ACC_PRIVATE); // make package-private (i.e. no flag)
+        if (hasFlag(access, ACC_PRIVATE)) {
+            return clearFlag(access, ACC_PRIVATE); // make package-private (i.e. no flag)
         }
         return access;
     }
