@@ -81,6 +81,8 @@ Version History
 
 ### Upcoming Changes
 
+- Create only one instance of lambdas which do not capture arguments; i.e.
+  the same optimization as what JDK 8 does
 - Start the sequence number of lambda classes from one (e.g.
   `com.example.Foo$$Lambda$1`) for each enclosing class
 

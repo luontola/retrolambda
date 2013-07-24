@@ -91,7 +91,7 @@ public class LambdaUsageBackporter {
         @Override
         public void visitEnd() {
             for (LambdaFactoryMethod factoryMethod : lambdaFactoryMethods) {
-                factoryMethod.generateMethod(cv);
+                factoryMethod.generate(cv);
             }
             super.visitEnd();
         }
@@ -200,19 +200,27 @@ public class LambdaUsageBackporter {
             this.lambdaClass = lambdaClass;
         }
 
-        public void generateMethod(ClassVisitor cv) {
+        public void generate(ClassVisitor cv) {
             MethodVisitor mv = cv.visitMethod(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC,
                     getName(), invokedType.getDescriptor(), null, null);
             mv.visitCode();
-            mv.visitTypeInsn(NEW, lambdaClass);
-            mv.visitInsn(DUP);
-            int varIndex = 0;
-            for (Type type : invokedType.getArgumentTypes()) {
-                mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
-                varIndex += type.getSize();
+
+            if (invokedType.getArgumentTypes().length == 0) {
+                // TODO: knowledge about this field is split between here and LambdaClassBackporter; move this factory method there
+                mv.visitFieldInsn(GETSTATIC, lambdaClass, "instance", "L" + lambdaClass + ";");
+                mv.visitInsn(ARETURN);
+            } else {
+                mv.visitTypeInsn(NEW, lambdaClass);
+                mv.visitInsn(DUP);
+                int varIndex = 0;
+                for (Type type : invokedType.getArgumentTypes()) {
+                    mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
+                    varIndex += type.getSize();
+                }
+                mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
+                mv.visitInsn(ARETURN);
             }
-            mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
-            mv.visitInsn(ARETURN);
+
             mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
             mv.visitEnd();
         }
