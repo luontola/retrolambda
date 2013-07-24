@@ -79,7 +79,12 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-**Retrolambda 1.0.0 (2013-07-23)**
+### Upcoming Changes
+
+- Start the sequence number of lambda classes from one (e.g.
+  `com.example.Foo$$Lambda$1`) for each enclosing class
+
+### Retrolambda 1.0.0 (2013-07-23)
 
 - Backports lambda expressions and method handles to Java 7 and older
 - Tested to work with JDK 8 Early Access Build b99 (2013-07-19)

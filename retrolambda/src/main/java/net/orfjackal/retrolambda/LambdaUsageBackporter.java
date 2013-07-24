@@ -5,11 +5,13 @@
 package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.*;
+import org.objectweb.asm.Type;
 
 import java.lang.invoke.*;
-import java.lang.reflect.Constructor;
+import java.lang.reflect.*;
 import java.nio.ByteBuffer;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -24,6 +26,7 @@ public class LambdaUsageBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         asmJava8SupportWorkaround(bytecode);
+        resetLambdaClassSequenceNumber();
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         new ClassReader(bytecode).accept(new MyClassVisitor(cw, targetVersion), 0);
         return cw.toByteArray();
@@ -42,6 +45,20 @@ public class LambdaUsageBackporter {
             throw new IllegalArgumentException("Only Java 8 and lower is supported, but bytecode version was " + majorVersion);
         }
     }
+
+    private static void resetLambdaClassSequenceNumber() {
+        try {
+            Field counterField = Class.forName("java.lang.invoke.InnerClassLambdaMetafactory").getDeclaredField("counter");
+            counterField.setAccessible(true);
+            AtomicInteger counter = (AtomicInteger) counterField.get(null);
+            counter.set(0);
+        } catch (Exception e) {
+            System.err.println("WARNING: Failed to start class numbering from one. Don't worry, it's cosmetic, " +
+                    "but please file a bug report and tell on which JDK version this happened.");
+            e.printStackTrace();
+        }
+    }
+
 
     private static class MyClassVisitor extends ClassVisitor {
         private final List<LambdaFactoryMethod> lambdaFactoryMethods = new ArrayList<>();
