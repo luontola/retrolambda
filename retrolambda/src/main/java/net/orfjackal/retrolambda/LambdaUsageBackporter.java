@@ -61,7 +61,6 @@ public class LambdaUsageBackporter {
 
 
     private static class MyClassVisitor extends ClassVisitor {
-        private final List<LambdaFactoryMethod> lambdaFactoryMethods = new ArrayList<>();
         private final int targetVersion;
         private String className;
 
@@ -85,26 +84,16 @@ public class LambdaUsageBackporter {
                 access = Flags.makeNonPrivate(access);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className, lambdaFactoryMethods);
-        }
-
-        @Override
-        public void visitEnd() {
-            for (LambdaFactoryMethod factoryMethod : lambdaFactoryMethods) {
-                factoryMethod.generate(cv);
-            }
-            super.visitEnd();
+            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className);
         }
     }
 
     private static class InvokeDynamicInsnConvertingMethodVisitor extends MethodVisitor {
         private final String myClassName;
-        private final List<LambdaFactoryMethod> lambdaFactoryMethods;
 
-        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName, List<LambdaFactoryMethod> lambdaFactoryMethods) {
+        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName) {
             super(api, mv);
             this.myClassName = myClassName;
-            this.lambdaFactoryMethods = lambdaFactoryMethods;
         }
 
         @Override
@@ -126,9 +115,9 @@ public class LambdaUsageBackporter {
             callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
             String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
 
-            LambdaFactoryMethod factoryMethod = new LambdaFactoryMethod(invokedType, lambdaClass);
-            lambdaFactoryMethods.add(factoryMethod);
-            super.visitMethodInsn(INVOKESTATIC, myClassName, factoryMethod.getName(), invokedType.getDescriptor());
+            // TODO: get rid of toFactoryMethodDesc by changing the method's return type to be same as invokedType
+            String factoryDesc = LambdaClassBackporter.toFactoryMethodDesc(lambdaClass, invokedType);
+            super.visitMethodInsn(INVOKESTATIC, lambdaClass, LambdaClassBackporter.FACTORY_METHOD_NAME, factoryDesc);
         }
 
         private static CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
@@ -140,7 +129,7 @@ public class LambdaUsageBackporter {
             args.add(invokedName);
             args.add(toMethodType(invokedType, cl));
             for (Object arg : bsmArgs) {
-                args.add(asmToInvokerType(arg, cl, caller));
+                args.add(asmToJdkType(arg, cl, caller));
             }
 
             MethodHandle bootstrapMethod = toMethodHandle(bsm, cl, caller);
@@ -153,7 +142,7 @@ public class LambdaUsageBackporter {
             return ctor.newInstance(targetClass);
         }
 
-        private static Object asmToInvokerType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) throws Exception {
+        private static Object asmToJdkType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) throws Exception {
             if (arg instanceof Type) {
                 return toMethodType((Type) arg, classLoader);
             } else if (arg instanceof Handle) {
@@ -188,49 +177,6 @@ public class LambdaUsageBackporter {
                 default:
                     throw new AssertionError("Unexpected handle type: " + handle);
             }
-        }
-    }
-
-    private static class LambdaFactoryMethod {
-        private final Type invokedType;
-        private final String lambdaClass;
-
-        public LambdaFactoryMethod(Type invokedType, String lambdaClass) {
-            this.invokedType = invokedType;
-            this.lambdaClass = lambdaClass;
-        }
-
-        public void generate(ClassVisitor cv) {
-            MethodVisitor mv = cv.visitMethod(ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC,
-                    getName(), invokedType.getDescriptor(), null, null);
-            mv.visitCode();
-
-            if (invokedType.getArgumentTypes().length == 0) {
-                // TODO: knowledge about this field is split between here and LambdaClassBackporter; move this factory method there
-                mv.visitFieldInsn(GETSTATIC, lambdaClass, "instance", "L" + lambdaClass + ";");
-                mv.visitInsn(ARETURN);
-            } else {
-                mv.visitTypeInsn(NEW, lambdaClass);
-                mv.visitInsn(DUP);
-                int varIndex = 0;
-                for (Type type : invokedType.getArgumentTypes()) {
-                    mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
-                    varIndex += type.getSize();
-                }
-                mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", withVoidReturnType(invokedType));
-                mv.visitInsn(ARETURN);
-            }
-
-            mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
-            mv.visitEnd();
-        }
-
-        public String getName() {
-            return "lambdaFactory$" + lambdaClass.replaceFirst(".+\\$\\$Lambda\\$", "");
-        }
-
-        private static String withVoidReturnType(Type type) {
-            return Type.getMethodType(Type.VOID_TYPE, type.getArgumentTypes()).getDescriptor();
         }
     }
 }

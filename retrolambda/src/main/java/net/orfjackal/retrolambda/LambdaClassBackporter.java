@@ -10,28 +10,35 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaClassBackporter {
 
+    public static final String FACTORY_METHOD_NAME = "$create";
+    private static final String SINGLETON_FIELD_NAME = "instance";
+
     private static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
-        ClassWriter writer = new ClassWriter(0);
-        new ClassReader(bytecode).accept(new MyClassVisitor(writer, targetVersion), 0);
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        new ClassReader(bytecode).accept(new LambdaClassVisitor(writer, targetVersion), 0);
         return writer.toByteArray();
     }
 
-    private static class MyClassVisitor extends ClassVisitor {
-        private final int targetVersion;
-        private String className;
-        private boolean stateless = false;
+    public static String toFactoryMethodDesc(String lambdaClass, Type invocationOrConstructor) {
+        return Type.getMethodDescriptor(Type.getType("L" + lambdaClass + ";"), invocationOrConstructor.getArgumentTypes());
+    }
 
-        public MyClassVisitor(ClassWriter cw, int targetVersion) {
+    private static class LambdaClassVisitor extends ClassVisitor {
+        private final int targetVersion;
+        private String lambdaClass;
+        private Type constructor;
+
+        public LambdaClassVisitor(ClassWriter cw, int targetVersion) {
             super(ASM4, cw);
             this.targetVersion = targetVersion;
         }
 
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-            className = name;
+            lambdaClass = name;
             if (version > targetVersion) {
                 version = targetVersion;
             }
@@ -44,10 +51,7 @@ public class LambdaClassBackporter {
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
             if (name.equals("<init>")) {
-                access = Flags.makeNonPrivate(access);
-            }
-            if (name.equals("<init>") && desc.equals("()V")) {
-                stateless = true;
+                constructor = Type.getMethodType(desc);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new MagicLambdaRemovingMethodVisitor(mv);
@@ -55,28 +59,64 @@ public class LambdaClassBackporter {
 
         @Override
         public void visitEnd() {
-            if (stateless) {
+            if (isStateless()) {
                 makeSingleton();
             }
+            generateFactoryMethod();
             super.visitEnd();
         }
 
         private void makeSingleton() {
-            String fieldName = "instance";
-            String fieldDesc = "L" + className + ";";
-
-            FieldVisitor fv = super.visitField(ACC_PUBLIC | ACC_FINAL | ACC_STATIC, fieldName, fieldDesc, null, null);
+            FieldVisitor fv = super.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL,
+                    SINGLETON_FIELD_NAME, singletonFieldDesc(), null, null);
             fv.visitEnd();
 
             MethodVisitor mv = super.visitMethod(ACC_STATIC, "<clinit>", "()V", null, null);
             mv.visitCode();
-            mv.visitTypeInsn(NEW, className);
+            mv.visitTypeInsn(NEW, lambdaClass);
             mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, className, "<init>", "()V");
-            mv.visitFieldInsn(PUTSTATIC, className, fieldName, fieldDesc);
+            mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", "()V");
+            mv.visitFieldInsn(PUTSTATIC, lambdaClass, SINGLETON_FIELD_NAME, singletonFieldDesc());
             mv.visitInsn(RETURN);
-            mv.visitMaxs(2, 0);
+            mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
             mv.visitEnd();
+        }
+
+        private void generateFactoryMethod() {
+            MethodVisitor mv = cv.visitMethod(ACC_PUBLIC | ACC_STATIC,
+                    FACTORY_METHOD_NAME, factoryMethodDesc(), null, null);
+            mv.visitCode();
+
+            if (isStateless()) {
+                mv.visitFieldInsn(GETSTATIC, lambdaClass, SINGLETON_FIELD_NAME, singletonFieldDesc());
+                mv.visitInsn(ARETURN);
+
+            } else {
+                mv.visitTypeInsn(NEW, lambdaClass);
+                mv.visitInsn(DUP);
+                int varIndex = 0;
+                for (Type type : constructor.getArgumentTypes()) {
+                    mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
+                    varIndex += type.getSize();
+                }
+                mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", constructor.getDescriptor());
+                mv.visitInsn(ARETURN);
+            }
+
+            mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
+            mv.visitEnd();
+        }
+
+        private String factoryMethodDesc() {
+            return toFactoryMethodDesc(lambdaClass, constructor);
+        }
+
+        private String singletonFieldDesc() {
+            return "L" + lambdaClass + ";";
+        }
+
+        private boolean isStateless() {
+            return constructor.getArgumentTypes().length == 0;
         }
     }
 

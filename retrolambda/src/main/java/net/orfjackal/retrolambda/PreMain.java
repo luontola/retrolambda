@@ -13,6 +13,6 @@ public class PreMain {
         Config config = new Config(System.getProperties());
         int bytecodeVersion = config.getBytecodeVersion();
         Path outputDir = config.getOutputDir();
-        inst.addTransformer(new LambdaSavingClassFileTransformer(outputDir,bytecodeVersion));
+        inst.addTransformer(new LambdaSavingClassFileTransformer(outputDir, bytecodeVersion));
     }
 }
