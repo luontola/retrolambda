@@ -10,7 +10,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaClassBackporter {
 
-    public static final String FACTORY_METHOD_NAME = "$create";
+    public static final String FACTORY_METHOD_NAME = "lambdaFactory$";
     private static final String SINGLETON_FIELD_NAME = "instance";
 
     private static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
