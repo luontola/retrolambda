@@ -2,6 +2,7 @@
 set -eu
 : ${1:? Usage: $0 RELEASE_VERSION}
 SCRIPTS=`dirname "$0"`
+APP_NAME="Retrolambda"
 
 RELEASE_VERSION="$1"
 if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -12,7 +13,7 @@ fi
 function contains-line() {
     grep --line-regexp --quiet --fixed-strings -e "$1"
 }
-RELEASE_NOTES_TITLE="### Retrolambda $RELEASE_VERSION (`date --iso-8601`)"
+RELEASE_NOTES_TITLE="### $APP_NAME $RELEASE_VERSION (`date --iso-8601`)"
 cat README.md | contains-line "$RELEASE_NOTES_TITLE" || (echo "Add this line to release notes and try again:"; echo "$RELEASE_NOTES_TITLE"; exit 1)
 
 function bump_version()
@@ -31,9 +32,9 @@ mvn versions:set \
     --file parent/pom.xml
 git add -u
 git commit -m "Release $RELEASE_VERSION"
-git tag -s -m "Retrolambda $RELEASE_VERSION" "v$RELEASE_VERSION"
+git tag -s -m "$APP_NAME $RELEASE_VERSION" "v$RELEASE_VERSION"
 
-$SCRIPTS/stage.sh "Retrolambda $RELEASE_VERSION"
+$SCRIPTS/stage.sh "$APP_NAME $RELEASE_VERSION"
 
 mvn versions:set \
     -DgenerateBackupPoms=false \
@@ -42,4 +43,4 @@ mvn versions:set \
 git add -u
 git commit -m "Prepare for next development iteration"
 
-$SCRIPTS/publish.sh "Retrolambda $RELEASE_VERSION"
+$SCRIPTS/publish.sh "$APP_NAME $RELEASE_VERSION"
