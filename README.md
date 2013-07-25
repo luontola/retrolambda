@@ -79,7 +79,7 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-### Upcoming Changes
+### Retrolambda 1.1.0 (2013-07-25)
 
 - Create only one instance of lambdas which do not capture arguments; i.e.
   the same optimization as what JDK 8 does
