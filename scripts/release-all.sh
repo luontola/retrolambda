@@ -2,8 +2,6 @@
 set -eu
 : ${1:? Usage: $0 RELEASE_VERSION}
 SCRIPTS=`dirname "$0"`
-APP_NAME="Retrolambda"
-
 RELEASE_VERSION="$1"
 if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
     echo "Error: RELEASE_VERSION must be in X.Y.Z format, but was $RELEASE_VERSION"
@@ -13,17 +11,26 @@ fi
 function contains-line() {
     grep --line-regexp --quiet --fixed-strings -e "$1"
 }
-RELEASE_NOTES_TITLE="### $APP_NAME $RELEASE_VERSION (`date --iso-8601`)"
-cat README.md | contains-line "$RELEASE_NOTES_TITLE" || (echo "Add this line to release notes and try again:"; echo "$RELEASE_NOTES_TITLE"; exit 1)
 
-function bump_version()
+function assert-file-contains() {
+    local file="$1"
+    local expected="$2"
+    cat "$file" | contains-line "$expected" || (echo "Add this line to $file and try again:"; echo "$expected"; exit 1)
+}
+
+function bump-version()
 {
     local prefix=`echo $1 | sed -n -r 's/([0-9]+\.[0-9]+\.)[0-9]+/\1/p'`
     local suffix=`echo $1 | sed -n -r 's/[0-9]+\.[0-9]+\.([0-9]+)/\1/p'`
     ((suffix++))
     echo "$prefix$suffix-SNAPSHOT"
 }
-NEXT_VERSION=`bump_version $RELEASE_VERSION`
+
+APP_NAME="Retrolambda"
+NEXT_VERSION=`bump-version $RELEASE_VERSION`
+
+assert-file-contains README.md "### $APP_NAME $RELEASE_VERSION (`date --iso-8601`)"
+
 set -x
 
 mvn versions:set \
