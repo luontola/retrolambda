@@ -10,7 +10,6 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaClassBackporter {
 
-    public static final String FACTORY_METHOD_NAME = "lambdaFactory$";
     private static final String SINGLETON_FIELD_NAME = "instance";
 
     private static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
@@ -22,14 +21,11 @@ public class LambdaClassBackporter {
         return writer.toByteArray();
     }
 
-    public static String toFactoryMethodDesc(String lambdaClass, Type invocationOrConstructor) {
-        return Type.getMethodDescriptor(Type.getType("L" + lambdaClass + ";"), invocationOrConstructor.getArgumentTypes());
-    }
-
     private static class LambdaClassVisitor extends ClassVisitor {
         private final int targetVersion;
         private String lambdaClass;
         private Type constructor;
+        private LambdaFactoryMethod factoryMethod;
 
         public LambdaClassVisitor(ClassWriter cw, int targetVersion) {
             super(ASM4, cw);
@@ -39,6 +35,9 @@ public class LambdaClassBackporter {
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             lambdaClass = name;
+            LambdaReifier.setLambdaClass(lambdaClass);
+            factoryMethod = LambdaReifier.getLambdaFactoryMethod();
+
             if (version > targetVersion) {
                 version = targetVersion;
             }
@@ -84,7 +83,7 @@ public class LambdaClassBackporter {
 
         private void generateFactoryMethod() {
             MethodVisitor mv = cv.visitMethod(ACC_PUBLIC | ACC_STATIC,
-                    FACTORY_METHOD_NAME, factoryMethodDesc(), null, null);
+                    factoryMethod.getName(), factoryMethod.getDesc(), null, null);
             mv.visitCode();
 
             if (isStateless()) {
@@ -105,10 +104,6 @@ public class LambdaClassBackporter {
 
             mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
             mv.visitEnd();
-        }
-
-        private String factoryMethodDesc() {
-            return toFactoryMethodDesc(lambdaClass, constructor);
         }
 
         private String singletonFieldDesc() {

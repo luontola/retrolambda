@@ -13,8 +13,7 @@ public class LambdaFactoryMethod {
 
     public LambdaFactoryMethod(String lambdaClass, Type invokedType) {
         owner = lambdaClass;
-        // TODO: get rid of toFactoryMethodDesc by changing the method's return type to be same as invokedType
-        desc = LambdaClassBackporter.toFactoryMethodDesc(lambdaClass, invokedType);
+        desc = invokedType.getDescriptor();
     }
 
     public String getOwner() {
@@ -22,7 +21,7 @@ public class LambdaFactoryMethod {
     }
 
     public String getName() {
-        return LambdaClassBackporter.FACTORY_METHOD_NAME;
+        return "lambdaFactory$";
     }
 
     public String getDesc() {

@@ -9,14 +9,12 @@ import java.lang.instrument.*;
 import java.nio.file.*;
 import java.security.ProtectionDomain;
 import java.util.*;
-import java.util.concurrent.*;
 import java.util.regex.Pattern;
 
 public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
 
     private static final Pattern LAMBDA_CLASS = Pattern.compile("^.+\\$\\$Lambda\\$\\d+$");
 
-    private static final BlockingDeque<String> foundLambdaClasses = new LinkedBlockingDeque<>(1); // we expect only one at a time
     private final Path outputDir;
     private final int targetVersion;
     private final List<ClassLoader> ignoredClassLoaders = new ArrayList<>();
@@ -28,10 +26,6 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
             ignoredClassLoaders.add(cl);
         }
         ignoredClassLoaders.add(null);
-    }
-
-    public static String getLastFoundLambdaClass() {
-        return foundLambdaClasses.pop();
     }
 
     @Override
@@ -46,11 +40,10 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
         }
         try {
             System.out.println("Saving lambda class: " + className);
-            foundLambdaClasses.push(className);
-            byte[] transformedBytes = LambdaClassBackporter.transform(classfileBuffer, targetVersion);
+            byte[] backportedBytecode = LambdaClassBackporter.transform(classfileBuffer, targetVersion);
             Path savePath = outputDir.resolve(className + ".class");
             Files.createDirectories(savePath.getParent());
-            Files.write(savePath, transformedBytes);
+            Files.write(savePath, backportedBytecode);
 
         } catch (IOException e) {
             e.printStackTrace();
