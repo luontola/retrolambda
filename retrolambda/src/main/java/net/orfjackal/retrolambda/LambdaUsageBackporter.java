@@ -5,12 +5,9 @@
 package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.*;
-import org.objectweb.asm.Type;
 
-import java.lang.invoke.*;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Pattern;
 
@@ -99,83 +96,25 @@ public class LambdaUsageBackporter {
         @Override
         public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
             if (bsm.getOwner().equals(LAMBDA_METAFACTORY)) {
-                try {
-                    backportLambda(name, Type.getType(desc), bsm, bsmArgs);
-                } catch (Throwable t) {
-                    throw new RuntimeException(t);
-                }
+                backportLambda(name, Type.getType(desc), bsm, bsmArgs);
             } else {
                 super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
             }
         }
 
-        private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
-            ClassLoader cl = Thread.currentThread().getContextClassLoader();
-            Class<?> invoker = cl.loadClass(myClassName.replace('/', '.'));
-            callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
-            String lambdaClass = LambdaSavingClassFileTransformer.getLastFoundLambdaClass();
+        private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
+            Class<?> invoker = loadClass(myClassName);
+            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(invoker, invokedName, invokedType, bsm, bsmArgs);
+            super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc());
 
-            // TODO: get rid of toFactoryMethodDesc by changing the method's return type to be same as invokedType
-            String factoryDesc = LambdaClassBackporter.toFactoryMethodDesc(lambdaClass, invokedType);
-            super.visitMethodInsn(INVOKESTATIC, lambdaClass, LambdaClassBackporter.FACTORY_METHOD_NAME, factoryDesc);
         }
 
-        private static CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {
-            ClassLoader cl = invoker.getClassLoader();
-            MethodHandles.Lookup caller = getLookup(invoker);
-
-            List<Object> args = new ArrayList<>();
-            args.add(caller);
-            args.add(invokedName);
-            args.add(toMethodType(invokedType, cl));
-            for (Object arg : bsmArgs) {
-                args.add(asmToJdkType(arg, cl, caller));
-            }
-
-            MethodHandle bootstrapMethod = toMethodHandle(bsm, cl, caller);
-            return (CallSite) bootstrapMethod.invokeWithArguments(args);
-        }
-
-        private static MethodHandles.Lookup getLookup(Class<?> targetClass) throws Exception {
-            Constructor<MethodHandles.Lookup> ctor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
-            ctor.setAccessible(true);
-            return ctor.newInstance(targetClass);
-        }
-
-        private static Object asmToJdkType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) throws Exception {
-            if (arg instanceof Type) {
-                return toMethodType((Type) arg, classLoader);
-            } else if (arg instanceof Handle) {
-                return toMethodHandle((Handle) arg, classLoader, caller);
-            } else {
-                return arg;
-            }
-        }
-
-        private static MethodType toMethodType(Type type, ClassLoader classLoader) {
-            return MethodType.fromMethodDescriptorString(type.getInternalName(), classLoader);
-        }
-
-        private static MethodHandle toMethodHandle(Handle handle, ClassLoader classLoader, MethodHandles.Lookup lookup) throws Exception {
-            MethodType type = MethodType.fromMethodDescriptorString(handle.getDesc(), classLoader);
-            Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
-
-            switch (handle.getTag()) {
-                case H_INVOKESTATIC:
-                    return lookup.findStatic(owner, handle.getName(), type);
-
-                case H_INVOKEVIRTUAL:
-                case H_INVOKEINTERFACE:
-                    return lookup.findVirtual(owner, handle.getName(), type);
-
-                case H_INVOKESPECIAL:
-                    return lookup.findSpecial(owner, handle.getName(), type, owner);
-
-                case H_NEWINVOKESPECIAL:
-                    return lookup.findConstructor(owner, type);
-
-                default:
-                    throw new AssertionError("Unexpected handle type: " + handle);
+        private static Class<?> loadClass(String className) {
+            try {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                return cl.loadClass(className.replace('/', '.'));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
             }
         }
     }
