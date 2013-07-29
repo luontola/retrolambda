@@ -14,9 +14,8 @@ even to Java 6 or Java 5. And if you reach Java 5, there are [other
 backporting tools](http://en.wikipedia.org/wiki/Java_backporting_tools)
 that may let you go down to Java 1.4.
 
-P.S. If you hear about experiences of using Retrolambda for Android
-development, please [send a message](https://github.com/orfjackal). In
-theory it should be possible...
+Android developers may also use Retrolambda. [There are reports](http://blog.orfjackal.net/2013/07/lambda-expressions-backported-to-java-7.html?showComment=1374655919855#c222763220984063335)
+of it working on the Dalvik VM.
 
 
 User Guide
