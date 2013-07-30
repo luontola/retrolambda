@@ -106,7 +106,6 @@ public class LambdaUsageBackporter {
             Class<?> invoker = loadClass(myClassName);
             LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc());
-
         }
 
         private static Class<?> loadClass(String className) {
