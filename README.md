@@ -21,6 +21,8 @@ of it working on the Dalvik VM.
 User Guide
 ----------
 
+### Getting Started
+
 [Download](http://repo.maven.apache.org/maven2/net/orfjackal/retrolambda/retrolambda/)
 the latest `retrolambda.jar` from Maven Central.
 
@@ -28,13 +30,39 @@ Use JDK 8 to compile your source code.
 
 Run Retrolambda, using Java 8, on the class files produced by JDK 8. Run
 `java -jar retrolambda.jar` without any additional options to see the
-instructions. For an example of how to do this with Maven, see how
+instructions.
+
+Your class files should now run on Java 7. Be sure to run comprehensive tests
+on Java 7, in case the code accidentally uses Java 8 APIs or language features
+that Retrolambda doesn't backport.
+
+
+### Tips
+
+For an example of how to run Retrolambda using Maven, see how
 maven-dependency-plugin and maven-antrun-plugin are used in
 [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
+There isn't yet a Maven plugin for doing that with less boilerplate, but maybe
+later.
 
-Your class files should now run on Java 7. Be sure to run comprehensive tests on
-Java 7, in case the code accidentally uses Java 8 APIs or language features that
-Retrolambda doesn't backport.
+During development, inside an IDE, it's the easiest to use Java 8, without
+Retrolamba, to compile and run tests. But in your continuous integration build
+you should run tests using the target Java version. For example, you can
+configure Maven Surefire Plugin to run tests
+[using a different JVM](http://maven.apache.org/surefire/maven-surefire-plugin/test-mojo.html#jvm).
+
+I recommend setting up environment variables JAVA8_HOME, JAVA7_HOME etc. and
+referring to those variables in the build configuration, instead of relying on
+what happens to be the default Java version in JAVA_HOME.
+
+You will need Java 8 for compiling and also for generating Javadocs.
+
+
+### Third Party Tools
+
+- [Gradle Retrolamba Plugin](https://github.com/evant/gradle-retrolambda)
+
+If you have things to add to this list, [create a pull request](https://github.com/orfjackal/retrolambda/pulls).
 
 
 Known Limitations
