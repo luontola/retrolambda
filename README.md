@@ -87,7 +87,7 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-### Incoming Changes
+### Retrolambda 1.1.1 (2013-11-27)
 
 - Show help if the `-javaagent` parameter is missing
   ([Issue #2](https://github.com/orfjackal/retrolambda/issues/2))
