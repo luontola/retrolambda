@@ -341,7 +341,7 @@
                     <version>1.4.4</version>
                     <configuration>
                         <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                        <serverId>ossrh-releases</serverId>
+                        <serverId>ossrh-releases-net.orfjackal</serverId>
                         <stagingProfileId>9e9bbc30f020cf</stagingProfileId>
                     </configuration>
                 </plugin>
