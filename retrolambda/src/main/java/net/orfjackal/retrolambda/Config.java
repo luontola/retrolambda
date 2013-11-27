@@ -40,6 +40,10 @@ public class Config {
     }
 
     public boolean isFullyConfigured() {
+        return hasAllRequiredProperties() && PreMain.isAgentLoaded();
+    }
+
+    private boolean hasAllRequiredProperties() {
         for (String requiredParameter : requiredProperties) {
             if (p.getProperty(requiredParameter) == null) {
                 return false;

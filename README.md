@@ -87,6 +87,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Incoming Changes
+
+- Show help if the `-javaagent` parameter is missing
+  ([Issue #2](https://github.com/orfjackal/retrolambda/issues/2))
+
 ### Retrolambda 1.1.0 (2013-07-25)
 
 - Create only one instance of lambdas which do not capture arguments; i.e.

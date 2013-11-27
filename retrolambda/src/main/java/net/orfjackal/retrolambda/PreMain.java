@@ -9,10 +9,17 @@ import java.nio.file.Path;
 
 public class PreMain {
 
+    private static boolean agentLoaded = false;
+
     public static void premain(String agentArgs, Instrumentation inst) {
         Config config = new Config(System.getProperties());
         int bytecodeVersion = config.getBytecodeVersion();
         Path outputDir = config.getOutputDir();
         inst.addTransformer(new LambdaSavingClassFileTransformer(outputDir, bytecodeVersion));
+        agentLoaded = true;
+    }
+
+    public static boolean isAgentLoaded() {
+        return agentLoaded;
     }
 }
