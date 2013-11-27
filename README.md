@@ -30,7 +30,7 @@ Use JDK 8 to compile your source code.
 
 Run Retrolambda, using Java 8, on the class files produced by JDK 8. Run
 `java -jar retrolambda.jar` without any additional options to see the
-instructions. For your convenience it's also shown below.
+instructions (for your convenience they are also shown below).
 
 Your class files should now run on Java 7. Be sure to run comprehensive tests
 on Java 7, in case the code accidentally uses Java 8 APIs or language features
