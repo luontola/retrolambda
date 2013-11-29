@@ -20,8 +20,10 @@ function assert-file-contains() {
 
 function bump-version()
 {
-    local prefix=`echo $1 | sed -n -r 's/([0-9]+\.[0-9]+\.)[0-9]+/\1/p'`
-    local suffix=`echo $1 | sed -n -r 's/[0-9]+\.[0-9]+\.([0-9]+)/\1/p'`
+    [[ $1 =~ ([0-9]+.[0-9]+.)[0-9]+ ]]
+    local prefix=${BASH_REMATCH[1]}
+    [[ $1 =~ [0-9]+.[0-9]+.([0-9]+) ]]
+    local suffix=${BASH_REMATCH[1]}
     ((suffix++))
     echo "$prefix$suffix-SNAPSHOT"
 }
