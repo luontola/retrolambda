@@ -114,9 +114,18 @@ May break if a future JDK 8 build stops generating a new class for each
 that `java.lang.invoke.LambdaMetafactory` generates dynamically, so
 optimizations to that mechanism may break Retrolambda.
 
+Does not implement JDK 8's safety measure of using `invokespecial` to call
+lambda implementation methods that are private instance methods (i.e. when
+the lambda accesses an instance variable).
+
 
 Version History
 ---------------
+
+### Upcoming
+
+- Updated to work with JDK 8 Early Access Build b121 (2013-12-19)
+  ([Issue #3](https://github.com/orfjackal/retrolambda/issues/3))
 
 ### Retrolambda 1.1.1 (2013-11-27)
 

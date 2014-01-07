@@ -8,14 +8,10 @@ import org.objectweb.asm.*;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.regex.Pattern;
 
 import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaUsageBackporter {
-
-    private static final String LAMBDA_METAFACTORY = "java/lang/invoke/LambdaMetafactory";
-    private static final Pattern LAMBDA_IMPL_METHOD = Pattern.compile("^lambda\\$\\d+$");
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         resetLambdaClassSequenceNumber();
@@ -58,7 +54,7 @@ public class LambdaUsageBackporter {
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-            if (LAMBDA_IMPL_METHOD.matcher(name).matches()) {
+            if (LambdaNaming.LAMBDA_IMPL_METHOD.matcher(name).matches()) {
                 access = Flags.makeNonPrivate(access);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
@@ -76,7 +72,7 @@ public class LambdaUsageBackporter {
 
         @Override
         public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
-            if (bsm.getOwner().equals(LAMBDA_METAFACTORY)) {
+            if (bsm.getOwner().equals(LambdaNaming.LAMBDA_METAFACTORY)) {
                 backportLambda(name, Type.getType(desc), bsm, bsmArgs);
             } else {
                 super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);

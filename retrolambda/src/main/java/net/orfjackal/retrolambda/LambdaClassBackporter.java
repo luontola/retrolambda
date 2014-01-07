@@ -1,4 +1,4 @@
-// Copyright © 2013 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -11,8 +11,6 @@ import static org.objectweb.asm.Opcodes.*;
 public class LambdaClassBackporter {
 
     private static final String SINGLETON_FIELD_NAME = "instance";
-
-    private static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
@@ -41,7 +39,7 @@ public class LambdaClassBackporter {
             if (version > targetVersion) {
                 version = targetVersion;
             }
-            if (superName.equals(MAGIC_LAMBDA_IMPL)) {
+            if (superName.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)) {
                 superName = JAVA_LANG_OBJECT;
             }
             super.visit(version, access, name, signature, superName, interfaces);
@@ -53,7 +51,9 @@ public class LambdaClassBackporter {
                 constructor = Type.getMethodType(desc);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new MagicLambdaRemovingMethodVisitor(mv);
+            mv = new MagicLambdaRemovingMethodVisitor(mv);
+            mv = new PrivateMethodInvocationFixingMethodVisitor(mv, factoryMethod.getInvoker());
+            return mv;
         }
 
         @Override
@@ -124,10 +124,30 @@ public class LambdaClassBackporter {
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
             if (opcode == INVOKESPECIAL
-                    && owner.equals(MAGIC_LAMBDA_IMPL)
+                    && owner.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)
                     && name.equals("<init>")
                     && desc.equals("()V")) {
                 owner = JAVA_LANG_OBJECT;
+            }
+            super.visitMethodInsn(opcode, owner, name, desc);
+        }
+    }
+
+    private static class PrivateMethodInvocationFixingMethodVisitor extends MethodVisitor {
+
+        private final String invoker;
+
+        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, Class<?> invoker) {
+            super(ASM4, mv);
+            this.invoker = Type.getInternalName(invoker);
+        }
+
+        @Override
+        public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+            if (opcode == INVOKESPECIAL
+                    && owner.equals(invoker)
+                    && LambdaNaming.LAMBDA_IMPL_METHOD.matcher(name).matches()) {
+                opcode = INVOKEVIRTUAL;
             }
             super.visitMethodInsn(opcode, owner, name, desc);
         }

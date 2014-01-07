@@ -1,19 +1,18 @@
-// Copyright © 2013 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda;
+
+import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.lang.instrument.*;
 import java.nio.file.*;
 import java.security.ProtectionDomain;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
-
-    private static final Pattern LAMBDA_CLASS = Pattern.compile("^.+\\$\\$Lambda\\$\\d+$");
 
     private final Path outputDir;
     private final int targetVersion;
@@ -35,6 +34,11 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
             // The transformed application classes have their own class loader.
             return null;
         }
+        if (className == null) {
+            // Since JDK 8 build b121 or so, lambda classes have a null class name,
+            // but we can read it from the bytecode where the name still exists.
+            className = new ClassReader(classfileBuffer).getClassName();
+        }
         if (!isLambdaClass(className)) {
             return null;
         }
@@ -52,6 +56,6 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
     }
 
     private static boolean isLambdaClass(String className) {
-        return LAMBDA_CLASS.matcher(className).matches();
+        return LambdaNaming.LAMBDA_CLASS.matcher(className).matches();
     }
 }
