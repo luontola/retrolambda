@@ -133,7 +133,7 @@ public class Config {
                 "and have been compiled with Java 8, to run on Java 7 (maybe even Java 5).\n" +
                 "See https://github.com/orfjackal/retrolambda\n" +
                 "\n" +
-                "Copyright (c) 2013  Esko Luontola <www.orfjackal.net>\n" +
+                "Copyright (c) 2013-2014  Esko Luontola <www.orfjackal.net>\n" +
                 "This software is released under the Apache License 2.0.\n" +
                 "The license text is at http://www.apache.org/licenses/LICENSE-2.0\n" +
                 "\n" +
