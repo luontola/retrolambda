@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.ow2.asm:asm-debug-all:5.0_BETA">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-debug-all/5.0_BETA/asm-debug-all-5.0_BETA.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-debug-all/5.0_BETA/asm-debug-all-5.0_BETA-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/ow2/asm/asm-debug-all/5.0_BETA/asm-debug-all-5.0_BETA-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
