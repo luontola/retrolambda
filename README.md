@@ -122,7 +122,7 @@ the lambda accesses an instance variable).
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 1.1.2 (2014-01-08)
 
 - Updated to work with JDK 8 Early Access Build b121 (2013-12-19)
   ([Issue #3](https://github.com/orfjackal/retrolambda/issues/3))
