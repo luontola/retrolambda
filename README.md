@@ -23,7 +23,7 @@ User Guide
 
 ### Getting Started
 
-[Download](http://repo.maven.apache.org/maven2/net/orfjackal/retrolambda/retrolambda/)
+[Download](https://oss.sonatype.org/content/groups/public/net/orfjackal/retrolambda/retrolambda/)
 the latest `retrolambda.jar` from Maven Central.
 
 Use JDK 8 to compile your source code.
