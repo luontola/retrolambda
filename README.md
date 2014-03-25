@@ -122,6 +122,12 @@ the lambda accesses an instance variable).
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed incompatibility with the Eclipse JDT compiler, version Kepler SR2
+  with the Java 8 support patch 1.0.0.v20140317-1959
+  ([Issue #12](https://github.com/orfjackal/retrolambda/issues/12))
+
 ### Retrolambda 1.1.2 (2014-01-08)
 
 - Updated to work with JDK 8 Early Access Build b121 (2013-12-19)

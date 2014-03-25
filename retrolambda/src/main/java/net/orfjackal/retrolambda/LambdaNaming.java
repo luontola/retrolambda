@@ -10,6 +10,15 @@ public class LambdaNaming {
 
     public static final String LAMBDA_METAFACTORY = "java/lang/invoke/LambdaMetafactory";
     public static final String MAGIC_LAMBDA_IMPL = "java/lang/invoke/MagicLambdaImpl";
+
+    /**
+     * Java 8 produces at runtime classes named {@code EnclosingClass$$Lambda$1}
+     */
     public static final Pattern LAMBDA_CLASS = Pattern.compile("^.+\\$\\$Lambda\\$\\d+$");
-    public static final Pattern LAMBDA_IMPL_METHOD = Pattern.compile("^lambda\\$.*\\$\\d+$");
+
+    /**
+     * Oracle JDK 8 compiler names the methods {@code lambda$methodName$0} but the
+     * Eclipse JDT compiler names them {@code lambda$0} (similar to older JDK 8 EA builds).
+     */
+    public static final Pattern LAMBDA_IMPL_METHOD = Pattern.compile("^lambda(\\$.*)?\\$\\d+$");
 }
