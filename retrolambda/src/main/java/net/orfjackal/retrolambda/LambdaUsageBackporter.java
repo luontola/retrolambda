@@ -36,6 +36,7 @@ public class LambdaUsageBackporter {
 
     private static class MyClassVisitor extends ClassVisitor {
         private final int targetVersion;
+        private int classAccess;
         private String className;
 
         public MyClassVisitor(ClassWriter cw, int targetVersion) {
@@ -49,16 +50,25 @@ public class LambdaUsageBackporter {
                 version = targetVersion;
             }
             super.visit(version, access, name, signature, superName, interfaces);
+            this.classAccess = access;
             this.className = name;
         }
 
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+            if (isBridgeMethodOnInterface(access)) {
+                return null;
+            }
             if (LambdaNaming.LAMBDA_IMPL_METHOD.matcher(name).matches()) {
                 access = Flags.makeNonPrivate(access);
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className);
+        }
+
+        private boolean isBridgeMethodOnInterface(int methodAccess) {
+            return Flags.hasFlag(classAccess, Opcodes.ACC_INTERFACE) &&
+                    Flags.hasFlag(methodAccess, Opcodes.ACC_BRIDGE);
         }
     }
 
