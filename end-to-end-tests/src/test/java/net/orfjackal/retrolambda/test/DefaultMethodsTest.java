@@ -25,7 +25,8 @@ public class DefaultMethodsTest {
                 return "foo";
             }
         }
-        assertThat(new Foo().foo(), is("foo"));
+        assertThat("direct call", new Foo().foo(), is("foo"));
+        assertThat("bridged call", ((Parent) new Foo()).foo(), is((Object) "foo"));
     }
 
     public interface Parent {
