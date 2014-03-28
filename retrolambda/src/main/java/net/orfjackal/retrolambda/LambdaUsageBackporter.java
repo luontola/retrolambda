@@ -57,7 +57,18 @@ public class LambdaUsageBackporter {
         @Override
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
             if (isBridgeMethodOnInterface(access)) {
-                return null;
+                return null; // remove the bridge method; Java 7 didn't use them
+            }
+            if (isNonAbstractMethodOnInterface(access)) {
+                // We are not aware of other reasons than the bridge methods
+                // why JDK 8 would produce non-abstract methods on interfaces,
+                // but we have this warning here to get a bug report sooner
+                // in case we missed something.
+                System.out.println("WARNING: Method '" + name + "' of interface '" + className + "' is non-abstract! " +
+                        "This will probably fail to run on Java 7 and below. " +
+                        "If you get this warning _without_ using Java 8's default methods, " +
+                        "please report a bug at https://github.com/orfjackal/retrolambda/issues " +
+                        "together with an SSCCE (http://www.sscce.org/)");
             }
             if (LambdaNaming.LAMBDA_IMPL_METHOD.matcher(name).matches()) {
                 access = Flags.makeNonPrivate(access);
@@ -69,6 +80,11 @@ public class LambdaUsageBackporter {
         private boolean isBridgeMethodOnInterface(int methodAccess) {
             return Flags.hasFlag(classAccess, Opcodes.ACC_INTERFACE) &&
                     Flags.hasFlag(methodAccess, Opcodes.ACC_BRIDGE);
+        }
+
+        private boolean isNonAbstractMethodOnInterface(int methodAccess) {
+            return Flags.hasFlag(classAccess, Opcodes.ACC_INTERFACE) &&
+                    !Flags.hasFlag(methodAccess, Opcodes.ACC_ABSTRACT);
         }
     }
 
