@@ -18,7 +18,7 @@ public class DefaultMethodsTest {
      * to remove it for it - this makes the bytecode same as what JDK 7 produces.
      */
     @Test
-    public void will_remove_non_abstract_methods_from_interfaces() {
+    public void will_remove_bridge_methods_from_interfaces() {
         class Foo implements Child {
             @Override
             public String foo() {
