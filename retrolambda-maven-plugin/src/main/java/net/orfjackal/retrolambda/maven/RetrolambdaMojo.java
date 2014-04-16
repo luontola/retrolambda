@@ -28,11 +28,15 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.BuildPluginManager;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
@@ -57,7 +61,11 @@ public class RetrolambdaMojo extends AbstractMojo {
 	@Parameter(defaultValue = "${project.build.directory}", property = "outputDir", required = true)
 	private File outputDirectory;
 
+	@Override
 	public void execute() throws MojoExecutionException {
+		Log log = getLog();
+		log.info("starting execution");
+		String retrolambdaVersion = getRetrolambdaVersion();
 		executeMojo(
 				plugin(groupId("org.apache.maven.plugins"),
 						artifactId("maven-dependency-plugin"), version("2.0")),
@@ -68,11 +76,23 @@ public class RetrolambdaMojo extends AbstractMojo {
 								element(name("groupId"),
 										"net.orfjackal.retrolambda"),
 								element(name("artifactId"), "retrolambda"),
-								element(name("version"), "1.1.4"),
-								element(name("overwrite"), "true"),
+								element(name("version"), retrolambdaVersion),
+								element(name("overWrite"), "true"),
 								element(name("outputDirectory"), project
-										.getBuild().getOutputDirectory()),
+										.getBuild().getDirectory()),
 								element(name("destFileName"), "retrolambda.jar")))),
 				executionEnvironment(project, session, pluginManager));
+	}
+
+	private static String getRetrolambdaVersion() {
+		InputStream is = RetrolambdaMojo.class
+				.getResourceAsStream("/retrolambda.properties");
+		Properties p = new Properties();
+		try {
+			p.load(is);
+			return p.getProperty("retrolambda.version");
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }
