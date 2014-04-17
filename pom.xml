@@ -19,7 +19,6 @@
         <module>parent</module>
         <module>retrolambda</module>
 		<module>retrolambda-maven-plugin</module>
-		<module>retrolambda-maven-plugin-test</module>
         <module>end-to-end-tests</module>
     </modules>
 
