@@ -25,7 +25,8 @@
 				<executions>
 					<execution>
 						<goals>
-							<goal>process</goal>
+							<goal>process-main</goal>
+							<goal>process-test</goal>
 						</goals>
 					</execution>
 				</executions>

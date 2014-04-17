@@ -1,4 +1,6 @@
-package net.orfjackal.retrolambda;
+package net.orfjackal.retrolambda.test;
+
+import net.orfjackal.retrolambda.test.Example;
 
 import org.junit.Test;
 

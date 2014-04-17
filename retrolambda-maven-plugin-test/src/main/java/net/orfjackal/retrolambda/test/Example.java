@@ -1,4 +1,4 @@
-package net.orfjackal.retrolambda;
+package net.orfjackal.retrolambda.test;
 
 import java.util.function.Consumer;
 
