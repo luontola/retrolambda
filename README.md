@@ -66,15 +66,32 @@ Optional system properties:
       Output directory into where the generated class files are written.
       Defaults to same as retrolambda.inputDir
 ```
+### Maven plugin
+To run Retrolambda using Maven add the following to your pom.xml:
+```xml
+<build>
+  <plugins>
+    ...
+    <plugin>
+      <groupId>net.orfjackal.retrolambda</groupId>
+      <artifactId>retrolambda-maven-plugin</artifactId>
+      <version>0.1.15-SNAPSHOT</version>
+      <executions>
+        <execution>
+          <goals>
+            <goal>process-main</goal>
+            <goal>process-test</goal>
+          </goals>
+        </execution>
+      </executions>
+    </plugin>
+    ...
+```
+See [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml) for an example.
 
+Plugin documentation is [here](). (TODO decide where to put the site report)
 
 ### Tips
-
-For an example of how to run Retrolambda using Maven, see how
-maven-dependency-plugin and maven-antrun-plugin are used in
-[end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
-There isn't yet a Maven plugin for doing that with less boilerplate, but maybe
-later.
 
 During development, inside an IDE, it's the easiest to use Java 8, without
 Retrolamba, to compile and run tests. But in your continuous integration build
