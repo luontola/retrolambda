@@ -47,21 +47,43 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 	@Component
 	private MavenProject project;
 
+	/**
+	 * The location of the java 8 jdk (not jre).
+	 */
 	@Parameter(required = false, property = "java8home", defaultValue = "${env.JAVA8_HOME}")
 	private String java8home;
 
+	/**
+	 * The version of the bytecode to be produced by retrolamda. Defaults to 51
+	 * which is java 7 compatible bytecode.
+	 */
 	@Parameter(required = false, property = "bytecodeVersion", defaultValue = DEFAULT_BYTE_CODE_VERSION
 			+ "")
 	private String bytecodeVersion;
 
+	/**
+	 * The directory containing the main (non-test) compiled classes. These
+	 * classes will be overwritten with bytecode changes to obtain compatibility
+	 * with java 7 runtime.
+	 */
 	@Parameter(required = false, property = "retrolambdaMainClassesDir", defaultValue = "${project.build.outputDirectory}")
 	private String mainClassesDir;
 
+	/**
+	 * The directory containing the compiled test classes. These classes will be
+	 * overwritten with bytecode changes to obtain compatibility with java 7
+	 * runtime.
+	 */
 	@Parameter(required = false, property = "retrolambdaTestClassesDir", defaultValue = "${project.build.testOutputDirectory}")
 	private String testClassesDir;
 
 	private final ClassesType classesType;
 
+	/**
+	 * Constructor.
+	 * 
+	 * @param classesType
+	 */
 	ProcessClassesMojo(ClassesType classesType) {
 		this.classesType = classesType;
 	}

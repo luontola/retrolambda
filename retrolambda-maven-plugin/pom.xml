@@ -12,12 +12,15 @@
 
 	<name>${project.artifactId}</name>
 
-	<!-- FIXME change it to the project's website -->
-	<url>http://maven.apache.org</url>
+	<url>https://github.com/orfjackal/retrolambda</url>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
+
+	<prerequisites>
+		<maven>${minimumMavenVersion}</maven>
+	</prerequisites>
 
 	<dependencies>
 		<dependency>
@@ -41,9 +44,6 @@
 			<artifactId>mojo-executor</artifactId>
 			<version>2.2.0</version>
 		</dependency>
-		<!-- this dep here only to ensure the build order -->
-		<!-- <dependency> <groupId>net.orfjackal.retrolambda</groupId> <artifactId>retrolambda</artifactId> 
-			<version>${project.parent.version}</version> <scope>provided</scope> </dependency> -->
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -95,13 +95,34 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+				<executions>
+					<execution>
+						<id>attach-descriptor</id>
+						<goals>
+							<goal>attach-descriptor</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-plugin-plugin</artifactId>
+							<version>3.2</version>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>
 		<profile>
 			<id>run-its</id>
 			<build>
-
 				<plugins>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
@@ -133,7 +154,6 @@
 						</executions>
 					</plugin>
 				</plugins>
-
 			</build>
 		</profile>
 	</profiles>
