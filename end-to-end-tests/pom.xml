@@ -62,7 +62,7 @@
 			</plugin>
 
 	<!-- alternatively, can use a call to the dependency plugin and antrun plugins for fine control of retrolambda parameters -->
-    <!-- although optimally all such use should be through the maven plugin above. Request changes if you need them -->
+    <!-- although optimally all such use should be through the maven plugin above. Request changes if you need them! -->
 	<!--
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
