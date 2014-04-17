@@ -29,11 +29,13 @@ import org.apache.maven.project.MavenProject;
 
 abstract class ProcessClassesMojo extends AbstractMojo {
 
+    private static final String VERSION_DEPENDENCY = "2.0";
+    private static final String GROUP_ID_DEPENDENCY = "org.apache.maven.plugins";
+    private static final String ARTIFACT_ID_DEPENDENCY = "maven-dependency-plugin";
     private static final String VERSION_ANTRUN = "1.7";
 
-    private static final String ARTIFACT_ID_ANTRUN = "maven-antrun-plugin";
-
     private static final String GROUP_ID_ANTRUN = "org.apache.maven.plugins";
+    private static final String ARTIFACT_ID_ANTRUN = "maven-antrun-plugin";
 
     private static final String RETROLAMBDA_JAR = "retrolambda.jar";
 
@@ -96,8 +98,8 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         validateJava8home();
         String retrolambdaVersion = getRetrolambdaVersion();
         executeMojo(
-                plugin(groupId(GROUP_ID_ANTRUN), artifactId("maven-dependency-plugin"),
-                        version("2.0")),
+                plugin(groupId(GROUP_ID_DEPENDENCY), artifactId(ARTIFACT_ID_DEPENDENCY),
+                        version(VERSION_DEPENDENCY)),
                 goal("copy"),
                 configuration(element(
                         "artifactItems",
