@@ -5,13 +5,13 @@ import org.apache.maven.plugins.annotations.Mojo;
 
 /**
  * Processes main (non-test) classes compiled with java 8 so that they are
- * compatible with java 7 runtime.
+ * compatible with java 5,6 or 7 runtime.
  */
 @Mojo(name = "process-main", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class ProcessMainClassesMojo extends ProcessClassesMojo {
 
-    public ProcessMainClassesMojo() {
-        super(ClassesType.MAIN);
-    }
+	public ProcessMainClassesMojo() {
+		super(ClassesType.MAIN);
+	}
 
 }
