@@ -124,7 +124,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 		File jdk = new File(java8home);
 		if (!jdk.exists() || !jdk.isDirectory()) {
 			throw new MojoExecutionException(
-					"must set configuration element java8home or environment variable JAVA8_HOME to a valid jdk location");
+					"must set configuration element java8home or environment variable JAVA8_HOME to a valid jdk 8 location");
 		}
 	}
 
