@@ -13,6 +13,7 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.name;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
@@ -92,6 +93,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 	public void execute() throws MojoExecutionException {
 		Log log = getLog();
 		log.info("starting execution");
+		validateJava8home();
 		String retrolambdaVersion = getRetrolambdaVersion();
 		executeMojo(
 				plugin(groupId(GROUP_ID_ANTRUN),
@@ -116,6 +118,14 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 		else
 			processClasses(testClassesDir, "maven.test.classpath");
 		log.info("processed classes");
+	}
+
+	private void validateJava8home() throws MojoExecutionException {
+		File jdk = new File(java8home);
+		if (!jdk.exists() || !jdk.isDirectory()) {
+			throw new MojoExecutionException(
+					"must set configuration element java8home or environment variable JAVA8_HOME to a valid jdk location");
+		}
 	}
 
 	private void processClasses(String input, String classpathId)
