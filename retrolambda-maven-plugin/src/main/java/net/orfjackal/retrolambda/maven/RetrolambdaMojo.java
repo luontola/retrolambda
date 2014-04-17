@@ -17,6 +17,8 @@ package net.orfjackal.retrolambda.maven;
  */
 
 import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.attribute;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.attributes;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.element;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
@@ -46,6 +48,8 @@ import org.apache.maven.project.MavenProject;
 @Mojo(name = "process", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class RetrolambdaMojo extends AbstractMojo {
 
+	private static final String RETROLAMBDA_JAR = "retrolambda.jar";
+
 	@Component
 	private MavenSession session;
 
@@ -55,11 +59,17 @@ public class RetrolambdaMojo extends AbstractMojo {
 	@Component
 	private MavenProject project;
 
-	/**
-	 * Location of the file.
-	 */
-	@Parameter(defaultValue = "${project.build.directory}", property = "outputDir", required = true)
-	private File outputDirectory;
+	@Parameter(required = false, property = "java8home")
+	private String java8home;
+
+	@Parameter(required = false, property = "bytecodeVersion")
+	private String bytecodeVersion;
+
+	@Parameter(required = false, property = "retrolambdaInputDir")
+	private String inputDir;
+
+	@Parameter(required = false, property = "retrolambdaInputTestDir")
+	private String inputTestDir;
 
 	@Override
 	public void execute() throws MojoExecutionException {
@@ -80,8 +90,72 @@ public class RetrolambdaMojo extends AbstractMojo {
 								element(name("overWrite"), "true"),
 								element(name("outputDirectory"), project
 										.getBuild().getDirectory()),
-								element(name("destFileName"), "retrolambda.jar")))),
+								element(name("destFileName"), RETROLAMBDA_JAR)))),
 				executionEnvironment(project, session, pluginManager));
+		log.info("copied retrolambda.jar to build directory");
+
+		if (inputDir == null)
+			inputDir = project.getBuild().getOutputDirectory();
+		if (inputTestDir == null)
+			inputTestDir = project.getBuild().getTestOutputDirectory();
+
+		// process main classes
+		processClasses(inputDir, "maven.compile.classpath");
+
+		// process test classes
+		processClasses(inputTestDir, "maven.test.classpath");
+
+	}
+
+	private void processClasses(String input, String classpathId)
+			throws MojoExecutionException {
+		if (bytecodeVersion == null)
+			bytecodeVersion = "51";
+
+		executeMojo(
+				plugin(groupId("org.apache.maven.plugins"),
+						artifactId("maven-antrun-plugin"), version("1.7")),
+				goal("run"),
+				configuration(element(
+						"target",
+						element("property",
+								attributes(attribute("name", "the_classpath"),
+										attribute("refid", classpathId))),
+						element("exec",
+								attributes(
+										attribute("executable", java8home()
+												+ "/bin/java"),
+										attribute("failonerror", "true")),
+								element("arg",
+										attribute("value",
+												"-Dretrolambda.bytecodeVersion="
+														+ bytecodeVersion)),
+								element("arg",
+										attribute("value",
+												"-Dretrolambda.inputDir="
+														+ input)),
+								element("arg",
+										attribute("value",
+												"-Dretrolambda.classpath=${the_classpath}")),
+								element("arg",
+										attribute("value", "-javaagent:"
+												+ project.getBuild()
+														.getDirectory() + "/"
+												+ RETROLAMBDA_JAR)),
+								element("arg", attribute("value", "-jar")),
+								element("arg",
+										attribute("value", project.getBuild()
+												.getDirectory()
+												+ "/"
+												+ RETROLAMBDA_JAR))))),
+				executionEnvironment(project, session, pluginManager));
+	}
+
+	private String java8home() {
+		if (java8home != null)
+			return new File(java8home).getAbsolutePath();
+		else
+			return System.getenv("JAVA8_HOME");
 	}
 
 	private static String getRetrolambdaVersion() {

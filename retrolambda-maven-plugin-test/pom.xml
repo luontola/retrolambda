@@ -13,6 +13,12 @@
 	<build>
 		<plugins>
 			<plugin>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>net.orfjackal.retrolambda</groupId>
 				<artifactId>retrolambda-maven-plugin</artifactId>
 				<version>${project.parent.version}</version>
@@ -25,5 +31,5 @@
 				</executions>
 			</plugin>
 		</plugins>
-    </build>
+	</build>
 </project>
