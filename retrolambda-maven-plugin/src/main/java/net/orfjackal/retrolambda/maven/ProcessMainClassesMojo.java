@@ -10,8 +10,8 @@ import org.apache.maven.plugins.annotations.Mojo;
 @Mojo(name = "process-main", defaultPhase = LifecyclePhase.PROCESS_CLASSES)
 public class ProcessMainClassesMojo extends ProcessClassesMojo {
 
-	public ProcessMainClassesMojo() {
-		super(ClassesType.MAIN);
-	}
+    public ProcessMainClassesMojo() {
+        super(ClassesType.MAIN);
+    }
 
 }
