@@ -66,30 +66,31 @@ Optional system properties:
       Output directory into where the generated class files are written.
       Defaults to same as retrolambda.inputDir
 ```
-### Maven plugin
-To run Retrolambda using Maven add the following to your pom.xml:
-```xml
-<build>
-  <plugins>
-    ...
-    <plugin>
-      <groupId>net.orfjackal.retrolambda</groupId>
-      <artifactId>retrolambda-maven-plugin</artifactId>
-      <version>0.1.15-SNAPSHOT</version>
-      <executions>
-        <execution>
-          <goals>
-            <goal>process-main</goal>
-            <goal>process-test</goal>
-          </goals>
-        </execution>
-      </executions>
-    </plugin>
-    ...
-```
-See [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml) for an example.
 
-Plugin documentation is [here](). (TODO decide where to put the site report)
+
+### Maven Plugin
+
+To run Retrolambda using Maven, add the following to your pom.xml:
+
+```xml
+<plugin>
+    <groupId>net.orfjackal.retrolambda</groupId>
+    <artifactId>retrolambda-maven-plugin</artifactId>
+    <version>1.1.5-SNAPSHOT</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>process-main</goal>
+                <goal>process-test</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+See the [plugin documentation](http://orfjackal.github.io/retrolambda/retrolambda-maven-plugin/plugin-info.html)
+for all possible parameters. There is also a usage example in [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
+
 
 ### Tips
 
