@@ -13,6 +13,16 @@
     <artifactId>end-to-end-tests</artifactId>
     <packaging>jar</packaging>
 
+    <dependencies>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>17.0</version>
+        </dependency>
+
+    </dependencies>
+
     <build>
         <plugins>
 
