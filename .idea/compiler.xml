@@ -17,10 +17,13 @@
         <processorPath useClasspath="true" />
         <module name="end-to-end-tests" />
         <module name="retrolambda" />
+        <module name="retrolambda-maven-plugin" />
         <module name="retrolambda-runtime (1)" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.8" />
+    <bytecodeTargetLevel target="1.8">
+      <module name="retrolambda-maven-plugin" target="1.6" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 
