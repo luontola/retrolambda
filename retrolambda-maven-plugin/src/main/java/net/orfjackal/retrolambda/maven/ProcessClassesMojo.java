@@ -4,9 +4,9 @@
 
 package net.orfjackal.retrolambda.maven;
 
+import com.google.common.base.Joiner;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.*;
-import org.apache.maven.plugin.logging.Log;
 import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 
@@ -16,14 +16,6 @@ import java.util.*;
 import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
 abstract class ProcessClassesMojo extends AbstractMojo {
-
-    private static final String VERSION_DEPENDENCY = "2.0";
-    private static final String GROUP_ID_DEPENDENCY = "org.apache.maven.plugins";
-    private static final String ARTIFACT_ID_DEPENDENCY = "maven-dependency-plugin";
-    private static final String VERSION_ANTRUN = "1.7";
-
-    private static final String GROUP_ID_ANTRUN = "org.apache.maven.plugins";
-    private static final String ARTIFACT_ID_ANTRUN = "maven-antrun-plugin";
 
     private static final String RETROLAMBDA_JAR = "retrolambda.jar";
 
@@ -42,17 +34,17 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      * The location of the Java 8 JDK (not JRE).
      */
     @Parameter(required = false, property = "java8home", defaultValue = "${env.JAVA8_HOME}")
-    private String java8home;
+    public String java8home;
 
     /**
      * The Java version targeted by the bytecode processing. Possible values are
      * 1.5, 1.6, 1.7 and 1.8. After processing the classes will be compatible
-     * with the target JVM provided the known limitations are considered. See <a
-     * href="https://github.com/orfjackal/retrolambda">project documentation</a>
+     * with the target JVM provided the known limitations are considered. See
+     * <a href="https://github.com/orfjackal/retrolambda">project documentation</a>
      * for more details.
      */
     @Parameter(required = false, property = "retrolambdaTarget", defaultValue = "1.7")
-    private String target;
+    public String target;
 
     /**
      * The directory containing the main (non-test) compiled classes. These
@@ -60,7 +52,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      * with target Java runtime.
      */
     @Parameter(required = false, property = "retrolambdaMainClassesDir", defaultValue = "${project.build.outputDirectory}")
-    private String mainClassesDir;
+    public String mainClassesDir;
 
     /**
      * The directory containing the compiled test classes. These classes will be
@@ -68,7 +60,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      * Java runtime.
      */
     @Parameter(required = false, property = "retrolambdaTestClassesDir", defaultValue = "${project.build.testOutputDirectory}")
-    private String testClassesDir;
+    public String testClassesDir;
 
     private final ClassesType classesType;
 
@@ -82,55 +74,53 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        Log log = getLog();
-        log.info("starting execution");
         validateJava8home();
         validateTarget();
-        String retrolambdaVersion = getRetrolambdaVersion();
+
+        getLog().info("Retrieving the Retrolambda JAR");
         executeMojo(
-                plugin(groupId(GROUP_ID_DEPENDENCY),
-                        artifactId(ARTIFACT_ID_DEPENDENCY),
-                        version(VERSION_DEPENDENCY)),
+                plugin(groupId("org.apache.maven.plugins"),
+                        artifactId("maven-dependency-plugin"),
+                        version("2.0")),
                 goal("copy"),
                 configuration(element("artifactItems",
                         element("artifactItem",
                                 element(name("groupId"), "net.orfjackal.retrolambda"),
                                 element(name("artifactId"), "retrolambda"),
-                                element(name("version"), retrolambdaVersion),
+                                element(name("version"), getRetrolambdaVersion()),
                                 element(name("overWrite"), "true"),
                                 element(name("outputDirectory"), project.getBuild().getDirectory()),
                                 element(name("destFileName"), RETROLAMBDA_JAR)))),
                 executionEnvironment(project, session, pluginManager));
-        log.info("copied retrolambda.jar to build directory");
-        log.info("processing classes");
+
+        getLog().info("Processing classes with Retrolambda");
         if (classesType == ClassesType.MAIN) {
             processClasses(mainClassesDir, "maven.compile.classpath");
         } else {
             processClasses(testClassesDir, "maven.test.classpath");
         }
-        log.info("processed classes");
     }
 
     private void validateTarget() throws MojoExecutionException {
         if (!targetBytecodeVersions.containsKey(target)) {
+            String possibleValues = Joiner.on(", ").join(new ArrayList<String>(targetBytecodeVersions.keySet()));
             throw new MojoExecutionException(
-                    "Unrecognized target '" + target + "'. Possible values are 1.5, 1.6, 1.7, 1.8 representing those versions of Java.");
+                    "Unrecognized target '" + target + "'. Possible values are " + possibleValues);
         }
     }
 
     private void validateJava8home() throws MojoExecutionException {
-        File jdk = new File(java8home);
-        if (!jdk.exists() || !jdk.isDirectory()) {
-            throw new MojoExecutionException("Must set configuration element java8home or environment variable JAVA8_HOME to a valid JDK 8 location");
+        if (!new File(java8home).isDirectory()) {
+            throw new MojoExecutionException(
+                    "Must set configuration element java8home or environment variable JAVA8_HOME to a valid JDK 8 location: " + java8home);
         }
     }
 
-    private void processClasses(String input, String classpathId)
-            throws MojoExecutionException {
-
+    private void processClasses(String inputDir, String classpathId) throws MojoExecutionException {
         executeMojo(
-                plugin(groupId(GROUP_ID_ANTRUN),
-                        artifactId(ARTIFACT_ID_ANTRUN), version(VERSION_ANTRUN)),
+                plugin(groupId("org.apache.maven.plugins"),
+                        artifactId("maven-antrun-plugin"),
+                        version("1.7")),
                 goal("run"),
                 configuration(element(
                         "target",
@@ -142,7 +132,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                         attribute("executable", java8home + "/bin/java"),
                                         attribute("failonerror", "true")),
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
-                                element("arg", attribute("value", "-Dretrolambda.inputDir=" + input)),
+                                element("arg", attribute("value", "-Dretrolambda.inputDir=" + inputDir)),
                                 element("arg", attribute("value", "-Dretrolambda.classpath=${the_classpath}")),
                                 element("arg", attribute("value", "-javaagent:" + project.getBuild().getDirectory() + "/" + RETROLAMBDA_JAR)),
                                 element("arg", attribute("value", "-jar")),
@@ -150,14 +140,19 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                 executionEnvironment(project, session, pluginManager));
     }
 
-    private static String getRetrolambdaVersion() {
-        InputStream is = ProcessClassesMojo.class.getResourceAsStream("/retrolambda.properties");
-        Properties p = new Properties();
+    private static String getRetrolambdaVersion() throws MojoExecutionException {
         try {
-            p.load(is);
-            return p.getProperty("retrolambda.version");
+            InputStream is = ProcessClassesMojo.class.getResourceAsStream(
+                    "/META-INF/maven/net.orfjackal.retrolambda/retrolambda-maven-plugin/pom.properties");
+            try {
+                Properties p = new Properties();
+                p.load(is);
+                return p.getProperty("version");
+            } finally {
+                is.close();
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new MojoExecutionException("Failed to detect the Retrolambda version", e);
         }
     }
 }
