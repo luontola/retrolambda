@@ -50,92 +50,20 @@
             <plugin>
                 <groupId>net.orfjackal.retrolambda</groupId>
                 <artifactId>retrolambda-maven-plugin</artifactId>
-                <version>${project.parent.version}</version>
+                <version>${project.version}</version>
                 <executions>
                     <execution>
                         <goals>
                             <goal>process-main</goal>
                             <goal>process-test</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-	<!-- alternatively, can use a call to the dependency plugin and antrun plugins for fine control of retrolambda parameters -->
-    <!-- although optimally all such use should be through the maven plugin above. Request changes if you need them! -->
-	<!-- if people are happy we could delete this block now -->
-	<!--
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>copy-retrolambda</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
                         <configuration>
-                            <artifactItems>
-                                <artifactItem>
-                                    <groupId>net.orfjackal.retrolambda</groupId>
-                                    <artifactId>retrolambda</artifactId>
-                                    <version>${project.version}</version>
-                                    <overWrite>true</overWrite>
-                                    <outputDirectory>${project.build.directory}</outputDirectory>
-                                    <destFileName>retrolambda.jar</destFileName>
-                                </artifactItem>
-                            </artifactItems>
+                            <target>${testBytecodeTarget}</target>
                         </configuration>
                     </execution>
                 </executions>
             </plugin>
 
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>retrolambda-classes</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <property name="compile_classpath" refid="maven.compile.classpath"/>
-                                <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
-                                    <arg value="-Dretrolambda.bytecodeVersion=${testBytecodeVersion}"/>
-                                    <arg value="-Dretrolambda.inputDir=${project.build.outputDirectory}"/>
-                                    <arg value="-Dretrolambda.classpath=${compile_classpath}"/>
-                                    <arg value="-javaagent:${project.build.directory}/retrolambda.jar"/>
-                                    <arg value="-jar"/>
-                                    <arg value="${project.build.directory}/retrolambda.jar"/>
-                                </exec>
-                            </target>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>retrolambda-test-classes</id>
-                        <phase>process-test-classes</phase>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                        <configuration>
-                            <target>
-                                <property name="test_classpath" refid="maven.test.classpath"/>
-                                <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
-                                    <arg value="-Dretrolambda.bytecodeVersion=${testBytecodeVersion}"/>
-                                    <arg value="-Dretrolambda.inputDir=${project.build.testOutputDirectory}"/>
-                                    <arg value="-Dretrolambda.classpath=${test_classpath}"/>
-                                    <arg value="-javaagent:${project.build.directory}/retrolambda.jar"/>
-                                    <arg value="-jar"/>
-                                    <arg value="${project.build.directory}/retrolambda.jar"/>
-                                </exec>
-                            </target>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
--->
         </plugins>
     </build>
 

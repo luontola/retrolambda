@@ -45,7 +45,7 @@
         <minimumMavenVersion>3.0.3</minimumMavenVersion>
         <compileJavaHome>${env.JAVA8_HOME}</compileJavaHome>
         <testJavaHome>${env.JAVA7_HOME}</testJavaHome>
-        <testBytecodeVersion>51</testBytecodeVersion>
+        <testBytecodeTarget>1.7</testBytecodeTarget>
     </properties>
 
     <prerequisites>
@@ -355,14 +355,14 @@
             <id>java6</id>
             <properties>
                 <testJavaHome>${env.JAVA6_HOME}</testJavaHome>
-                <testBytecodeVersion>50</testBytecodeVersion>
+                <testBytecodeTarget>1.6</testBytecodeTarget>
             </properties>
         </profile>
         <profile>
             <id>java5</id>
             <properties>
                 <testJavaHome>${env.JAVA5_HOME}</testJavaHome>
-                <testBytecodeVersion>49</testBytecodeVersion>
+                <testBytecodeTarget>1.5</testBytecodeTarget>
             </properties>
         </profile>
     </profiles>
