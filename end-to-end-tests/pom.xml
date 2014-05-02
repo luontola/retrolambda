@@ -47,7 +47,24 @@
             </plugin>
 
             <!-- Process our byte codes to make them run on Java 7 -->
+            <plugin>
+                <groupId>net.orfjackal.retrolambda</groupId>
+                <artifactId>retrolambda-maven-plugin</artifactId>
+                <version>${project.parent.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>process-main</goal>
+                            <goal>process-test</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
+	<!-- alternatively, can use a call to the dependency plugin and antrun plugins for fine control of retrolambda parameters -->
+    <!-- although optimally all such use should be through the maven plugin above. Request changes if you need them! -->
+	<!-- if people are happy we could delete this block now -->
+	<!--
             <plugin>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
@@ -118,7 +135,7 @@
                     </execution>
                 </executions>
             </plugin>
-
+-->
         </plugins>
     </build>
 
