@@ -81,7 +81,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         executeMojo(
                 plugin(groupId("org.apache.maven.plugins"),
                         artifactId("maven-dependency-plugin"),
-                        version("2.0")),
+                        version("2.8")),
                 goal("copy"),
                 configuration(element("artifactItems",
                         element("artifactItem",
