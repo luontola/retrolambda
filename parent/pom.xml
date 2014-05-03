@@ -303,8 +303,6 @@
                     <artifactId>maven-shade-plugin</artifactId>
                     <version>2.3</version>
                     <configuration>
-                        <!-- XXX: we cannot relocate the classes or minimize the JAR, because the shade plugin doesn't yet support Java 8 -->
-                        <!--<minimizeJar>true</minimizeJar>-->
                         <!-- Keep the generated POM file out of the base directory -->
                         <dependencyReducedPomLocation>
                             ${project.build.directory}/dependency-reduced-pom.xml

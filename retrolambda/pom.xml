@@ -41,7 +41,6 @@
             </plugin>
 
             <!-- Create an uber jar containing all dependencies -->
-            <!-- XXX: we cannot relocate the classes or minimize the JAR, because the shade plugin doesn't yet support Java 8 -->
 
             <plugin>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -52,6 +51,24 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <minimizeJar>true</minimizeJar>
+                    <relocations>
+                        <relocation>
+                            <pattern>org.objectweb.asm</pattern>
+                            <shadedPattern>net.orfjackal.retrolambda.asm</shadedPattern>
+                        </relocation>
+                    </relocations>
+                    <filters>
+                        <filter>
+                            <artifact>org.ow2.asm:asm-debug-all</artifact>
+                            <excludes>
+                                <exclude>**/*.html</exclude>
+                                <exclude>**/*.dtd</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+                </configuration>
             </plugin>
 
         </plugins>
