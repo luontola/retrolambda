@@ -103,7 +103,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     private void validateTarget() throws MojoExecutionException {
         if (!targetBytecodeVersions.containsKey(target)) {
-            String possibleValues = Joiner.on(", ").join(new ArrayList<String>(targetBytecodeVersions.keySet()));
+            String possibleValues = Joiner.on(", ").join(new TreeSet<String>(targetBytecodeVersions.keySet()));
             throw new MojoExecutionException(
                     "Unrecognized target '" + target + "'. Possible values are " + possibleValues);
         }
