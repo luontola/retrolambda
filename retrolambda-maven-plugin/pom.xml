@@ -89,7 +89,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-site-plugin</artifactId>
                 <executions>
                     <execution>
@@ -99,18 +98,30 @@
                         </goals>
                     </execution>
                 </executions>
-                <configuration>
-                    <reportPlugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-plugin-plugin</artifactId>
-                            <version>3.2</version>
-                        </plugin>
-                    </reportPlugins>
-                </configuration>
             </plugin>
 
         </plugins>
     </build>
+
+    <reporting>
+        <plugins>
+
+            <plugin>
+                <artifactId>maven-plugin-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <!-- We want no stinky generic reports -->
+                        </reports>
+                    </reportSet>
+                </reportSets>
+            </plugin>
+
+        </plugins>
+    </reporting>
 
 </project>
