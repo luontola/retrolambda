@@ -84,7 +84,7 @@
             <dependency>
                 <groupId>org.ow2.asm</groupId>
                 <artifactId>asm-debug-all</artifactId>
-                <version>5.0_BETA</version>
+                <version>5.0.2</version>
             </dependency>
 
             <!-- Testing -->
@@ -112,6 +112,14 @@
                 <groupId>org.mockito</groupId>
                 <artifactId>mockito-core</artifactId>
                 <version>1.9.5</version>
+            </dependency>
+
+            <!-- Utils -->
+
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>17.0</version>
             </dependency>
 
         </dependencies>
