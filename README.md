@@ -148,7 +148,8 @@ Version History
 
 ### Retrolambda 1.2.0 (2014-05-02)
 
-- Maven plugin for running Retrolambda (by Dave Moten)
+- Maven plugin for running Retrolambda
+  (thanks, [Dave Moten](https://github.com/davidmoten))
 
 ### Retrolambda 1.1.4 (2014-03-29)
 
