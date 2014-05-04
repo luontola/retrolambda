@@ -144,6 +144,7 @@ Version History
 
 - Fixed the Retrolambda Maven plugin not using the project's classpath
   ([Issue #16](https://github.com/orfjackal/retrolambda/issues/16))
+- Maven plugin: save `retrolambda.jar` under `target/retrolambda/`
 
 ### Retrolambda 1.2.0 (2014-05-02)
 

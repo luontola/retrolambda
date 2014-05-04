@@ -17,8 +17,6 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
 abstract class ProcessClassesMojo extends AbstractMojo {
 
-    private static final String RETROLAMBDA_JAR = "retrolambda.jar";
-
     private final Map<String, Integer> targetBytecodeVersions = new HashMap<String, Integer>();
 
     @Component
@@ -77,7 +75,9 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         validateJava8home();
         validateTarget();
 
-        getLog().info("Retrieving the Retrolambda JAR");
+        // TODO: use Maven's built-in artifact resolving, so that we can refer to retrolambda.jar in the local repository without copying it
+        String version = getRetrolambdaVersion();
+        getLog().info("Retrieving Retrolambda " + version);
         executeMojo(
                 plugin(groupId("org.apache.maven.plugins"),
                         artifactId("maven-dependency-plugin"),
@@ -87,10 +87,10 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                         element("artifactItem",
                                 element(name("groupId"), "net.orfjackal.retrolambda"),
                                 element(name("artifactId"), "retrolambda"),
-                                element(name("version"), getRetrolambdaVersion()),
+                                element(name("version"), version),
                                 element(name("overWrite"), "true"),
-                                element(name("outputDirectory"), project.getBuild().getDirectory()),
-                                element(name("destFileName"), RETROLAMBDA_JAR)))),
+                                element(name("outputDirectory"), getRetrolambdaJarDir()),
+                                element(name("destFileName"), getRetrolambdaJarName())))),
                 executionEnvironment(project, session, pluginManager));
 
         getLog().info("Processing classes with Retrolambda");
@@ -117,6 +117,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     }
 
     private void processClasses(String inputDir, String classpathId) throws MojoExecutionException {
+        String retrolambdaJar = getRetrolambdaJarPath();
         executeMojo(
                 plugin(groupId("org.apache.maven.plugins"),
                         artifactId("maven-antrun-plugin"),
@@ -134,10 +135,22 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
                                 element("arg", attribute("value", "-Dretrolambda.inputDir=" + inputDir)),
                                 element("arg", attribute("value", "-Dretrolambda.classpath=${the_classpath}")),
-                                element("arg", attribute("value", "-javaagent:" + project.getBuild().getDirectory() + "/" + RETROLAMBDA_JAR)),
+                                element("arg", attribute("value", "-javaagent:" + retrolambdaJar)),
                                 element("arg", attribute("value", "-jar")),
-                                element("arg", attribute("value", project.getBuild().getDirectory() + "/" + RETROLAMBDA_JAR))))),
+                                element("arg", attribute("value", retrolambdaJar))))),
                 executionEnvironment(project, session, pluginManager));
+    }
+
+    private String getRetrolambdaJarPath() {
+        return getRetrolambdaJarDir() + "/" + getRetrolambdaJarName();
+    }
+
+    private String getRetrolambdaJarDir() {
+        return project.getBuild().getDirectory() + "/retrolambda";
+    }
+
+    private String getRetrolambdaJarName() {
+        return "retrolambda.jar";
     }
 
     private static String getRetrolambdaVersion() throws MojoExecutionException {
