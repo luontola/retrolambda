@@ -18,6 +18,8 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+            <!-- We must use an older version of the library,  so that we can run our tests on Java 5 -->
+            <version>11.0.2</version>
         </dependency>
 
     </dependencies>
