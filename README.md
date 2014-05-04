@@ -140,6 +140,11 @@ the lambda accesses an instance variable).
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed the Retrolambda Maven plugin not using the project's classpath
+  ([Issue #16](https://github.com/orfjackal/retrolambda/issues/16))
+
 ### Retrolambda 1.2.0 (2014-05-02)
 
 - Maven plugin for running Retrolambda (by Dave Moten)

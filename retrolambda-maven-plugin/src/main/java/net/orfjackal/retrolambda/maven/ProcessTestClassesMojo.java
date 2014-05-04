@@ -10,7 +10,9 @@ import org.apache.maven.plugins.annotations.*;
  * Processes test classes compiled with Java 8 so that they will be compatible with
  * Java 5, 6 or 7 runtime.
  */
-@Mojo(name = "process-test", defaultPhase = LifecyclePhase.PROCESS_TEST_CLASSES)
+@Mojo(name = "process-test",
+        defaultPhase = LifecyclePhase.PROCESS_TEST_CLASSES,
+        requiresDependencyResolution = ResolutionScope.TEST)
 public class ProcessTestClassesMojo extends ProcessClassesMojo {
 
     public ProcessTestClassesMojo() {
