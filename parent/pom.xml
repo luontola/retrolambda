@@ -357,7 +357,7 @@
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.1</version>
+                    <version>1.5.1</version>
                     <configuration>
                         <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                         <serverId>ossrh-releases-net.orfjackal</serverId>
