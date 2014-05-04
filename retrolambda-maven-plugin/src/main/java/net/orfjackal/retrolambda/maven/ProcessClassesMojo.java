@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda.maven;
 
 import com.google.common.base.Joiner;
+import com.google.common.collect.ImmutableMap;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.*;
 import org.apache.maven.plugins.annotations.*;
@@ -17,7 +18,12 @@ import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
 abstract class ProcessClassesMojo extends AbstractMojo {
 
-    private final Map<String, Integer> targetBytecodeVersions = new HashMap<String, Integer>();
+    private static final Map<String, Integer> targetBytecodeVersions = ImmutableMap.of(
+            "1.5", 49,
+            "1.6", 50,
+            "1.7", 51,
+            "1.8", 52
+    );
 
     @Component
     private MavenSession session;
@@ -64,10 +70,6 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     ProcessClassesMojo(ClassesType classesType) {
         this.classesType = classesType;
-        targetBytecodeVersions.put("1.5", 49);
-        targetBytecodeVersions.put("1.6", 50);
-        targetBytecodeVersions.put("1.7", 51);
-        targetBytecodeVersions.put("1.8", 52);
     }
 
     @Override
