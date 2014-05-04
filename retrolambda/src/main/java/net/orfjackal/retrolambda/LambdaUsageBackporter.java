@@ -59,11 +59,16 @@ public class LambdaUsageBackporter {
             if (isBridgeMethodOnInterface(access)) {
                 return null; // remove the bridge method; Java 7 didn't use them
             }
-            if (isNonAbstractMethodOnInterface(access)) {
-                // We are not aware of other reasons than the bridge methods
-                // why JDK 8 would produce non-abstract methods on interfaces,
-                // but we have this warning here to get a bug report sooner
-                // in case we missed something.
+            if (isNonAbstractMethodOnInterface(access)
+                    && !isClassInitializerMethod(name, desc, access)) {
+                // In case we have missed a case of Java 8 producing non-abstract methods
+                // on interfaces, we have this warning here to get a bug report sooner.
+                // Not allowed by Java 7:
+                // - default methods
+                // - static methods
+                // - bridge methods
+                // Allowed by Java 7:
+                // - class initializer methods (for initializing constants)
                 System.out.println("WARNING: Method '" + name + "' of interface '" + className + "' is non-abstract! " +
                         "This will probably fail to run on Java 7 and below. " +
                         "If you get this warning _without_ using Java 8's default methods, " +
@@ -85,6 +90,12 @@ public class LambdaUsageBackporter {
         private boolean isNonAbstractMethodOnInterface(int methodAccess) {
             return Flags.hasFlag(classAccess, Opcodes.ACC_INTERFACE) &&
                     !Flags.hasFlag(methodAccess, Opcodes.ACC_ABSTRACT);
+        }
+
+        private static boolean isClassInitializerMethod(String name, String desc, int methodAccess) {
+            return name.equals("<clinit>") &&
+                    desc.equals("()V") &&
+                    Flags.hasFlag(methodAccess, Opcodes.ACC_STATIC);
         }
     }
 
