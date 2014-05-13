@@ -1,4 +1,4 @@
-// Copyright © 2013 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -112,5 +112,16 @@ public class LambdaTest {
         Callable<List<String>> ref = ArrayList<String>::new;
 
         assertThat(ref.call(), is(instanceOf(ArrayList.class)));
+    }
+
+    @Test
+    public void method_references_to_private_methods() throws Exception {
+        Callable<String> ref = this::privateMethod;
+
+        assertThat(ref.call(), is("foo"));
+    }
+
+    private String privateMethod() {
+        return "foo";
     }
 }
