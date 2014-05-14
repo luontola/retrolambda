@@ -27,7 +27,12 @@ public class LambdaReifier {
         try {
             setInvoker(invoker);
             setInvokedType(invokedType);
+
+            // Causes the lambda class to be loaded. Retrolambda's Java agent
+            // will detect it, save it to a file and tell us (via the globals
+            // in this class) that what the name of the lambda class was.
             callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
+
             return getLambdaFactoryMethod();
 
         } catch (Throwable t) {
