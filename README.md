@@ -133,8 +133,10 @@ that `java.lang.invoke.LambdaMetafactory` generates dynamically, so
 optimizations to that mechanism may break Retrolambda.
 
 Does not implement JDK 8's safety measure of using `invokespecial` to call
-lambda implementation methods that are private instance methods (i.e. when
-the lambda accesses an instance variable).
+lambda implementation methods that are private instance methods (such as
+when the lambda accesses an instance variable, or the lambda is a method
+reference to a private instance method), but instead makes those methods
+package-private.
 
 
 Version History
