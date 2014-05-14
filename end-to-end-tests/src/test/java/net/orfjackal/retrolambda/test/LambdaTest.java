@@ -6,11 +6,13 @@ package net.orfjackal.retrolambda.test;
 
 import org.junit.Test;
 
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.junit.Assert.assertTrue;
 
 public class LambdaTest {
 
@@ -116,12 +118,38 @@ public class LambdaTest {
 
     @Test
     public void method_references_to_private_methods() throws Exception {
-        Callable<String> ref = this::privateMethod;
+        Callable<String> ref1 = this::privateInstanceMethod;
+        Callable<String> ref2 = LambdaTest::privateClassMethod;
 
-        assertThat(ref.call(), is("foo"));
+        assertThat(ref1.call(), is("foo"));
+        assertThat(ref2.call(), is("foo"));
     }
 
-    private String privateMethod() {
+    private String privateInstanceMethod() {
+        return "foo";
+    }
+
+    private static String privateClassMethod() {
+        return "foo";
+    }
+
+    /**
+     * We must make private lambda implementation methods package-private,
+     * so that the lambda class may call them, but we should not make any
+     * more methods non-private than is absolutely necessary.
+     */
+    @Test
+    public void will_not_change_the_visibility_of_unrelated_methods() throws Exception {
+        assertThat(unrelatedPrivateMethod(), is("foo"));
+
+        Method method = getClass().getDeclaredMethod("unrelatedPrivateMethod");
+        int modifiers = method.getModifiers();
+
+        assertTrue("expected " + method.getName() + " to be private, but modifiers were: " + Modifier.toString(modifiers),
+                Modifier.isPrivate(modifiers));
+    }
+
+    private String unrelatedPrivateMethod() {
         return "foo";
     }
 }
