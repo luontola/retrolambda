@@ -14,7 +14,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertTrue;
 
-public class LambdaTest {
+public class LambdaTest extends SuperClass {
 
     @Test
     public void empty_lambda() {
@@ -117,6 +117,18 @@ public class LambdaTest {
     }
 
     @Test
+    public void method_references_to_overridden_inherited_methods_with_super() throws Exception {
+        Callable<String> ref = super::inheritedMethod;
+
+        assertThat(ref.call(), is("superclass version"));
+    }
+
+    @Override
+    String inheritedMethod() {
+        return "overridden version";
+    }
+
+    @Test
     public void method_references_to_private_methods() throws Exception {
         Callable<String> ref1 = LambdaTest::privateClassMethod;
         assertThat(ref1.call(), is("foo"));
@@ -151,5 +163,11 @@ public class LambdaTest {
 
     private String unrelatedPrivateMethod() {
         return "foo";
+    }
+}
+
+class SuperClass {
+    String inheritedMethod() {
+        return "superclass version";
     }
 }
