@@ -15,10 +15,4 @@ public class LambdaNaming {
      * Java 8 produces at runtime classes named {@code EnclosingClass$$Lambda$1}
      */
     public static final Pattern LAMBDA_CLASS = Pattern.compile("^.+\\$\\$Lambda\\$\\d+$");
-
-    /**
-     * Oracle JDK 8 compiler names the methods {@code lambda$methodName$0} but the
-     * Eclipse JDT compiler names them {@code lambda$0} (similar to older JDK 8 EA builds).
-     */
-    public static final Pattern LAMBDA_IMPL_METHOD = Pattern.compile("^lambda(\\$.*)?\\$\\d+$");
 }

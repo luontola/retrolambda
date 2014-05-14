@@ -118,7 +118,6 @@ public class LambdaUsageBackporter {
         @Override
         public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
             if (bsm.getOwner().equals(LambdaNaming.LAMBDA_METAFACTORY)) {
-                lambdaImplMethods.add((Handle) bsmArgs[1]);
                 backportLambda(name, Type.getType(desc), bsm, bsmArgs);
             } else {
                 super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -127,7 +126,9 @@ public class LambdaUsageBackporter {
 
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
             Class<?> invoker = loadClass(myClassName);
-            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(invoker, invokedName, invokedType, bsm, bsmArgs);
+            Handle lambdaImplMethod = (Handle) bsmArgs[1];
+            lambdaImplMethods.add(lambdaImplMethod);
+            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(lambdaImplMethod, invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc());
         }
 

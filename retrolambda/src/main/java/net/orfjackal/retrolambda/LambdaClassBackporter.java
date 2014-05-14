@@ -23,6 +23,7 @@ public class LambdaClassBackporter {
         private final int targetVersion;
         private String lambdaClass;
         private Type constructor;
+        private Handle implMethod;
         private LambdaFactoryMethod factoryMethod;
 
         public LambdaClassVisitor(ClassWriter cw, int targetVersion) {
@@ -34,6 +35,7 @@ public class LambdaClassBackporter {
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
             lambdaClass = name;
             LambdaReifier.setLambdaClass(lambdaClass);
+            implMethod = LambdaReifier.getLambdaImplMethod();
             factoryMethod = LambdaReifier.getLambdaFactoryMethod();
 
             if (version > targetVersion) {
@@ -52,7 +54,7 @@ public class LambdaClassBackporter {
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             mv = new MagicLambdaRemovingMethodVisitor(mv);
-            mv = new PrivateMethodInvocationFixingMethodVisitor(mv, factoryMethod.getInvoker());
+            mv = new PrivateMethodInvocationFixingMethodVisitor(mv, implMethod);
             return mv;
         }
 
@@ -135,18 +137,24 @@ public class LambdaClassBackporter {
 
     private static class PrivateMethodInvocationFixingMethodVisitor extends MethodVisitor {
 
-        private final String invoker;
+        private final Handle implMethod;
 
-        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, Class<?> invoker) {
+        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, Handle implMethod) {
             super(ASM4, mv);
-            this.invoker = Type.getInternalName(invoker);
+            this.implMethod = implMethod;
         }
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+            // Java 8's lambda classes get away with calling private virtual methods
+            // by using invokespecial because the JVM relaxes the bytecode validation
+            // of the lambda classes it generates. We must however use invokevirtual
+            // for them (which is possible because we also make them non-private).
             if (opcode == INVOKESPECIAL
-                    && owner.equals(invoker)
-                    && LambdaNaming.LAMBDA_IMPL_METHOD.matcher(name).matches()) {
+                    && !name.equals("<init>")
+                    && owner.equals(implMethod.getOwner())
+                    && name.equals(implMethod.getName())
+                    && desc.equals(implMethod.getDesc())) {
                 opcode = INVOKEVIRTUAL;
             }
             super.visitMethodInsn(opcode, owner, name, desc);

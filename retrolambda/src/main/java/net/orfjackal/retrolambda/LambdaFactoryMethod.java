@@ -10,12 +10,10 @@ public class LambdaFactoryMethod {
 
     private final String owner;
     private final String desc;
-    private final Class<?> invoker;
 
-    public LambdaFactoryMethod(String lambdaClass, Type invokedType, Class<?> invoker) {
+    public LambdaFactoryMethod(String lambdaClass, Type invokedType) {
         owner = lambdaClass;
         desc = invokedType.getDescriptor();
-        this.invoker = invoker;
     }
 
     public String getOwner() {
@@ -28,9 +26,5 @@ public class LambdaFactoryMethod {
 
     public String getDesc() {
         return desc;
-    }
-
-    public Class<?> getInvoker() {
-        return invoker;
     }
 }
