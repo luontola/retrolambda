@@ -118,10 +118,10 @@ public class LambdaTest {
 
     @Test
     public void method_references_to_private_methods() throws Exception {
-        Callable<String> ref1 = this::privateInstanceMethod;
-        Callable<String> ref2 = LambdaTest::privateClassMethod;
-
+        Callable<String> ref1 = LambdaTest::privateClassMethod;
         assertThat(ref1.call(), is("foo"));
+
+        Callable<String> ref2 = this::privateInstanceMethod;
         assertThat(ref2.call(), is("foo"));
     }
 
