@@ -76,7 +76,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.2.1</version>
+    <version>1.2.2</version>
     <executions>
         <execution>
             <goals>
@@ -142,7 +142,7 @@ package-private.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 1.2.2 (2014-05-15)
 
 - Fixed method references to private methods; will now make them
   package-private the same way as lambda implementation methods
