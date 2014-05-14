@@ -5,8 +5,10 @@
 package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.*;
+import org.objectweb.asm.tree.*;
 
 import java.lang.reflect.Field;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -15,8 +17,14 @@ public class LambdaUsageBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         resetLambdaClassSequenceNumber();
+
+        MethodVisibilityAdjuster stage2 = new MethodVisibilityAdjuster();
+        InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
+        new ClassReader(bytecode).accept(stage1, 0);
+        stage2.makePackagePrivate(stage1.lambdaImplMethods);
+
         ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        new ClassReader(bytecode).accept(new MyClassVisitor(cw, targetVersion), 0);
+        stage2.accept(cw);
         return cw.toByteArray();
     }
 
@@ -34,13 +42,14 @@ public class LambdaUsageBackporter {
     }
 
 
-    private static class MyClassVisitor extends ClassVisitor {
+    private static class InvokeDynamicInsnConverter extends ClassVisitor {
         private final int targetVersion;
         private int classAccess;
         private String className;
+        public final List<Handle> lambdaImplMethods = new ArrayList<>();
 
-        public MyClassVisitor(ClassWriter cw, int targetVersion) {
-            super(ASM4, cw);
+        public InvokeDynamicInsnConverter(ClassVisitor next, int targetVersion) {
+            super(ASM4, next);
             this.targetVersion = targetVersion;
         }
 
@@ -75,11 +84,8 @@ public class LambdaUsageBackporter {
                         "please report a bug at https://github.com/orfjackal/retrolambda/issues " +
                         "together with an SSCCE (http://www.sscce.org/)");
             }
-            if (LambdaNaming.LAMBDA_IMPL_METHOD.matcher(name).matches()) {
-                access = Flags.makeNonPrivate(access);
-            }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className);
+            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className, lambdaImplMethods);
         }
 
         private boolean isBridgeMethodOnInterface(int methodAccess) {
@@ -101,15 +107,18 @@ public class LambdaUsageBackporter {
 
     private static class InvokeDynamicInsnConvertingMethodVisitor extends MethodVisitor {
         private final String myClassName;
+        private final List<Handle> lambdaImplMethods;
 
-        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName) {
+        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName, List<Handle> lambdaImplMethods) {
             super(api, mv);
             this.myClassName = myClassName;
+            this.lambdaImplMethods = lambdaImplMethods;
         }
 
         @Override
         public void visitInvokeDynamicInsn(String name, String desc, Handle bsm, Object... bsmArgs) {
             if (bsm.getOwner().equals(LambdaNaming.LAMBDA_METAFACTORY)) {
+                lambdaImplMethods.add((Handle) bsmArgs[1]);
                 backportLambda(name, Type.getType(desc), bsm, bsmArgs);
             } else {
                 super.visitInvokeDynamicInsn(name, desc, bsm, bsmArgs);
@@ -129,6 +138,32 @@ public class LambdaUsageBackporter {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+        }
+    }
+
+    private static class MethodVisibilityAdjuster extends ClassNode {
+
+        public MethodVisibilityAdjuster() {
+            super(Opcodes.ASM4);
+        }
+
+        public void makePackagePrivate(List<Handle> targetMethods) {
+            for (MethodNode method : this.methods) {
+                if (contains(method, targetMethods)) {
+                    method.access = Flags.makeNonPrivate(method.access);
+                }
+            }
+        }
+
+        private boolean contains(MethodNode needle, List<Handle> haystack) {
+            for (Handle handle : haystack) {
+                if (handle.getOwner().equals(this.name) &&
+                        handle.getName().equals(needle.name) &&
+                        handle.getDesc().equals(needle.desc)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

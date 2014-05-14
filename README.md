@@ -140,6 +140,12 @@ the lambda accesses an instance variable).
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed method references to private methods; will now make them
+  package-private the same way as lambda implementation methods
+  ([Issue #17](https://github.com/orfjackal/retrolambda/issues/17))
+
 ### Retrolambda 1.2.1 (2014-05-04)
 
 - Fixed the Retrolambda Maven plugin not using the project's classpath
