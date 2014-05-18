@@ -135,6 +135,11 @@ public class LambdaTest extends SuperClass {
 
         Callable<String> ref2 = this::privateInstanceMethod;
         assertThat(ref2.call(), is("foo"));
+
+        // Normal method calls should still work after our magic
+        // of making them them accessible from the lambda classes.
+        assertThat(privateClassMethod(), is("foo"));
+        assertThat(privateInstanceMethod(), is("foo"));
     }
 
     private String privateInstanceMethod() {
@@ -146,7 +151,7 @@ public class LambdaTest extends SuperClass {
     }
 
     /**
-     * We must make private lambda implementation methods package-private,
+     * We could make private lambda implementation methods package-private,
      * so that the lambda class may call them, but we should not make any
      * more methods non-private than is absolutely necessary.
      */
@@ -164,10 +169,44 @@ public class LambdaTest extends SuperClass {
     private String unrelatedPrivateMethod() {
         return "foo";
     }
+
+    /**
+     * We cannot just make the private methods package-private for the
+     * lambda class to call them, because that may cause a method in subclass
+     * to override them.
+     */
+    @Test
+    public void will_not_cause_private_methods_to_be_overridable() throws Exception {
+        // Our test assumes that there exists a private method with
+        // the same name and signature in super and sub classes.
+        String name = "privateMethod";
+        assertThat(getClass().getDeclaredMethod(name), is(notNullValue()));
+        assertThat(getClass().getSuperclass().getDeclaredMethod(name), is(notNullValue()));
+
+        assertThat(privateMethod(), is("subclass version"));
+
+        Callable<String> ref1 = this::privateMethod;
+        assertThat(ref1.call(), is("subclass version"));
+
+        Callable<String> ref2 = privateMethodInSuperAsMethodReference();
+        assertThat(ref2.call(), is("superclass version"));
+    }
+
+    private String privateMethod() {
+        return "subclass version";
+    }
 }
 
 class SuperClass {
     String inheritedMethod() {
+        return "superclass version";
+    }
+
+    Callable<String> privateMethodInSuperAsMethodReference() {
+        return this::privateMethod;
+    }
+
+    private String privateMethod() {
         return "superclass version";
     }
 }
