@@ -177,36 +177,43 @@ public class LambdaTest extends SuperClass {
      */
     @Test
     public void will_not_cause_private_methods_to_be_overridable() throws Exception {
+        class Parent {
+            private String privateMethod() {
+                return "parent version";
+            }
+
+            Callable<String> parentRef() {
+                return this::privateMethod;
+            }
+        }
+        class Child extends Parent {
+            private String privateMethod() { // would override if were not private
+                return "child version";
+            }
+
+            Callable<String> childRef() {
+                return this::privateMethod;
+            }
+        }
+
+        Child child = new Child();
+
         // Our test assumes that there exists a private method with
         // the same name and signature in super and sub classes.
         String name = "privateMethod";
-        assertThat(getClass().getDeclaredMethod(name), is(notNullValue()));
-        assertThat(getClass().getSuperclass().getDeclaredMethod(name), is(notNullValue()));
+        assertThat(child.getClass().getDeclaredMethod(name), is(notNullValue()));
+        assertThat(child.getClass().getSuperclass().getDeclaredMethod(name), is(notNullValue()));
 
-        assertThat(privateMethod(), is("subclass version"));
+        Callable<String> ref1 = child.childRef();
+        assertThat(ref1.call(), is("child version"));
 
-        Callable<String> ref1 = this::privateMethod;
-        assertThat(ref1.call(), is("subclass version"));
-
-        Callable<String> ref2 = privateMethodInSuperAsMethodReference();
-        assertThat(ref2.call(), is("superclass version"));
-    }
-
-    private String privateMethod() {
-        return "subclass version";
+        Callable<String> ref2 = child.parentRef();
+        assertThat(ref2.call(), is("parent version"));
     }
 }
 
 class SuperClass {
     String inheritedMethod() {
-        return "superclass version";
-    }
-
-    Callable<String> privateMethodInSuperAsMethodReference() {
-        return this::privateMethod;
-    }
-
-    private String privateMethod() {
         return "superclass version";
     }
 }
