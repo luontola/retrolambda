@@ -49,7 +49,7 @@ public class LambdaUsageBackporter {
         public final List<Handle> lambdaImplMethods = new ArrayList<>();
 
         public InvokeDynamicInsnConverter(ClassVisitor next, int targetVersion) {
-            super(ASM4, next);
+            super(ASM5, next);
             this.targetVersion = targetVersion;
         }
 
@@ -85,23 +85,23 @@ public class LambdaUsageBackporter {
                         "together with an SSCCE (http://www.sscce.org/)");
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new InvokeDynamicInsnConvertingMethodVisitor(api, mv, className, lambdaImplMethods);
+            return new InvokeDynamicInsnConvertingMethodVisitor(mv, className, lambdaImplMethods);
         }
 
         private boolean isBridgeMethodOnInterface(int methodAccess) {
-            return Flags.hasFlag(classAccess, Opcodes.ACC_INTERFACE) &&
-                    Flags.hasFlag(methodAccess, Opcodes.ACC_BRIDGE);
+            return Flags.hasFlag(classAccess, ACC_INTERFACE) &&
+                    Flags.hasFlag(methodAccess, ACC_BRIDGE);
         }
 
         private boolean isNonAbstractMethodOnInterface(int methodAccess) {
-            return Flags.hasFlag(classAccess, Opcodes.ACC_INTERFACE) &&
-                    !Flags.hasFlag(methodAccess, Opcodes.ACC_ABSTRACT);
+            return Flags.hasFlag(classAccess, ACC_INTERFACE) &&
+                    !Flags.hasFlag(methodAccess, ACC_ABSTRACT);
         }
 
         private static boolean isClassInitializerMethod(String name, String desc, int methodAccess) {
             return name.equals("<clinit>") &&
                     desc.equals("()V") &&
-                    Flags.hasFlag(methodAccess, Opcodes.ACC_STATIC);
+                    Flags.hasFlag(methodAccess, ACC_STATIC);
         }
     }
 
@@ -109,8 +109,8 @@ public class LambdaUsageBackporter {
         private final String myClassName;
         private final List<Handle> lambdaImplMethods;
 
-        public InvokeDynamicInsnConvertingMethodVisitor(int api, MethodVisitor mv, String myClassName, List<Handle> lambdaImplMethods) {
-            super(api, mv);
+        public InvokeDynamicInsnConvertingMethodVisitor(MethodVisitor mv, String myClassName, List<Handle> lambdaImplMethods) {
+            super(ASM5, mv);
             this.myClassName = myClassName;
             this.lambdaImplMethods = lambdaImplMethods;
         }
@@ -129,7 +129,7 @@ public class LambdaUsageBackporter {
             Handle lambdaImplMethod = (Handle) bsmArgs[1];
             lambdaImplMethods.add(lambdaImplMethod);
             LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(lambdaImplMethod, invoker, invokedName, invokedType, bsm, bsmArgs);
-            super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc());
+            super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
         }
 
         private static Class<?> loadClass(String className) {
@@ -145,7 +145,7 @@ public class LambdaUsageBackporter {
     private static class MethodVisibilityAdjuster extends ClassNode {
 
         public MethodVisibilityAdjuster() {
-            super(Opcodes.ASM4);
+            super(ASM5);
         }
 
         public void makePackagePrivate(List<Handle> targetMethods) {

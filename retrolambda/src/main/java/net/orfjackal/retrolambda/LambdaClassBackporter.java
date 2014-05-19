@@ -27,7 +27,7 @@ public class LambdaClassBackporter {
         private LambdaFactoryMethod factoryMethod;
 
         public LambdaClassVisitor(ClassWriter cw, int targetVersion) {
-            super(ASM4, cw);
+            super(ASM5, cw);
             this.targetVersion = targetVersion;
         }
 
@@ -76,7 +76,7 @@ public class LambdaClassBackporter {
             mv.visitCode();
             mv.visitTypeInsn(NEW, lambdaClass);
             mv.visitInsn(DUP);
-            mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", "()V");
+            mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", "()V", false);
             mv.visitFieldInsn(PUTSTATIC, lambdaClass, SINGLETON_FIELD_NAME, singletonFieldDesc());
             mv.visitInsn(RETURN);
             mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
@@ -100,7 +100,7 @@ public class LambdaClassBackporter {
                     mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
                     varIndex += type.getSize();
                 }
-                mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", constructor.getDescriptor());
+                mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", constructor.getDescriptor(), false);
                 mv.visitInsn(ARETURN);
             }
 
@@ -120,18 +120,18 @@ public class LambdaClassBackporter {
     private static class MagicLambdaRemovingMethodVisitor extends MethodVisitor {
 
         public MagicLambdaRemovingMethodVisitor(MethodVisitor mv) {
-            super(ASM4, mv);
+            super(ASM5, mv);
         }
 
         @Override
-        public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             if (opcode == INVOKESPECIAL
                     && owner.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)
                     && name.equals("<init>")
                     && desc.equals("()V")) {
                 owner = JAVA_LANG_OBJECT;
             }
-            super.visitMethodInsn(opcode, owner, name, desc);
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 
@@ -140,12 +140,12 @@ public class LambdaClassBackporter {
         private final Handle implMethod;
 
         public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, Handle implMethod) {
-            super(ASM4, mv);
+            super(ASM5, mv);
             this.implMethod = implMethod;
         }
 
         @Override
-        public void visitMethodInsn(int opcode, String owner, String name, String desc) {
+        public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             // Java 8's lambda classes get away with calling private virtual methods
             // by using invokespecial because the JVM relaxes the bytecode validation
             // of the lambda classes it generates. We must however use invokevirtual
@@ -157,7 +157,7 @@ public class LambdaClassBackporter {
                     && desc.equals(implMethod.getDesc())) {
                 opcode = INVOKEVIRTUAL;
             }
-            super.visitMethodInsn(opcode, owner, name, desc);
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 }
