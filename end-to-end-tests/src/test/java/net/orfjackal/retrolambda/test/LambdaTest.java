@@ -204,11 +204,11 @@ public class LambdaTest extends SuperClass {
         assertThat(child.getClass().getDeclaredMethod(name), is(notNullValue()));
         assertThat(child.getClass().getSuperclass().getDeclaredMethod(name), is(notNullValue()));
 
-        Callable<String> ref1 = child.childRef();
-        assertThat(ref1.call(), is("child version"));
+        assertThat(child.privateMethod(), is("child version"));
+        assertThat(child.childRef().call(), is("child version"));
 
-        Callable<String> ref2 = child.parentRef();
-        assertThat(ref2.call(), is("parent version"));
+        assertThat(((Parent) child).privateMethod(), is("parent version"));
+        assertThat(child.parentRef().call(), is("parent version"));
     }
 }
 
