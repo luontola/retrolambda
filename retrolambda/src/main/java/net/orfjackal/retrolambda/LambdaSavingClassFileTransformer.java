@@ -50,7 +50,7 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
 
         } catch (Throwable t) {
             // print to stdout to keep in sync with other log output
-            System.out.println("ERROR: Failed so backport lambda class: " + className);
+            System.out.println("ERROR: Failed to backport lambda class: " + className);
             t.printStackTrace(System.out);
         }
         return null;
