@@ -6,7 +6,6 @@ package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.ClassReader;
 
-import java.io.IOException;
 import java.lang.instrument.*;
 import java.nio.file.*;
 import java.security.ProtectionDomain;
@@ -49,8 +48,10 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
             Files.createDirectories(savePath.getParent());
             Files.write(savePath, backportedBytecode);
 
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            // print to stdout to keep in sync with other log output
+            System.out.println("ERROR: Failed so backport lambda class: " + className);
+            t.printStackTrace(System.out);
         }
         return null;
     }

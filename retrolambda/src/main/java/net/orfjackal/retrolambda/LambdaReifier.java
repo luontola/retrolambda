@@ -11,8 +11,6 @@ import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.concurrent.*;
 
-import static org.objectweb.asm.Opcodes.*;
-
 public class LambdaReifier {
 
     // These globals are used for communicating with the Java agent which
@@ -20,12 +18,15 @@ public class LambdaReifier {
     // We expect only one class being processed at a time, so it should
     // be an error if these collections contain more than one element.
     private static final BlockingDeque<Handle> currentLambdaImplMethod = new LinkedBlockingDeque<>(1);
+    private static final BlockingDeque<Handle> currentLambdaBridgeMethod = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Type> currentInvokedType = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<String> currentLambdaClass = new LinkedBlockingDeque<>(1);
 
-    public static LambdaFactoryMethod reifyLambdaClass(Handle lambdaImplMethod, Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
+    public static LambdaFactoryMethod reifyLambdaClass(Handle lambdaImplMethod, Handle lambdaBridgeMethod,
+                                                       Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
         try {
             setLambdaImplMethod(lambdaImplMethod);
+            setLambdaBridgeMethod(lambdaBridgeMethod);
             setInvokedType(invokedType);
 
             // Causes the lambda class to be loaded. Retrolambda's Java agent
@@ -46,6 +47,10 @@ public class LambdaReifier {
         currentLambdaImplMethod.push(lambdaImplMethod);
     }
 
+    private static void setLambdaBridgeMethod(Handle lambdaBridgeMethod) {
+        currentLambdaBridgeMethod.push(lambdaBridgeMethod);
+    }
+
     private static void setInvokedType(Type invokedType) {
         currentInvokedType.push(invokedType);
     }
@@ -58,6 +63,10 @@ public class LambdaReifier {
         return currentLambdaImplMethod.getFirst();
     }
 
+    public static Handle getLambdaBridgeMethod() {
+        return currentLambdaBridgeMethod.getFirst();
+    }
+
     public static LambdaFactoryMethod getLambdaFactoryMethod() {
         String lambdaClass = currentLambdaClass.getFirst();
         Type invokedType = currentInvokedType.getFirst();
@@ -66,6 +75,7 @@ public class LambdaReifier {
 
     private static void resetGlobals() {
         currentLambdaImplMethod.clear();
+        currentLambdaBridgeMethod.clear();
         currentInvokedType.clear();
         currentLambdaClass.clear();
     }
@@ -77,12 +87,12 @@ public class LambdaReifier {
         List<Object> args = new ArrayList<>();
         args.add(caller);
         args.add(invokedName);
-        args.add(toMethodType(invokedType, cl));
+        args.add(Types.toMethodType(invokedType, cl));
         for (Object arg : bsmArgs) {
-            args.add(asmToJdkType(arg, cl, caller));
+            args.add(Types.asmToJdkType(arg, cl, caller));
         }
 
-        MethodHandle bootstrapMethod = toMethodHandle(bsm, cl, caller);
+        MethodHandle bootstrapMethod = Types.toMethodHandle(bsm, cl, caller);
         return (CallSite) bootstrapMethod.invokeWithArguments(args);
     }
 
@@ -90,42 +100,5 @@ public class LambdaReifier {
         Constructor<MethodHandles.Lookup> ctor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
         ctor.setAccessible(true);
         return ctor.newInstance(targetClass);
-    }
-
-    private static Object asmToJdkType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) throws Exception {
-        if (arg instanceof Type) {
-            return toMethodType((Type) arg, classLoader);
-        } else if (arg instanceof Handle) {
-            return toMethodHandle((Handle) arg, classLoader, caller);
-        } else {
-            return arg;
-        }
-    }
-
-    private static MethodType toMethodType(Type type, ClassLoader classLoader) {
-        return MethodType.fromMethodDescriptorString(type.getInternalName(), classLoader);
-    }
-
-    private static MethodHandle toMethodHandle(Handle handle, ClassLoader classLoader, MethodHandles.Lookup lookup) throws Exception {
-        MethodType type = MethodType.fromMethodDescriptorString(handle.getDesc(), classLoader);
-        Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
-
-        switch (handle.getTag()) {
-            case H_INVOKESTATIC:
-                return lookup.findStatic(owner, handle.getName(), type);
-
-            case H_INVOKEVIRTUAL:
-            case H_INVOKEINTERFACE:
-                return lookup.findVirtual(owner, handle.getName(), type);
-
-            case H_INVOKESPECIAL:
-                return lookup.findSpecial(owner, handle.getName(), type, owner);
-
-            case H_NEWINVOKESPECIAL:
-                return lookup.findConstructor(owner, type);
-
-            default:
-                throw new AssertionError("Unexpected handle type: " + handle);
-        }
     }
 }

@@ -142,6 +142,15 @@ package-private.
 Version History
 ---------------
 
+### Upcoming
+
+- Android: Fixed NoSuchMethodError when calling a private method to which
+  there is a method reference
+  ([Issue #18](https://github.com/orfjackal/retrolambda/issues/18))
+- Fixed the possibility of accidentally overriding private methods to which
+  there is method reference
+  ([Issue #19](https://github.com/orfjackal/retrolambda/issues/19))
+
 ### Retrolambda 1.2.2 (2014-05-15)
 
 - Fixed method references to private methods; will now make them

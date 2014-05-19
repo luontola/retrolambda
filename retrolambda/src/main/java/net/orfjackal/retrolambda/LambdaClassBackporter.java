@@ -24,6 +24,7 @@ public class LambdaClassBackporter {
         private String lambdaClass;
         private Type constructor;
         private Handle implMethod;
+        private Handle bridgeMethod;
         private LambdaFactoryMethod factoryMethod;
 
         public LambdaClassVisitor(ClassWriter cw, int targetVersion) {
@@ -36,6 +37,7 @@ public class LambdaClassBackporter {
             lambdaClass = name;
             LambdaReifier.setLambdaClass(lambdaClass);
             implMethod = LambdaReifier.getLambdaImplMethod();
+            bridgeMethod = LambdaReifier.getLambdaBridgeMethod();
             factoryMethod = LambdaReifier.getLambdaFactoryMethod();
 
             if (version > targetVersion) {
@@ -54,7 +56,7 @@ public class LambdaClassBackporter {
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             mv = new MagicLambdaRemovingMethodVisitor(mv);
-            mv = new PrivateMethodInvocationFixingMethodVisitor(mv, implMethod);
+            mv = new PrivateMethodInvocationFixingMethodVisitor(mv, this);
             return mv;
         }
 
@@ -138,26 +140,32 @@ public class LambdaClassBackporter {
     private static class PrivateMethodInvocationFixingMethodVisitor extends MethodVisitor {
 
         private final Handle implMethod;
+        private final Handle bridgeMethod;
 
-        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, Handle implMethod) {
+        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, LambdaClassVisitor context) {
             super(ASM5, mv);
-            this.implMethod = implMethod;
+            this.implMethod = context.implMethod;
+            this.bridgeMethod = context.bridgeMethod;
         }
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
             // Java 8's lambda classes get away with calling private virtual methods
             // by using invokespecial because the JVM relaxes the bytecode validation
-            // of the lambda classes it generates. We must however use invokevirtual
-            // for them (which is possible because we also make them non-private).
-            if (opcode == INVOKESPECIAL
-                    && !name.equals("<init>")
-                    && owner.equals(implMethod.getOwner())
+            // of the lambda classes it generates. We must however call them through
+            // a non-private bridge method which we have generated.
+            if (owner.equals(implMethod.getOwner())
                     && name.equals(implMethod.getName())
                     && desc.equals(implMethod.getDesc())) {
-                opcode = INVOKEVIRTUAL;
+                super.visitMethodInsn(
+                        Handles.getOpcode(bridgeMethod),
+                        bridgeMethod.getOwner(),
+                        bridgeMethod.getName(),
+                        bridgeMethod.getDesc(),
+                        bridgeMethod.getTag() == H_INVOKEINTERFACE);
+            } else {
+                super.visitMethodInsn(opcode, owner, name, desc, itf);
             }
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
         }
     }
 }

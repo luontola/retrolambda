@@ -5,7 +5,6 @@
 package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.*;
-import org.objectweb.asm.tree.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -18,14 +17,10 @@ public class LambdaUsageBackporter {
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         resetLambdaClassSequenceNumber();
 
-        MethodVisibilityAdjuster stage2 = new MethodVisibilityAdjuster();
+        ClassWriter stage2 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
         new ClassReader(bytecode).accept(stage1, 0);
-        stage2.makePackagePrivate(stage1.lambdaImplMethods);
-
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        stage2.accept(cw);
-        return cw.toByteArray();
+        return stage2.toByteArray();
     }
 
     private static void resetLambdaClassSequenceNumber() {
@@ -34,10 +29,11 @@ public class LambdaUsageBackporter {
             counterField.setAccessible(true);
             AtomicInteger counter = (AtomicInteger) counterField.get(null);
             counter.set(0);
-        } catch (Exception e) {
-            System.err.println("WARNING: Failed to start class numbering from one. Don't worry, it's cosmetic, " +
+        } catch (Throwable t) {
+            // print to stdout to keep in sync with other log output
+            System.out.println("WARNING: Failed to start class numbering from one. Don't worry, it's cosmetic, " +
                     "but please file a bug report and tell on which JDK version this happened.");
-            e.printStackTrace();
+            t.printStackTrace(System.out);
         }
     }
 
@@ -45,8 +41,8 @@ public class LambdaUsageBackporter {
     private static class InvokeDynamicInsnConverter extends ClassVisitor {
         private final int targetVersion;
         private int classAccess;
-        private String className;
-        public final List<Handle> lambdaImplMethods = new ArrayList<>();
+        String className;
+        private final Map<Handle, Handle> lambdaBridgesToImplMethods = new LinkedHashMap<>();
 
         public InvokeDynamicInsnConverter(ClassVisitor next, int targetVersion) {
             super(ASM5, next);
@@ -85,7 +81,7 @@ public class LambdaUsageBackporter {
                         "together with an SSCCE (http://www.sscce.org/)");
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            return new InvokeDynamicInsnConvertingMethodVisitor(mv, className, lambdaImplMethods);
+            return new InvokeDynamicInsnConvertingMethodVisitor(mv, this);
         }
 
         private boolean isBridgeMethodOnInterface(int methodAccess) {
@@ -103,16 +99,53 @@ public class LambdaUsageBackporter {
                     desc.equals("()V") &&
                     Flags.hasFlag(methodAccess, ACC_STATIC);
         }
+
+        Handle getLambdaBridgeMethod(Handle implMethod) {
+            if (!implMethod.getOwner().equals(className)) {
+                return implMethod;
+            }
+            // TODO: do not generate a bridge method if the impl method is not private (probably not implementable with a single pass)
+            String name = "access$lambda$" + lambdaBridgesToImplMethods.size();
+            String desc = implMethod.getTag() == H_INVOKESTATIC
+                    ? implMethod.getDesc()
+                    : Types.prependArgumentType(Type.getType("L" + className + ";"), implMethod.getDesc());
+            Handle bridgeMethod = new Handle(H_INVOKESTATIC, className, name, desc);
+            lambdaBridgesToImplMethods.put(bridgeMethod, implMethod);
+            return bridgeMethod;
+        }
+
+        @Override
+        public void visitEnd() {
+            for (Map.Entry<Handle, Handle> entry : lambdaBridgesToImplMethods.entrySet()) {
+                Handle bridgeMethod = entry.getKey();
+                Handle implMethod = entry.getValue();
+                generateLambdaBridgeMethod(bridgeMethod, implMethod);
+            }
+            super.visitEnd();
+        }
+
+        private void generateLambdaBridgeMethod(Handle bridge, Handle impl) {
+            MethodVisitor mv = super.visitMethod(ACC_STATIC | ACC_SYNTHETIC | ACC_BRIDGE,
+                    bridge.getName(), bridge.getDesc(), null, null);
+            mv.visitCode();
+            int varIndex = 0;
+            for (Type type : Type.getArgumentTypes(bridge.getDesc())) {
+                mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
+                varIndex += type.getSize();
+            }
+            mv.visitMethodInsn(Handles.getOpcode(impl), impl.getOwner(), impl.getName(), impl.getDesc(), impl.getTag() == H_INVOKEINTERFACE);
+            mv.visitInsn(Type.getReturnType(bridge.getDesc()).getOpcode(IRETURN));
+            mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
+            mv.visitEnd();
+        }
     }
 
     private static class InvokeDynamicInsnConvertingMethodVisitor extends MethodVisitor {
-        private final String myClassName;
-        private final List<Handle> lambdaImplMethods;
+        private final InvokeDynamicInsnConverter context;
 
-        public InvokeDynamicInsnConvertingMethodVisitor(MethodVisitor mv, String myClassName, List<Handle> lambdaImplMethods) {
+        public InvokeDynamicInsnConvertingMethodVisitor(MethodVisitor mv, InvokeDynamicInsnConverter context) {
             super(ASM5, mv);
-            this.myClassName = myClassName;
-            this.lambdaImplMethods = lambdaImplMethods;
+            this.context = context;
         }
 
         @Override
@@ -125,10 +158,12 @@ public class LambdaUsageBackporter {
         }
 
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
-            Class<?> invoker = loadClass(myClassName);
-            Handle lambdaImplMethod = (Handle) bsmArgs[1];
-            lambdaImplMethods.add(lambdaImplMethod);
-            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(lambdaImplMethod, invoker, invokedName, invokedType, bsm, bsmArgs);
+            Class<?> invoker = loadClass(context.className);
+            Handle implMethod = (Handle) bsmArgs[1];
+            Handle bridgeMethod = context.getLambdaBridgeMethod(implMethod);
+
+            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, bridgeMethod,
+                    invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
         }
 
@@ -139,32 +174,6 @@ public class LambdaUsageBackporter {
             } catch (ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
-        }
-    }
-
-    private static class MethodVisibilityAdjuster extends ClassNode {
-
-        public MethodVisibilityAdjuster() {
-            super(ASM5);
-        }
-
-        public void makePackagePrivate(List<Handle> targetMethods) {
-            for (MethodNode method : this.methods) {
-                if (contains(method, targetMethods)) {
-                    method.access = Flags.makeNonPrivate(method.access);
-                }
-            }
-        }
-
-        private boolean contains(MethodNode needle, List<Handle> haystack) {
-            for (Handle handle : haystack) {
-                if (handle.getOwner().equals(this.name) &&
-                        handle.getName().equals(needle.name) &&
-                        handle.getDesc().equals(needle.desc)) {
-                    return true;
-                }
-            }
-            return false;
         }
     }
 }
