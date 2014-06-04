@@ -9,8 +9,8 @@ import org.apache.maven.plugins.annotations.*;
 import java.io.File;
 
 /**
- * Processes main (non-test) classes compiled with Java 8 so that they will be
- * compatible with Java 5, 6 or 7 runtime.
+ * Processes main classes compiled with Java 8 so that they will be compatible with
+ * Java 5, 6 or 7 runtime.
  */
 @Mojo(name = "process-main",
         defaultPhase = LifecyclePhase.PROCESS_CLASSES,
