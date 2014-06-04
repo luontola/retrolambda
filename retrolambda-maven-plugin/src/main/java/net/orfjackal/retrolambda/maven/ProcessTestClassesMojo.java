@@ -26,7 +26,7 @@ public class ProcessTestClassesMojo extends ProcessClassesMojo {
     public File testInputDir;
 
     /**
-     * Directory where to write the backported main classes.
+     * Directory where to write the backported classes.
      * If same as the input directory, will overwrite the original classes.
      *
      * @since 1.3.0
