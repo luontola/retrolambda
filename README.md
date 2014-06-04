@@ -146,7 +146,7 @@ Version History
 
 - Maven plugin: made the input and output directories configurable
   ([Issue #20](https://github.com/orfjackal/retrolambda/issues/20))
-- Maven plugin: by default use the current JVM for running Retrolambda.
+- Maven plugin: by default use the current JRE for running Retrolambda.
   For the old behavior, add `<java8home>${env.JAVA8_HOME}</java8home>`
   to the plugin configuration
 

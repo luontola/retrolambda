@@ -35,7 +35,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     private MavenProject project;
 
     /**
-     * The location of the Java 8 JDK (not JRE).
+     * Directory of the Java 8 installation for running Retrolambda.
      *
      * @since 1.2.0
      */
