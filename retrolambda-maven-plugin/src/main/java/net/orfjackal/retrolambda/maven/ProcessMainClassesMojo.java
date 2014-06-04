@@ -34,10 +34,6 @@ public class ProcessMainClassesMojo extends ProcessClassesMojo {
     @Parameter(defaultValue = "${project.build.outputDirectory}", property = "retrolambdaMainOutputDir", required = true)
     public File mainOutputDir;
 
-    public ProcessMainClassesMojo() {
-        super(ClassesType.MAIN);
-    }
-
     @Override
     protected File getInputDir() {
         return mainInputDir;
@@ -46,5 +42,10 @@ public class ProcessMainClassesMojo extends ProcessClassesMojo {
     @Override
     protected File getOutputDir() {
         return mainOutputDir;
+    }
+
+    @Override
+    protected String getClasspathId() {
+        return "maven.compile.classpath";
     }
 }

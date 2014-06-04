@@ -54,45 +54,23 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     @Parameter(defaultValue = "1.7", property = "retrolambdaTarget", required = true)
     public String target;
 
-    private final ClassesType classesType;
-
-    ProcessClassesMojo(ClassesType classesType) {
-        this.classesType = classesType;
-    }
-
     protected abstract File getInputDir();
 
     protected abstract File getOutputDir();
+
+    protected abstract String getClasspathId();
 
     @Override
     public void execute() throws MojoExecutionException {
         validateJava8home();
         validateTarget();
 
-        // TODO: use Maven's built-in artifact resolving, so that we can refer to retrolambda.jar in the local repository without copying it
         String version = getRetrolambdaVersion();
         getLog().info("Retrieving Retrolambda " + version);
-        executeMojo(
-                plugin(groupId("org.apache.maven.plugins"),
-                        artifactId("maven-dependency-plugin"),
-                        version("2.8")),
-                goal("copy"),
-                configuration(element("artifactItems",
-                        element("artifactItem",
-                                element(name("groupId"), "net.orfjackal.retrolambda"),
-                                element(name("artifactId"), "retrolambda"),
-                                element(name("version"), version),
-                                element(name("overWrite"), "true"),
-                                element(name("outputDirectory"), getRetrolambdaJarDir()),
-                                element(name("destFileName"), getRetrolambdaJarName())))),
-                executionEnvironment(project, session, pluginManager));
+        retrieveRetrolambdaJar(version);
 
         getLog().info("Processing classes with Retrolambda");
-        if (classesType == ClassesType.MAIN) {
-            processClasses("maven.compile.classpath");
-        } else {
-            processClasses("maven.test.classpath");
-        }
+        processClasses();
     }
 
     private void validateTarget() throws MojoExecutionException {
@@ -110,7 +88,25 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         }
     }
 
-    private void processClasses(String classpathId) throws MojoExecutionException {
+    private void retrieveRetrolambdaJar(String version) throws MojoExecutionException {
+        // TODO: use Maven's built-in artifact resolving, so that we can refer to retrolambda.jar in the local repository without copying it
+        executeMojo(
+                plugin(groupId("org.apache.maven.plugins"),
+                        artifactId("maven-dependency-plugin"),
+                        version("2.8")),
+                goal("copy"),
+                configuration(element("artifactItems",
+                        element("artifactItem",
+                                element(name("groupId"), "net.orfjackal.retrolambda"),
+                                element(name("artifactId"), "retrolambda"),
+                                element(name("version"), version),
+                                element(name("overWrite"), "true"),
+                                element(name("outputDirectory"), getRetrolambdaJarDir()),
+                                element(name("destFileName"), getRetrolambdaJarName())))),
+                executionEnvironment(project, session, pluginManager));
+    }
+
+    private void processClasses() throws MojoExecutionException {
         String retrolambdaJar = getRetrolambdaJarPath();
         executeMojo(
                 plugin(groupId("org.apache.maven.plugins"),
@@ -121,7 +117,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                         "target",
                         element("property",
                                 attributes(attribute("name", "the_classpath"),
-                                        attribute("refid", classpathId))),
+                                        attribute("refid", getClasspathId()))),
                         element("exec",
                                 attributes(
                                         attribute("executable", java8home + "/bin/java"),

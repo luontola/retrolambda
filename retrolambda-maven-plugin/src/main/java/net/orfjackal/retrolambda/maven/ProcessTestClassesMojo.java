@@ -17,10 +17,6 @@ import java.io.File;
         requiresDependencyResolution = ResolutionScope.TEST)
 public class ProcessTestClassesMojo extends ProcessClassesMojo {
 
-    public ProcessTestClassesMojo() {
-        super(ClassesType.TEST);
-    }
-
     /**
      * Directory containing the original classes compiled with Java 8.
      *
@@ -46,5 +42,10 @@ public class ProcessTestClassesMojo extends ProcessClassesMojo {
     @Override
     protected File getOutputDir() {
         return testOutputDir;
+    }
+
+    @Override
+    protected String getClasspathId() {
+        return "maven.test.classpath";
     }
 }
