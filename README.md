@@ -142,6 +142,11 @@ package-private.
 Version History
 ---------------
 
+### Upcoming
+
+- Maven plugin: made the input and output directories configurable
+  ([Issue #20](https://github.com/orfjackal/retrolambda/issues/20))
+
 ### Retrolambda 1.2.3 (2014-05-19)
 
 - Android: Fixed NoSuchMethodError when calling a private method to which

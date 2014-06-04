@@ -36,8 +36,10 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     /**
      * The location of the Java 8 JDK (not JRE).
+     *
+     * @since 1.2.0
      */
-    @Parameter(required = false, property = "java8home", defaultValue = "${env.JAVA8_HOME}")
+    @Parameter(defaultValue = "${env.JAVA8_HOME}", property = "java8home", required = true)
     public String java8home;
 
     /**
@@ -46,31 +48,21 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      * with the target JVM provided the known limitations are considered. See
      * <a href="https://github.com/orfjackal/retrolambda">project documentation</a>
      * for more details.
+     *
+     * @since 1.2.0
      */
-    @Parameter(required = false, property = "retrolambdaTarget", defaultValue = "1.7")
+    @Parameter(defaultValue = "1.7", property = "retrolambdaTarget", required = true)
     public String target;
-
-    /**
-     * The directory containing the main (non-test) compiled classes. These
-     * classes will be overwritten with bytecode changes to obtain compatibility
-     * with target Java runtime.
-     */
-    @Parameter(required = false, property = "retrolambdaMainClassesDir", defaultValue = "${project.build.outputDirectory}")
-    public String mainClassesDir;
-
-    /**
-     * The directory containing the compiled test classes. These classes will be
-     * overwritten with bytecode changes to obtain compatibility with target
-     * Java runtime.
-     */
-    @Parameter(required = false, property = "retrolambdaTestClassesDir", defaultValue = "${project.build.testOutputDirectory}")
-    public String testClassesDir;
 
     private final ClassesType classesType;
 
     ProcessClassesMojo(ClassesType classesType) {
         this.classesType = classesType;
     }
+
+    protected abstract File getInputDir();
+
+    protected abstract File getOutputDir();
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -97,9 +89,9 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
         getLog().info("Processing classes with Retrolambda");
         if (classesType == ClassesType.MAIN) {
-            processClasses(mainClassesDir, "maven.compile.classpath");
+            processClasses("maven.compile.classpath");
         } else {
-            processClasses(testClassesDir, "maven.test.classpath");
+            processClasses("maven.test.classpath");
         }
     }
 
@@ -118,7 +110,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         }
     }
 
-    private void processClasses(String inputDir, String classpathId) throws MojoExecutionException {
+    private void processClasses(String classpathId) throws MojoExecutionException {
         String retrolambdaJar = getRetrolambdaJarPath();
         executeMojo(
                 plugin(groupId("org.apache.maven.plugins"),
@@ -135,7 +127,8 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                         attribute("executable", java8home + "/bin/java"),
                                         attribute("failonerror", "true")),
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
-                                element("arg", attribute("value", "-Dretrolambda.inputDir=" + inputDir)),
+                                element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
+                                element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
                                 element("arg", attribute("value", "-Dretrolambda.classpath=${the_classpath}")),
                                 element("arg", attribute("value", "-javaagent:" + retrolambdaJar)),
                                 element("arg", attribute("value", "-jar")),
