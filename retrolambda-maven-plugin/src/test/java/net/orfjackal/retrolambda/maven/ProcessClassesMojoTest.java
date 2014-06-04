@@ -8,6 +8,8 @@ import org.apache.maven.plugin.MojoExecutionException;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 
+import java.io.File;
+
 public class ProcessClassesMojoTest {
 
     private final ProcessMainClassesMojo mojo = new ProcessMainClassesMojo();
@@ -18,7 +20,7 @@ public class ProcessClassesMojoTest {
     @Before
     public void sensibleDefaults() {
         mojo.target = "1.7";
-        mojo.java8home = System.getProperty("java.home");
+        mojo.java8home = new File(System.getProperty("java.home"));
     }
 
     @Test

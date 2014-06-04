@@ -70,6 +70,7 @@
                         </goals>
                         <configuration>
                             <target>${testBytecodeTarget}</target>
+                            <java8home>${env.JAVA8_HOME}</java8home>
                         </configuration>
                     </execution>
                 </executions>

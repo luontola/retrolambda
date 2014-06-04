@@ -39,8 +39,8 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      *
      * @since 1.2.0
      */
-    @Parameter(defaultValue = "${env.JAVA8_HOME}", property = "java8home", required = true)
-    public String java8home;
+    @Parameter(defaultValue = "${java.home}", property = "java8home", required = true)
+    public File java8home;
 
     /**
      * The Java version targeted by the bytecode processing. Possible values are
@@ -104,7 +104,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     }
 
     private void validateJava8home() throws MojoExecutionException {
-        if (!new File(java8home).isDirectory()) {
+        if (!java8home.isDirectory()) {
             throw new MojoExecutionException(
                     "Must set configuration element java8home or environment variable JAVA8_HOME to a valid JDK 8 location: " + java8home);
         }
