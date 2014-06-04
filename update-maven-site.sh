@@ -9,3 +9,7 @@ git clone ../retrolambda/.git/ tmp
 rm -rf retrolambda-maven-plugin
 cp -rv tmp/retrolambda-maven-plugin/target/site retrolambda-maven-plugin
 rm -rf tmp
+
+git reset
+git add -A retrolambda-maven-plugin
+git commit -m "Maven plugin docs for version $VERSION"
