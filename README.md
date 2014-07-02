@@ -65,6 +65,11 @@ Optional system properties:
   retrolambda.outputDir
       Output directory into where the generated class files are written.
       Defaults to same as retrolambda.inputDir
+
+  retrolambda.changed
+      A list of all the files that have changed since last run.
+      This is useful for a build tool to support incremental compilation.
+
 ```
 
 
