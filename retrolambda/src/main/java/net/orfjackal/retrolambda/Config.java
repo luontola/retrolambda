@@ -14,11 +14,11 @@ import java.util.stream.Collectors;
 public class Config {
 
     private static final String PREFIX = "retrolambda.";
-    private static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
-    private static final String INPUT_DIR = PREFIX + "inputDir";
-    private static final String OUTPUT_DIR = PREFIX + "outputDir";
-    private static final String CLASSPATH = PREFIX + "classpath";
-    private static final String INCLUDED_FILES = PREFIX + "includedFiles";
+    public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
+    public static final String INPUT_DIR = PREFIX + "inputDir";
+    public static final String OUTPUT_DIR = PREFIX + "outputDir";
+    public static final String CLASSPATH = PREFIX + "classpath";
+    public static final String INCLUDED_FILES = PREFIX + "includedFiles";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final List<String> requiredProperitesHelp = new ArrayList<>();
@@ -33,7 +33,7 @@ public class Config {
         bytecodeVersionNames.put(Opcodes.V1_5, "Java 5");
         bytecodeVersionNames.put(Opcodes.V1_6, "Java 6");
         bytecodeVersionNames.put(Opcodes.V1_7, "Java 7");
-        bytecodeVersionNames.put(Opcodes.V1_7 + 1, "Java 8");
+        bytecodeVersionNames.put(Opcodes.V1_8, "Java 8");
     }
 
     private final Properties p;
@@ -136,6 +136,7 @@ public class Config {
             return null;
         }
         return Arrays.asList(files.split(File.pathSeparator)).stream()
+                .filter(s -> !s.isEmpty())
                 .map(Paths::get)
                 .collect(Collectors.toList());
     }
