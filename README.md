@@ -147,6 +147,12 @@ package-private.
 Version History
 ---------------
 
+### Upcoming
+
+- Added an optional `-Dretrolambda.includedFiles` parameter to support the
+  incremental compilers of build tools
+  ([Issue #23](https://github.com/orfjackal/retrolambda/pull/23))
+
 ### Retrolambda 1.3.0 (2014-06-04)
 
 - Maven plugin: made the input and output directories configurable
