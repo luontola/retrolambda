@@ -19,6 +19,7 @@ public class LambdaReifier {
     // be an error if these collections contain more than one element.
     private static final BlockingDeque<Handle> currentLambdaImplMethod = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Handle> currentLambdaBridgeMethod = new LinkedBlockingDeque<>(1);
+    private static final BlockingDeque<Class<?>> currentInvoker = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Type> currentInvokedType = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<String> currentLambdaClass = new LinkedBlockingDeque<>(1);
 
@@ -27,6 +28,7 @@ public class LambdaReifier {
         try {
             setLambdaImplMethod(lambdaImplMethod);
             setLambdaBridgeMethod(lambdaBridgeMethod);
+            setInvoker(invoker);
             setInvokedType(invokedType);
 
             // Causes the lambda class to be loaded. Retrolambda's Java agent
@@ -51,12 +53,23 @@ public class LambdaReifier {
         currentLambdaBridgeMethod.push(lambdaBridgeMethod);
     }
 
+    private static void setInvoker(Class<?> lambdaInvoker) {
+        currentInvoker.push(lambdaInvoker);
+    }
+
     private static void setInvokedType(Type invokedType) {
         currentInvokedType.push(invokedType);
     }
 
     public static void setLambdaClass(String lambdaClass) {
         currentLambdaClass.push(lambdaClass);
+    }
+
+    public static boolean isLambdaClassToReify(String className) {
+        Class<?> invoker = currentInvoker.peekFirst();
+        return invoker != null
+                && className.startsWith(Type.getInternalName(invoker))
+                && LambdaNaming.LAMBDA_CLASS.matcher(className).matches();
     }
 
     public static Handle getLambdaImplMethod() {
@@ -76,6 +89,7 @@ public class LambdaReifier {
     private static void resetGlobals() {
         currentLambdaImplMethod.clear();
         currentLambdaBridgeMethod.clear();
+        currentInvoker.clear();
         currentInvokedType.clear();
         currentLambdaClass.clear();
     }

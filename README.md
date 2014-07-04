@@ -152,6 +152,9 @@ Version History
 - Added an optional `-Dretrolambda.includedFiles` parameter to support the
   incremental compilers of build tools
   ([Issue #23](https://github.com/orfjackal/retrolambda/pull/23))
+- Decides which lambda classes to save based on the current class being
+  processed, instead of the class loader that loaded the lambda class
+  ([Issue #21](https://github.com/orfjackal/retrolambda/issues/21))
 
 ### Retrolambda 1.3.0 (2014-06-04)
 
