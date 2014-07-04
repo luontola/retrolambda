@@ -6,8 +6,11 @@ package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.Opcodes;
 
-import java.nio.file.*;
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Config {
 
@@ -16,6 +19,7 @@ public class Config {
     private static final String INPUT_DIR = PREFIX + "inputDir";
     private static final String OUTPUT_DIR = PREFIX + "outputDir";
     private static final String CLASSPATH = PREFIX + "classpath";
+    private static final String CHANGED = PREFIX + "changed";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final List<String> requiredProperitesHelp = new ArrayList<>();
@@ -119,6 +123,20 @@ public class Config {
         return value;
     }
 
+    // incremental files
+
+    static {
+        optionalParameterHelp(CHANGED,
+                "A list of all the files that have changed since last run.",
+                "This is useful for a build tool to support incremental compilation.");
+    }
+
+    public List<Path> getChangedFiles() {
+        String files = p.getProperty(CHANGED);
+        if (files == null) return null;
+        return Arrays.asList(files.split(File.pathSeparator)).stream()
+                .map(Paths::get).collect(Collectors.toList());
+    }
 
     // help
 

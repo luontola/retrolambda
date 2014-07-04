@@ -4,10 +4,19 @@
 
 package net.orfjackal.retrolambda;
 
-import java.io.*;
-import java.net.*;
-import java.nio.file.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
 
 public class Main {
 
@@ -23,10 +32,14 @@ public class Main {
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
         String classpath = config.getClasspath();
+        List<Path> changedFiles = config.getChangedFiles();
         System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
+        if (changedFiles != null) {
+            System.out.println("Changed:          " + changedFiles.size() + " files");
+        }
 
         if (!Files.isDirectory(inputDir)) {
             System.out.println("Nothing to do; not a directory: " + inputDir);
@@ -35,12 +48,21 @@ public class Main {
 
         try {
             Thread.currentThread().setContextClassLoader(new URLClassLoader(asUrls(classpath)));
-            Files.walkFileTree(inputDir, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
+
+            BytecodeTransformingFileVisitor visitor = new BytecodeTransformingFileVisitor(inputDir, outputDir) {
+                @Override
                 protected byte[] transform(byte[] bytecode) {
                     return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
                 }
-            });
+            };
 
+            if (changedFiles == null) {
+                Files.walkFileTree(inputDir, visitor);
+            } else {
+                for (Path inputFile : changedFiles) {
+                    visitor.visitFile(inputFile, Files.readAttributes(inputFile, BasicFileAttributes.class));
+                }
+            }
         } catch (Throwable t) {
             System.out.println("Error! Failed to transform some classes");
             t.printStackTrace(System.out);
