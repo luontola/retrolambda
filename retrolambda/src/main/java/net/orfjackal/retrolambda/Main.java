@@ -7,7 +7,6 @@ package net.orfjackal.retrolambda;
 import java.io.*;
 import java.net.*;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
 
 public class Main {
@@ -41,25 +40,24 @@ public class Main {
         try {
             Thread.currentThread().setContextClassLoader(new URLClassLoader(asUrls(classpath)));
 
-            BytecodeTransformingFileVisitor visitor = new BytecodeTransformingFileVisitor(inputDir, outputDir) {
+            visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
                 @Override
                 protected byte[] transform(byte[] bytecode) {
                     return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
                 }
-            };
-
-            if (includedFiles == null) {
-                Files.walkFileTree(inputDir, visitor);
-            } else {
-                for (Path inputFile : includedFiles) {
-                    visitor.visitFile(inputFile, Files.readAttributes(inputFile, BasicFileAttributes.class));
-                }
-            }
+            });
         } catch (Throwable t) {
             System.out.println("Error! Failed to transform some classes");
             t.printStackTrace(System.out);
             System.exit(1);
         }
+    }
+
+    static void visitFiles(Path inputDir, List<Path> includedFiles, FileVisitor<Path> visitor) throws IOException {
+        if (includedFiles != null) {
+            visitor = new FilteringFileVisitor(includedFiles, visitor);
+        }
+        Files.walkFileTree(inputDir, visitor);
     }
 
     private static URL[] asUrls(String classpath) {
