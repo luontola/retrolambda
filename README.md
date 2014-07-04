@@ -81,7 +81,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.3.0</version>
+    <version>1.4.0</version>
     <executions>
         <execution>
             <goals>
@@ -147,7 +147,7 @@ package-private.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 1.4.0 (2014-07-04)
 
 - Added an optional `-Dretrolambda.includedFiles` parameter to support the
   incremental compilers of build tools
