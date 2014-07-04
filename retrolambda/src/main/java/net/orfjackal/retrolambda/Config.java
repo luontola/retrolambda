@@ -1,4 +1,4 @@
-// Copyright © 2013 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,8 +7,7 @@ package net.orfjackal.retrolambda;
 import org.objectweb.asm.Opcodes;
 
 import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -133,9 +132,12 @@ public class Config {
 
     public List<Path> getChangedFiles() {
         String files = p.getProperty(CHANGED);
-        if (files == null) return null;
+        if (files == null) {
+            return null;
+        }
         return Arrays.asList(files.split(File.pathSeparator)).stream()
-                .map(Paths::get).collect(Collectors.toList());
+                .map(Paths::get)
+                .collect(Collectors.toList());
     }
 
     // help
