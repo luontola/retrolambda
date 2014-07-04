@@ -18,7 +18,7 @@ public class Config {
     private static final String INPUT_DIR = PREFIX + "inputDir";
     private static final String OUTPUT_DIR = PREFIX + "outputDir";
     private static final String CLASSPATH = PREFIX + "classpath";
-    private static final String CHANGED = PREFIX + "changed";
+    private static final String INCLUDED_FILES = PREFIX + "includedFiles";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final List<String> requiredProperitesHelp = new ArrayList<>();
@@ -125,13 +125,13 @@ public class Config {
     // incremental files
 
     static {
-        optionalParameterHelp(CHANGED,
-                "A list of all the files that have changed since last run.",
+        optionalParameterHelp(INCLUDED_FILES,
+                "List of files to process, instead of processing all files.",
                 "This is useful for a build tool to support incremental compilation.");
     }
 
-    public List<Path> getChangedFiles() {
-        String files = p.getProperty(CHANGED);
+    public List<Path> getIncludedFiles() {
+        String files = p.getProperty(INCLUDED_FILES);
         if (files == null) {
             return null;
         }

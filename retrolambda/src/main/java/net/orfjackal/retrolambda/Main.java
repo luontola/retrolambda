@@ -24,13 +24,13 @@ public class Main {
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
         String classpath = config.getClasspath();
-        List<Path> changedFiles = config.getChangedFiles();
+        List<Path> includedFiles = config.getIncludedFiles();
         System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
-        if (changedFiles != null) {
-            System.out.println("Changed:          " + changedFiles.size() + " files");
+        if (includedFiles != null) {
+            System.out.println("Included files:   " + includedFiles.size());
         }
 
         if (!Files.isDirectory(inputDir)) {
@@ -48,10 +48,10 @@ public class Main {
                 }
             };
 
-            if (changedFiles == null) {
+            if (includedFiles == null) {
                 Files.walkFileTree(inputDir, visitor);
             } else {
-                for (Path inputFile : changedFiles) {
+                for (Path inputFile : includedFiles) {
                     visitor.visitFile(inputFile, Files.readAttributes(inputFile, BasicFileAttributes.class));
                 }
             }
