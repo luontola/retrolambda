@@ -97,6 +97,11 @@ See the [plugin documentation](http://orfjackal.github.io/retrolambda/retrolambd
 for all possible parameters. There is also a usage example in [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
 
 
+### Gradle Plugin
+
+[Gradle Retrolamba Plugin](https://github.com/evant/gradle-retrolambda) is developed by Evan Tatarka. See its site for usage instructions.
+
+
 ### Tips
 
 During development, inside an IDE, it's the easiest to use Java 8, without
@@ -110,13 +115,6 @@ referring to those variables in the build configuration, instead of relying on
 what happens to be the default Java version in JAVA_HOME.
 
 You will need Java 8 for compiling and also for generating Javadocs.
-
-
-### Third Party Tools
-
-- [Gradle Retrolamba Plugin](https://github.com/evant/gradle-retrolambda)
-
-If you have things to add to this list, [create a pull request](https://github.com/orfjackal/retrolambda/pulls).
 
 
 Known Limitations
