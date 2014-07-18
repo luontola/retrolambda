@@ -7,14 +7,34 @@ package net.orfjackal.retrolambda.maven;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.*;
-import org.apache.maven.plugins.annotations.*;
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.BuildPluginManager;
+import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.toolchain.Toolchain;
+import org.apache.maven.toolchain.ToolchainManager;
 
-import java.io.*;
-import java.util.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+import java.util.Properties;
+import java.util.TreeSet;
 
-import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.attribute;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.attributes;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.element;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.name;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
 
 abstract class ProcessClassesMojo extends AbstractMojo {
 
@@ -24,6 +44,9 @@ abstract class ProcessClassesMojo extends AbstractMojo {
             "1.7", 51,
             "1.8", 52
     );
+
+    @Component
+    private ToolchainManager toolchainManager;
 
     @Component
     private MavenSession session;
@@ -73,6 +96,17 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         processClasses();
     }
 
+    private String getJavaCommandViaToolChain() {
+        Toolchain tc = toolchainManager.getToolchainFromBuildContext( "jdk", session);
+        if (tc != null) {
+            getLog().info("Using JDK Toolchain: " + tc );
+            String javaCommand = tc.findTool("java");
+            return javaCommand;
+        } else {
+            return java8home + "/bin/java";
+        }
+    }
+
     private void validateTarget() throws MojoExecutionException {
         if (!targetBytecodeVersions.containsKey(target)) {
             String possibleValues = Joiner.on(", ").join(new TreeSet<String>(targetBytecodeVersions.keySet()));
@@ -120,7 +154,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                         attribute("refid", getClasspathId()))),
                         element("exec",
                                 attributes(
-                                        attribute("executable", java8home + "/bin/java"),
+                                        attribute("executable", getJavaCommandViaToolChain()),
                                         attribute("failonerror", "true")),
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
                                 element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
