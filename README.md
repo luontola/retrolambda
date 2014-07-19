@@ -81,7 +81,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <executions>
         <execution>
             <goals>
@@ -145,7 +145,7 @@ package-private.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 1.5.0 (2014-07-19)
 
 - Maven plugin: use the [JDK from Maven Toolchains](http://maven.apache.org/plugins/maven-toolchains-plugin/toolchains/jdk.html)
   if available. The `java8home` configuration parameter overrides this
