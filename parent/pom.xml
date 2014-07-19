@@ -43,7 +43,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <minimumMavenVersion>3.1</minimumMavenVersion>
-        <compileJavaHome>${env.JAVA8_HOME}</compileJavaHome>
         <testJavaHome>${env.JAVA7_HOME}</testJavaHome>
         <testBytecodeTarget>1.7</testBytecodeTarget>
     </properties>
@@ -129,12 +128,28 @@
         <plugins>
 
             <plugin>
+                <artifactId>maven-toolchains-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>toolchain</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <toolchains>
+                        <jdk>
+                            <version>1.8</version>
+                        </jdk>
+                    </toolchains>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <fork>true</fork>
-                    <executable>${compileJavaHome}/bin/javac</executable>
                 </configuration>
             </plugin>
 
@@ -145,7 +160,6 @@
                         <include>**/*Test.class</include>
                     </includes>
                     <redirectTestOutputToFile>true</redirectTestOutputToFile>
-                    <jvm>${compileJavaHome}/bin/java</jvm>
                 </configuration>
             </plugin>
 
@@ -173,13 +187,6 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <configuration>
-                    <javadocExecutable>${compileJavaHome}/bin/javadoc</javadocExecutable>
-                </configuration>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
                     <execution>
@@ -203,12 +210,6 @@
                         </goals>
                         <configuration>
                             <rules>
-                                <requireFilesExist>
-                                    <message>Java installation directory not found: ${compileJavaHome}</message>
-                                    <files>
-                                        <file>${compileJavaHome}</file>
-                                    </files>
-                                </requireFilesExist>
                                 <requireFilesExist>
                                     <message>Java installation directory not found: ${testJavaHome}</message>
                                     <files>
@@ -246,6 +247,11 @@
         </plugins>
         <pluginManagement>
             <plugins>
+
+                <plugin>
+                    <artifactId>maven-toolchains-plugin</artifactId>
+                    <version>1.0</version>
+                </plugin>
 
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>

@@ -2,9 +2,12 @@
 Building Retrolambda
 ====================
 
-Set the environment variables `JAVA8_HOME` and `JAVA7_HOME` (optionally also
-`JAVA6_HOME` and `JAVA5_HOME`) point to the installation directories of those
-particular JDK versions.
+Set the following environment variables to point to the installation
+directories of those particular JDK versions:
+`JAVA8_HOME`, `JAVA7_HOME`, `JAVA6_HOME`, `JAVA5_HOME`
+
+Create ~/.m2/toolchains.xml and list all the JDKs there as shown in
+http://maven.apache.org/plugins/maven-toolchains-plugin/toolchains/jdk.html
 
 Compile the project with Maven using the command:
 

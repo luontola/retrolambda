@@ -68,12 +68,11 @@
                             <goal>process-main</goal>
                             <goal>process-test</goal>
                         </goals>
-                        <configuration>
-                            <target>${testBytecodeTarget}</target>
-                            <java8home>${env.JAVA8_HOME}</java8home>
-                        </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <target>${testBytecodeTarget}</target>
+                </configuration>
             </plugin>
 
         </plugins>
