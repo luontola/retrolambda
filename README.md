@@ -145,6 +145,12 @@ package-private.
 Version History
 ---------------
 
+### Upcoming
+
+- Maven plugin: use the [JDK from Maven Toolchains](http://maven.apache.org/plugins/maven-toolchains-plugin/toolchains/jdk.html)
+  if available. The `java8home` configuration parameter overrides this
+  ([Issue #24](https://github.com/orfjackal/retrolambda/pull/24))
+
 ### Retrolambda 1.4.0 (2014-07-04)
 
 - Added an optional `-Dretrolambda.includedFiles` parameter to support the

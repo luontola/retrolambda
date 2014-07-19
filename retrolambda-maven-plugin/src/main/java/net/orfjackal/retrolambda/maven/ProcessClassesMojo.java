@@ -7,34 +7,15 @@ package net.orfjackal.retrolambda.maven;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import org.apache.maven.execution.MavenSession;
-import org.apache.maven.plugin.AbstractMojo;
-import org.apache.maven.plugin.BuildPluginManager;
-import org.apache.maven.plugin.MojoExecutionException;
-import org.apache.maven.plugins.annotations.Component;
-import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugin.*;
+import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
-import org.apache.maven.toolchain.Toolchain;
-import org.apache.maven.toolchain.ToolchainManager;
+import org.apache.maven.toolchain.*;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Map;
-import java.util.Properties;
-import java.util.TreeSet;
+import java.io.*;
+import java.util.*;
 
-import static org.twdata.maven.mojoexecutor.MojoExecutor.artifactId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.attribute;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.attributes;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.configuration;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.element;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executeMojo;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.executionEnvironment;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.goal;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.groupId;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.name;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.plugin;
-import static org.twdata.maven.mojoexecutor.MojoExecutor.version;
+import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
 abstract class ProcessClassesMojo extends AbstractMojo {
 
@@ -46,7 +27,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     );
 
     @Component
-    private ToolchainManager toolchainManager;
+    ToolchainManager toolchainManager;
 
     @Component
     private MavenSession session;
@@ -59,10 +40,16 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     /**
      * Directory of the Java 8 installation for running Retrolambda.
+     * The JRE to be used will be determined in priority order:
+     * <ol>
+     * <li>This parameter</li>
+     * <li><a href="http://maven.apache.org/plugins/maven-toolchains-plugin/toolchains/jdk.html">JDK toolchain</a></li>
+     * <li>Same as Maven</li>
+     * </ol>
      *
      * @since 1.2.0
      */
-    @Parameter(defaultValue = "${java.home}", property = "java8home", required = true)
+    @Parameter(property = "java8home", required = false)
     public File java8home;
 
     /**
@@ -85,7 +72,6 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
-        validateJava8home();
         validateTarget();
 
         String version = getRetrolambdaVersion();
@@ -96,15 +82,26 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         processClasses();
     }
 
-    private String getJavaCommandViaToolChain() {
-        Toolchain tc = toolchainManager.getToolchainFromBuildContext( "jdk", session);
+    String getJavaCommand() {
+        String javaCommand = getJavaCommand(new File(System.getProperty("java.home")));
+
+        Toolchain tc = toolchainManager.getToolchainFromBuildContext("jdk", session);
         if (tc != null) {
-            getLog().info("Using JDK Toolchain: " + tc );
-            String javaCommand = tc.findTool("java");
-            return javaCommand;
-        } else {
-            return java8home + "/bin/java";
+            getLog().info("Toolchain in retrolambda-maven-plugin: " + tc);
+            javaCommand = tc.findTool("java");
         }
+
+        if (java8home != null) {
+            if (tc != null) {
+                getLog().warn("Toolchains are ignored, 'java8home' parameter is set to " + java8home);
+            }
+            javaCommand = getJavaCommand(java8home);
+        }
+        return javaCommand;
+    }
+
+    private static String getJavaCommand(File javaHome) {
+        return new File(javaHome, "bin/java").getPath();
     }
 
     private void validateTarget() throws MojoExecutionException {
@@ -112,13 +109,6 @@ abstract class ProcessClassesMojo extends AbstractMojo {
             String possibleValues = Joiner.on(", ").join(new TreeSet<String>(targetBytecodeVersions.keySet()));
             throw new MojoExecutionException(
                     "Unrecognized target '" + target + "'. Possible values are " + possibleValues);
-        }
-    }
-
-    private void validateJava8home() throws MojoExecutionException {
-        if (!java8home.isDirectory()) {
-            throw new MojoExecutionException(
-                    "Must set configuration element java8home or environment variable JAVA8_HOME to a valid JDK 8 location: " + java8home);
         }
     }
 
@@ -154,7 +144,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                         attribute("refid", getClasspathId()))),
                         element("exec",
                                 attributes(
-                                        attribute("executable", getJavaCommandViaToolChain()),
+                                        attribute("executable", getJavaCommand()),
                                         attribute("failonerror", "true")),
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
                                 element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
