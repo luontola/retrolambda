@@ -15,7 +15,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="true" />
+        <module name="android-tests-helper" />
         <module name="end-to-end-tests" />
+        <module name="end-to-end-tests (1)" />
         <module name="retrolambda" />
         <module name="retrolambda-maven-plugin" />
         <module name="retrolambda-runtime (1)" />

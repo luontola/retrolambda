@@ -45,6 +45,8 @@
         <minimumMavenVersion>3.1</minimumMavenVersion>
         <testJavaHome>${env.JAVA7_HOME}</testJavaHome>
         <testBytecodeTarget>1.7</testBytecodeTarget>
+        <android.play-services.version>4.4.52</android.play-services.version>
+        <android.platform.version>19</android.platform.version>
     </properties>
 
     <prerequisites>
@@ -119,6 +121,12 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>17.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>commons-lang</groupId>
+                <artifactId>commons-lang</artifactId>
+                <version>2.6</version>
             </dependency>
 
         </dependencies>

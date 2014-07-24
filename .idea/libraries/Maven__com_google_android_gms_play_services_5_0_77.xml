@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: com.google.android.gms:play-services:5.0.77">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/end-to-end-tests/target/android/play-services/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/android/gms/play-services/5.0.77/play-services-5.0.77-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/android/gms/play-services/5.0.77/play-services-5.0.77-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

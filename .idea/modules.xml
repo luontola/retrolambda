@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/android-tests-helper/android-tests-helper.iml" filepath="$PROJECT_DIR$/android-tests-helper/android-tests-helper.iml" />
       <module fileurl="file://$PROJECT_DIR$/end-to-end-tests/end-to-end-tests.iml" filepath="$PROJECT_DIR$/end-to-end-tests/end-to-end-tests.iml" />
       <module fileurl="file://$PROJECT_DIR$/parent/parent.iml" filepath="$PROJECT_DIR$/parent/parent.iml" />
       <module fileurl="file://$PROJECT_DIR$/project.iml" filepath="$PROJECT_DIR$/project.iml" />

@@ -22,7 +22,56 @@
             <version>11.0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>android-tests-helper</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services</artifactId>
+            <version>${android.play-services.version}</version>
+            <type>aar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.android.gms</groupId>
+            <artifactId>play-services</artifactId>
+            <version>${android.play-services.version}</version>
+            <type>jar</type>
+            <classifier>classes</classifier>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.android</groupId>
+            <artifactId>platform</artifactId>
+            <version>${android.platform.version}</version>
+            <scope>system</scope>
+            <systemPath>${env.ANDROID_HOME}/platforms/android-${android.platform.version}/android.jar</systemPath>
+        </dependency>
+
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>android</id>
+            <url>file://${env.ANDROID_HOME}/extras/android/m2repository</url>
+        </repository>
+        <repository>
+            <id>android-google</id>
+            <url>file://${env.ANDROID_HOME}/extras/google/m2repository</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -58,6 +107,7 @@
             </plugin>
 
             <!-- Process our byte codes to make them run on Java 7 -->
+
             <plugin>
                 <groupId>net.orfjackal.retrolambda</groupId>
                 <artifactId>retrolambda-maven-plugin</artifactId>
@@ -74,6 +124,57 @@
                     <target>${testBytecodeTarget}</target>
                 </configuration>
             </plugin>
+
+            <!-- Extract jar-in-jar dependencies for our tests from the Android SDK -->
+            <!--
+                        <plugin>
+                            <artifactId>maven-dependency-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>unpack-android-aar</id>
+                                    <phase>generate-sources</phase>
+                                    <goals>
+                                        <goal>copy-dependencies</goal>
+                                    </goals>
+                                    <configuration>
+                                        <includeTypes>aar</includeTypes>
+                                        <outputDirectory>${project.build.directory}/android</outputDirectory>
+                                        <stripVersion>true</stripVersion>
+                                        &lt;!&ndash;
+                                                                    <artifactItems>
+                                                                        <artifactItem>
+                                                                            <groupId>com.google.android.gms</groupId>
+                                                                            <artifactId>play-services</artifactId>
+                                                                            <version>5.0.77</version>
+                                                                            <type>aar</type>
+                                                                            <outputDirectory>${project.build.directory}/android</outputDirectory>
+                                                                            <destFileName>play-services.zip</destFileName>
+                                                                        </artifactItem>
+                                                                    </artifactItems>
+                                        &ndash;&gt;
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>
+
+                        <plugin>
+                            <artifactId>maven-antrun-plugin</artifactId>
+                            <executions>
+                                <execution>
+                                    <id>unpack-android-aar</id>
+                                    <phase>generate-sources</phase>
+                                    <goals>
+                                        <goal>run</goal>
+                                    </goals>
+                                    <configuration>
+                                        <tasks>
+                                            <unzip src="${project.build.directory}/android/play-services.aar"
+                                                   dest="${project.build.directory}/android/play-services/"/>
+                                        </tasks>
+                                    </configuration>
+                                </execution>
+                            </executions>
+                        </plugin>-->
 
         </plugins>
     </build>
