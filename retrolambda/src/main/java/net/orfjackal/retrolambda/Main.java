@@ -43,7 +43,15 @@ public class Main {
             visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
                 @Override
                 protected byte[] transform(byte[] bytecode) {
-                    return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
+                    if (PreMain.isAgentLoaded()) {
+                        return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
+                    } else {
+                        final LambdaClassDumper trans = new LambdaClassDumper(outputDir, bytecodeVersion);
+                        trans.registerDumper();
+                        byte[] ret = LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
+                        trans.unregisterDumper();
+                        return ret;
+                    }
                 }
             });
         } catch (Throwable t) {
