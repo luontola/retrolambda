@@ -21,7 +21,7 @@ public class Config {
     public static final String INCLUDED_FILES = PREFIX + "includedFiles";
 
     private static final List<String> requiredProperties = new ArrayList<>();
-    private static final List<String> requiredProperitesHelp = new ArrayList<>();
+    private static final List<String> requiredPropertiesHelp = new ArrayList<>();
     private static final List<String> optionalPropertiesHelp = new ArrayList<>();
     private static final Map<Integer, String> bytecodeVersionNames = new HashMap<>();
 
@@ -160,7 +160,7 @@ public class Config {
                 "\n" +
                 "Required system properties:\n" +
                 "\n" +
-                requiredProperitesHelp.stream().reduce((a, b) -> a + "\n" + b).get() +
+                requiredPropertiesHelp.stream().reduce((a, b) -> a + "\n" + b).get() +
                 "\n" +
                 "Optional system properties:\n" +
                 "\n" +
@@ -174,7 +174,7 @@ public class Config {
 
     private static void requiredParameterHelp(String key, String... lines) {
         requiredProperties.add(key);
-        requiredProperitesHelp.add(formatPropertyHelp(key, lines));
+        requiredPropertiesHelp.add(formatPropertyHelp(key, lines));
     }
 
     private static void optionalParameterHelp(String key, String... lines) {
