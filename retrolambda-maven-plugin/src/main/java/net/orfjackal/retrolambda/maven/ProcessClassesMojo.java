@@ -6,11 +6,7 @@ package net.orfjackal.retrolambda.maven;
 
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import java.io.*;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.*;
+import net.orfjackal.retrolambda.Main;
 import org.apache.maven.artifact.Artifact;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.*;
@@ -18,6 +14,8 @@ import org.apache.maven.plugins.annotations.*;
 import org.apache.maven.project.MavenProject;
 import org.apache.maven.toolchain.*;
 
+import java.io.*;
+import java.util.*;
 
 import static org.twdata.maven.mojoexecutor.MojoExecutor.*;
 
@@ -67,9 +65,9 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      */
     @Parameter(defaultValue = "1.7", property = "retrolambdaTarget", required = true)
     public String target;
-    
+
     /**
-     * Should we start new process or perform the retrolambdafication in the 
+     * Should we start new process or perform the retrolambdafication in the
      * same VM as Maven runs in (which has to be 1.8 then)? If the VM is
      * forked, it uses -javaagent argument to intercept class definitions.
      * When we run in the same process, we hook into the class generation
@@ -88,15 +86,17 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         validateTarget();
 
-        String version = getRetrolambdaVersion();
-        getLog().info("Retrieving Retrolambda " + version);
-        retrieveRetrolambdaJar(version);
+        if (fork) {
+            String version = getRetrolambdaVersion();
+            getLog().info("Retrieving Retrolambda " + version);
+            retrieveRetrolambdaJar(version);
+        }
 
         getLog().info("Processing classes with Retrolambda");
         if (fork) {
-            processClassesWithAgent();
+            processClassesWithAgentHook();
         } else {
-            processClasses();
+            processClassesWithDumperHook();
         }
     }
 
@@ -148,7 +148,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                 executionEnvironment(project, session, pluginManager));
     }
 
-    private void processClassesWithAgent() throws MojoExecutionException {
+    private void processClassesWithAgentHook() throws MojoExecutionException {
         String retrolambdaJar = getRetrolambdaJarPath();
         executeMojo(
                 plugin(groupId("org.apache.maven.plugins"),
@@ -173,32 +173,25 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                 element("arg", attribute("value", retrolambdaJar))))),
                 executionEnvironment(project, session, pluginManager));
     }
-    
-    private void processClasses() throws MojoExecutionException {
-        String retrolambdaJar = getRetrolambdaJarPath();
-        File jar = new File(retrolambdaJar);
-        
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(getInputDir());
-            for (Artifact a : project.getArtifacts()) {
-                if (a.getFile() != null) {
-                    sb.append(File.pathSeparator);
-                    sb.append(a.getFile());
-                }
+
+    private void processClassesWithDumperHook() {
+        System.setProperty("retrolambda.bytecodeVersion", "" + targetBytecodeVersions.get(target));
+        System.setProperty("retrolambda.inputDir", getInputDir().getAbsolutePath());
+        System.setProperty("retrolambda.outputDir", getOutputDir().getAbsolutePath());
+        System.setProperty("retrolambda.classpath", getProjectClasspath());
+        Main.main(new String[0]);
+    }
+
+    private String getProjectClasspath() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getInputDir());
+        for (Artifact a : project.getArtifacts()) {
+            if (a.getFile() != null) {
+                sb.append(File.pathSeparator);
+                sb.append(a.getFile());
             }
-        
-            URLClassLoader url = new URLClassLoader(new URL[] { jar.toURI().toURL() });
-            Class<?> mainClass = Class.forName("net.orfjackal.retrolambda.Main", true, url);
-            System.setProperty("retrolambda.bytecodeVersion", "" + targetBytecodeVersions.get(target));
-            System.setProperty("retrolambda.inputDir", getInputDir().getAbsolutePath());
-            System.setProperty("retrolambda.outputDir", getOutputDir().getAbsolutePath());
-            System.setProperty("retrolambda.classpath", sb.toString());
-            Method main = mainClass.getMethod("main", String[].class);
-            main.invoke(null, (Object) new String[0]);
-        } catch (Exception ex) {
-            throw new MojoExecutionException("Cannot initialize classloader for " + retrolambdaJar, ex);
         }
+        return sb.toString();
     }
 
     private String getRetrolambdaJarPath() {

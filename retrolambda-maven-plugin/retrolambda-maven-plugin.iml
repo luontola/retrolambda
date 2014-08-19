@@ -17,6 +17,8 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="retrolambda" />
+    <orderEntry type="library" name="Maven: org.ow2.asm:asm-debug-all:5.0.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-plugin-api:2.0" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Maven: org.apache.maven.plugin-tools:maven-plugin-annotations:3.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.maven:maven-artifact:3.0" level="project" />

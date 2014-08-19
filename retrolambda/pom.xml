@@ -40,6 +40,37 @@
                 </configuration>
             </plugin>
 
+            <!-- To allow the Maven plugin be directly compiled against Retrolamdba,
+                 we must backport Retrolambda itself to Java 6 -->
+
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>retrolambda-inception</id>
+                        <phase>process-classes</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <property name="compile_classpath" refid="maven.compile.classpath"/>
+                                <exec executable="${env.JAVA8_HOME}/bin/java" failonerror="true">
+                                    <arg value="-Dretrolambda.bytecodeVersion=50"/>
+                                    <arg value="-Dretrolambda.inputDir=${project.build.outputDirectory}"/>
+                                    <arg value="-Dretrolambda.classpath=${compile_classpath}"/>
+                                    <arg value="-cp"/>
+                                    <arg value="${project.build.outputDirectory}"/>
+                                    <arg value="-cp"/>
+                                    <arg value="${compile_classpath}"/>
+                                    <arg value="net.orfjackal.retrolambda.Main"/>
+                                </exec>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
             <!-- Create an uber jar containing all dependencies -->
 
             <plugin>

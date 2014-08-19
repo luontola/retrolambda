@@ -14,6 +14,11 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Retrolambda " + getVersion());
 
+        if (!isRunningJava8()) {
+            System.out.println("Error! Not running under Java 8");
+            System.exit(1);
+        }
+
         Config config = new Config(System.getProperties());
         if (!config.isFullyConfigured()) {
             System.out.print(config.getHelp());
@@ -61,6 +66,15 @@ public class Main {
         }
     }
 
+    private static boolean isRunningJava8() {
+        try {
+            Class.forName("java.util.stream.Stream");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     static void visitFiles(Path inputDir, List<Path> includedFiles, FileVisitor<Path> visitor) throws IOException {
         if (includedFiles != null) {
             visitor = new FilteringFileVisitor(includedFiles, visitor);
@@ -86,7 +100,7 @@ public class Main {
 
     private static String getVersion() {
         Properties p = new Properties();
-        try (InputStream in = ClassLoader.getSystemResourceAsStream("META-INF/maven/net.orfjackal.retrolambda/retrolambda/pom.properties")) {
+        try (InputStream in = Main.class.getResourceAsStream("/META-INF/maven/net.orfjackal.retrolambda/retrolambda/pom.properties")) {
             if (in != null) {
                 p.load(in);
             }
