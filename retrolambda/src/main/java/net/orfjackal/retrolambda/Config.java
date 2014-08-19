@@ -43,7 +43,7 @@ public class Config {
     }
 
     public boolean isFullyConfigured() {
-        return hasAllRequiredProperties() && PreMain.isAgentLoaded();
+        return hasAllRequiredProperties();
     }
 
     private boolean hasAllRequiredProperties() {
