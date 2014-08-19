@@ -27,4 +27,22 @@ public class ClasspathTest {
         lambda.describeTo(result);
         assertThat(result.toString(), is("foo"));
     }
+
+    /**
+     * This is to reproduce a bug where the Maven plugin does not include
+     * the main classes on the test classpath, causing Retrolambda to fail
+     * in loading test classes such as this one (i.e. test classes which
+     * depend on main classes at class loading time).
+     */
+    @Test
+    public void maven_plugin_includes_the_main_classes_in_the_test_classpath() {
+        class RequiresMainClassesInTestClasspath extends InMainSources {
+            public Runnable foo() {
+                // Any lambda, to make Retrolambda try to process this class
+                return () -> {
+                };
+            }
+        }
+        new RequiresMainClassesInTestClasspath().foo();
+    }
 }

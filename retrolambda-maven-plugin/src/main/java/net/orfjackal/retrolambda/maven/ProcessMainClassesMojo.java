@@ -4,9 +4,11 @@
 
 package net.orfjackal.retrolambda.maven;
 
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.plugins.annotations.*;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Processes main classes compiled with Java 8 so that they will be compatible with
@@ -45,7 +47,7 @@ public class ProcessMainClassesMojo extends ProcessClassesMojo {
     }
 
     @Override
-    protected String getClasspathId() {
-        return "maven.compile.classpath";
+    protected List<String> getClasspathElements() throws DependencyResolutionRequiredException {
+        return project.getCompileClasspathElements();
     }
 }

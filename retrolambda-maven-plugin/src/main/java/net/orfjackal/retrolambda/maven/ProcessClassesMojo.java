@@ -7,7 +7,7 @@ package net.orfjackal.retrolambda.maven;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
 import net.orfjackal.retrolambda.*;
-import org.apache.maven.artifact.Artifact;
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.*;
 import org.apache.maven.plugins.annotations.*;
@@ -38,7 +38,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     private BuildPluginManager pluginManager;
 
     @Component
-    private MavenProject project;
+    protected MavenProject project;
 
     /**
      * Directory of the Java 8 installation for running Retrolambda.
@@ -80,7 +80,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     protected abstract File getOutputDir();
 
-    protected abstract String getClasspathId();
+    protected abstract List<String> getClasspathElements() throws DependencyResolutionRequiredException;
 
     @Override
     public void execute() throws MojoExecutionException {
@@ -115,7 +115,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
             p.setProperty(Config.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
             p.setProperty(Config.INPUT_DIR, getInputDir().getAbsolutePath());
             p.setProperty(Config.OUTPUT_DIR, getOutputDir().getAbsolutePath());
-            p.setProperty(Config.CLASSPATH, getProjectClasspath());
+            p.setProperty(Config.CLASSPATH, getClasspath());
             Retrolambda.run(new Config(p));
         } catch (Throwable t) {
             throw new MojoExecutionException("Failed to run Retrolambda", t);
@@ -136,9 +136,6 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                 goal("run"),
                 configuration(element(
                         "target",
-                        element("property",
-                                attributes(attribute("name", "the_classpath"),
-                                        attribute("refid", getClasspathId()))),
                         element("exec",
                                 attributes(
                                         attribute("executable", getJavaCommand()),
@@ -146,7 +143,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
                                 element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
                                 element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
-                                element("arg", attribute("value", "-Dretrolambda.classpath=${the_classpath}")),
+                                element("arg", attribute("value", "-Dretrolambda.classpath=" + getClasspath())),
                                 element("arg", attribute("value", "-javaagent:" + retrolambdaJar)),
                                 element("arg", attribute("value", "-jar")),
                                 element("arg", attribute("value", retrolambdaJar))))),
@@ -193,16 +190,19 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         return new File(javaHome, "bin/java").getPath();
     }
 
-    private String getProjectClasspath() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getInputDir());
-        for (Artifact a : project.getArtifacts()) {
-            if (a.getFile() != null) {
-                sb.append(File.pathSeparator);
-                sb.append(a.getFile());
+    private String getClasspath() {
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (String classpathElement : getClasspathElements()) {
+                if (sb.length() > 0) {
+                    sb.append(File.pathSeparator);
+                }
+                sb.append(classpathElement);
             }
+            return sb.toString();
+        } catch (DependencyResolutionRequiredException e) {
+            throw new RuntimeException(e);
         }
-        return sb.toString();
     }
 
     private String getRetrolambdaJarPath() {
