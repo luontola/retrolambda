@@ -15,7 +15,7 @@ import java.nio.file.attribute.*;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.*;
 
-public class LambdaClassDumper {
+public class LambdaClassDumper implements AutoCloseable {
 
     private final Path outputDir;
     private final int targetVersion;
@@ -26,7 +26,7 @@ public class LambdaClassDumper {
         this.targetVersion = targetVersion;
     }
 
-    public void registerDumper() {
+    public void install() {
         try {
             Class<?> mf = Class.forName("java.lang.invoke.InnerClassLambdaMetafactory");
             dumperField = mf.getDeclaredField("dumper");
@@ -40,7 +40,7 @@ public class LambdaClassDumper {
         }
     }
 
-    public void unregisterDumper() {
+    public void uninstall() {
         if (dumperField != null) {
             try {
                 dumperField.set(null, null);
@@ -48,6 +48,11 @@ public class LambdaClassDumper {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    @Override
+    public void close() {
+        uninstall();
     }
 
     private static void makeNonFinal(Field field) throws Exception {

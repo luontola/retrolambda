@@ -32,20 +32,17 @@ public class Retrolambda {
 
         Thread.currentThread().setContextClassLoader(new URLClassLoader(asUrls(classpath)));
 
-        visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
-            @Override
-            protected byte[] transform(byte[] bytecode) {
-                if (PreMain.isAgentLoaded()) {
-                    return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
-                } else {
-                    LambdaClassDumper dumper = new LambdaClassDumper(outputDir, bytecodeVersion);
-                    dumper.registerDumper();
-                    byte[] ret = LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
-                    dumper.unregisterDumper();
-                    return ret;
-                }
+        try (LambdaClassDumper dumper = new LambdaClassDumper(outputDir, bytecodeVersion)) {
+            if (!PreMain.isAgentLoaded()) {
+                dumper.install();
             }
-        });
+            visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
+                @Override
+                protected byte[] transform(byte[] bytecode) {
+                    return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
+                }
+            });
+        }
     }
 
     static void visitFiles(Path inputDir, List<Path> includedFiles, FileVisitor<Path> visitor) throws IOException {
