@@ -4,6 +4,7 @@ set -eu
 VERSION="$1"
 set -x
 
+rm -rf tmp
 git clone ../retrolambda/.git/ tmp
 (cd tmp && git checkout "v$VERSION" && mvn site)
 rm -rf retrolambda-maven-plugin
