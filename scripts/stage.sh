@@ -8,6 +8,10 @@ rm -rfv staging
 
 mvn clean verify \
     --errors \
+    -P fork
+
+mvn clean verify \
+    --errors \
     -P java6
 
 mvn clean verify \

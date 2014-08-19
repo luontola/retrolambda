@@ -72,6 +72,7 @@
                 </executions>
                 <configuration>
                     <target>${testBytecodeTarget}</target>
+                    <fork>${testFork}</fork>
                 </configuration>
             </plugin>
 

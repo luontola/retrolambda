@@ -45,6 +45,7 @@
         <minimumMavenVersion>3.1</minimumMavenVersion>
         <testJavaHome>${env.JAVA7_HOME}</testJavaHome>
         <testBytecodeTarget>1.7</testBytecodeTarget>
+        <testFork>false</testFork>
     </properties>
 
     <prerequisites>
@@ -388,6 +389,12 @@
             <properties>
                 <testJavaHome>${env.JAVA5_HOME}</testJavaHome>
                 <testBytecodeTarget>1.5</testBytecodeTarget>
+            </properties>
+        </profile>
+        <profile>
+            <id>fork</id>
+            <properties>
+                <testFork>true</testFork>
             </properties>
         </profile>
     </profiles>
