@@ -4,16 +4,17 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.fs.*;
+
 import java.io.*;
 import java.lang.reflect.*;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
-import java.nio.file.*;
 import java.nio.file.FileSystem;
-import java.nio.file.attribute.*;
+import java.nio.file.*;
+import java.nio.file.attribute.FileAttribute;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.*;
+import java.util.Set;
 
 public class LambdaClassDumper implements AutoCloseable {
 
@@ -85,27 +86,7 @@ public class LambdaClassDumper implements AutoCloseable {
     }
 
 
-    private final class VirtualProvider extends FileSystemProvider {
-
-        @Override
-        public String getScheme() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public FileSystem newFileSystem(URI uri, Map<String, ?> env) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public FileSystem getFileSystem(URI uri) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path getPath(URI uri) {
-            throw new IllegalStateException();
-        }
+    private final class VirtualFSProvider extends FakeFileSystemProvider {
 
         @Override
         public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) {
@@ -113,134 +94,19 @@ public class LambdaClassDumper implements AutoCloseable {
         }
 
         @Override
-        public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) {
-            throw new IllegalStateException();
-        }
-
-        @Override
         public void createDirectory(Path dir, FileAttribute<?>... attrs) {
-        }
-
-        @Override
-        public void delete(Path path) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public void copy(Path source, Path target, CopyOption... options) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public void move(Path source, Path target, CopyOption... options) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean isSameFile(Path path, Path path2) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean isHidden(Path path) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public FileStore getFileStore(Path path) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public void checkAccess(Path path, AccessMode... modes) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public <V extends FileAttributeView> V getFileAttributeView(Path path, Class<V> type, LinkOption... options) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public void setAttribute(Path path, String attribute, Object value, LinkOption... options) {
-            throw new IllegalStateException();
         }
     }
 
-    private final class VirtualFS extends FileSystem {
+    private final class VirtualFS extends FakeFileSystem {
 
         @Override
         public FileSystemProvider provider() {
-            return new VirtualProvider();
-        }
-
-        @Override
-        public void close() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean isOpen() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean isReadOnly() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public String getSeparator() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Iterable<Path> getRootDirectories() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Iterable<FileStore> getFileStores() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Set<String> supportedFileAttributeViews() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path getPath(String first, String... more) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public PathMatcher getPathMatcher(String syntaxAndPattern) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public UserPrincipalLookupService getUserPrincipalLookupService() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public WatchService newWatchService() {
-            throw new IllegalStateException();
+            return new VirtualFSProvider();
         }
     }
 
-    private final class VirtualPath implements Path {
+    private final class VirtualPath extends FakePath {
 
         private final String path;
 
@@ -254,129 +120,16 @@ public class LambdaClassDumper implements AutoCloseable {
         }
 
         @Override
-        public boolean isAbsolute() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path getRoot() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path getFileName() {
-            throw new IllegalStateException();
-        }
-
-        @Override
         public Path getParent() {
             return this;
         }
 
         @Override
-        public int getNameCount() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path getName(int index) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path subpath(int beginIndex, int endIndex) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean startsWith(Path other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean startsWith(String other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean endsWith(Path other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public boolean endsWith(String other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path normalize() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path resolve(Path other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
         public Path resolve(String other) {
-            assert path.isEmpty();
+            if (!path.isEmpty()) {
+                throw new IllegalStateException();
+            }
             return new VirtualPath(other);
-        }
-
-        @Override
-        public Path resolveSibling(Path other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path resolveSibling(String other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path relativize(Path other) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public URI toUri() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path toAbsolutePath() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Path toRealPath(LinkOption... options) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public File toFile() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public WatchKey register(WatchService watcher, WatchEvent.Kind<?>[] events, WatchEvent.Modifier... modifiers) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public WatchKey register(WatchService watcher, WatchEvent.Kind<?>... events) {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public Iterator<Path> iterator() {
-            throw new IllegalStateException();
-        }
-
-        @Override
-        public int compareTo(Path other) {
-            throw new IllegalStateException();
         }
 
         @Override
@@ -385,7 +138,7 @@ public class LambdaClassDumper implements AutoCloseable {
         }
     }
 
-    private final class ClassChannel implements SeekableByteChannel {
+    private final class ClassChannel extends FakeSeekableByteChannel {
         private final Path path;
         private final ByteArrayOutputStream os;
         private final WritableByteChannel ch;
@@ -397,38 +150,8 @@ public class LambdaClassDumper implements AutoCloseable {
         }
 
         @Override
-        public int read(ByteBuffer dst) throws IOException {
-            throw new IOException();
-        }
-
-        @Override
         public int write(ByteBuffer src) throws IOException {
             return ch.write(src);
-        }
-
-        @Override
-        public long position() throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public SeekableByteChannel position(long newPosition) throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public long size() throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public SeekableByteChannel truncate(long size) throws IOException {
-            throw new IOException();
-        }
-
-        @Override
-        public boolean isOpen() {
-            return true;
         }
 
         @Override
