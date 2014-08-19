@@ -4,66 +4,64 @@
 
 package net.orfjackal.retrolambda;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
+import java.io.*;
+import java.lang.reflect.*;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.SeekableByteChannel;
-import java.nio.channels.WritableByteChannel;
+import java.nio.channels.*;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
-import java.nio.file.attribute.FileAttribute;
-import java.nio.file.attribute.FileAttributeView;
-import java.nio.file.attribute.UserPrincipalLookupService;
+import java.nio.file.FileSystem;
+import java.nio.file.attribute.*;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
-final class LambdaClassDumper {
+public class LambdaClassDumper {
 
     private final Path outputDir;
     private final int targetVersion;
+    private Field dumperField;
 
     public LambdaClassDumper(Path outputDir, int targetVersion) {
         this.outputDir = outputDir;
         this.targetVersion = targetVersion;
     }
 
-    private Field field;
-    void registerDumper() {
+    public void registerDumper() {
         try {
-            Class<?> dumper = Class.forName("java.lang.invoke.ProxyClassesDumper");
-            Constructor<?> cnstr = dumper.getDeclaredConstructor(Path.class);
-            cnstr.setAccessible(true);
             Class<?> mf = Class.forName("java.lang.invoke.InnerClassLambdaMetafactory");
-            field = mf.getDeclaredField("dumper");
-            Field m = field.getClass().getDeclaredField("modifiers");
-            m.setAccessible(true);
-            int mod = m.getInt(field);
-            m.setInt(field, mod & ~Modifier.FINAL);
-            field.setAccessible(true);
-            
+            dumperField = mf.getDeclaredField("dumper");
+            makeNonFinal(dumperField);
+            dumperField.setAccessible(true);
+
             Path p = new VirtualPath("");
-            field.set(null, cnstr.newInstance(p));
-        } catch (Exception ex) {
-            throw new IllegalStateException("Cannot initialize dumper", ex);
+            dumperField.set(null, newProxyClassesDumper(p));
+        } catch (Exception e) {
+            throw new RuntimeException("Cannot initialize dumper", e);
         }
     }
-    
-    void unregisterDumper() {
-        if (field != null) {
+
+    public void unregisterDumper() {
+        if (dumperField != null) {
             try {
-                field.set(null, null);
-            } catch (Exception ex) {
-                throw new IllegalArgumentException(ex);
+                dumperField.set(null, null);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
         }
+    }
+
+    private static void makeNonFinal(Field field) throws Exception {
+        Field modifiers = field.getClass().getDeclaredField("modifiers");
+        modifiers.setAccessible(true);
+        int mod = modifiers.getInt(field);
+        modifiers.setInt(field, mod & ~Modifier.FINAL);
+    }
+
+    private static Object newProxyClassesDumper(Path dumpDir) throws Exception {
+        Class<?> dumper = Class.forName("java.lang.invoke.ProxyClassesDumper");
+        Constructor<?> c = dumper.getDeclaredConstructor(Path.class);
+        c.setAccessible(true);
+        return c.newInstance(dumpDir);
     }
 
     private void reifyLambdaClass(String className, byte[] classfileBuffer) {
@@ -80,7 +78,8 @@ final class LambdaClassDumper {
             t.printStackTrace(System.out);
         }
     }
-    
+
+
     private final class VirtualProvider extends FileSystemProvider {
 
         @Override
@@ -89,7 +88,7 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public FileSystem newFileSystem(URI uri, Map<String, ?> env) throws IOException {
+        public FileSystem newFileSystem(URI uri, Map<String, ?> env) {
             throw new IllegalStateException();
         }
 
@@ -104,51 +103,51 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) throws IOException {
+        public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs) {
             return new ClassChannel(path);
         }
 
         @Override
-        public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) throws IOException {
+        public DirectoryStream<Path> newDirectoryStream(Path dir, DirectoryStream.Filter<? super Path> filter) {
             throw new IllegalStateException();
         }
 
         @Override
-        public void createDirectory(Path dir, FileAttribute<?>... attrs) throws IOException {
+        public void createDirectory(Path dir, FileAttribute<?>... attrs) {
         }
 
         @Override
-        public void delete(Path path) throws IOException {
+        public void delete(Path path) {
             throw new IllegalStateException();
         }
 
         @Override
-        public void copy(Path source, Path target, CopyOption... options) throws IOException {
+        public void copy(Path source, Path target, CopyOption... options) {
             throw new IllegalStateException();
         }
 
         @Override
-        public void move(Path source, Path target, CopyOption... options) throws IOException {
+        public void move(Path source, Path target, CopyOption... options) {
             throw new IllegalStateException();
         }
 
         @Override
-        public boolean isSameFile(Path path, Path path2) throws IOException {
+        public boolean isSameFile(Path path, Path path2) {
             throw new IllegalStateException();
         }
 
         @Override
-        public boolean isHidden(Path path) throws IOException {
+        public boolean isHidden(Path path) {
             throw new IllegalStateException();
         }
 
         @Override
-        public FileStore getFileStore(Path path) throws IOException {
+        public FileStore getFileStore(Path path) {
             throw new IllegalStateException();
         }
 
         @Override
-        public void checkAccess(Path path, AccessMode... modes) throws IOException {
+        public void checkAccess(Path path, AccessMode... modes) {
             throw new IllegalStateException();
         }
 
@@ -158,22 +157,21 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options) throws IOException {
+        public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options) {
             throw new IllegalStateException();
         }
 
         @Override
-        public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) throws IOException {
+        public Map<String, Object> readAttributes(Path path, String attributes, LinkOption... options) {
             throw new IllegalStateException();
         }
 
         @Override
-        public void setAttribute(Path path, String attribute, Object value, LinkOption... options) throws IOException {
+        public void setAttribute(Path path, String attribute, Object value, LinkOption... options) {
             throw new IllegalStateException();
         }
-        
     }
-    
+
     private final class VirtualFS extends FileSystem {
 
         @Override
@@ -182,7 +180,7 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             throw new IllegalStateException();
         }
 
@@ -232,13 +230,13 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public WatchService newWatchService() throws IOException {
+        public WatchService newWatchService() {
             throw new IllegalStateException();
         }
-        
     }
-    
+
     private final class VirtualPath implements Path {
+
         private final String path;
 
         public VirtualPath(String path) {
@@ -347,7 +345,7 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public Path toRealPath(LinkOption... options) throws IOException {
+        public Path toRealPath(LinkOption... options) {
             throw new IllegalStateException();
         }
 
@@ -357,12 +355,12 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public WatchKey register(WatchService watcher, WatchEvent.Kind<?>[] events, WatchEvent.Modifier... modifiers) throws IOException {
+        public WatchKey register(WatchService watcher, WatchEvent.Kind<?>[] events, WatchEvent.Modifier... modifiers) {
             throw new IllegalStateException();
         }
 
         @Override
-        public WatchKey register(WatchService watcher, WatchEvent.Kind<?>... events) throws IOException {
+        public WatchKey register(WatchService watcher, WatchEvent.Kind<?>... events) {
             throw new IllegalStateException();
         }
 
@@ -381,7 +379,7 @@ final class LambdaClassDumper {
             return path;
         }
     }
-    
+
     private final class ClassChannel implements SeekableByteChannel {
         private final Path path;
         private final ByteArrayOutputStream os;
@@ -392,7 +390,7 @@ final class LambdaClassDumper {
             this.os = new ByteArrayOutputStream();
             this.ch = Channels.newChannel(os);
         }
-        
+
         @Override
         public int read(ByteBuffer dst) throws IOException {
             throw new IOException();
@@ -429,12 +427,12 @@ final class LambdaClassDumper {
         }
 
         @Override
-        public void close() throws IOException {
+        public void close() {
             String className = path.toString();
             className = className.substring(0, className.length() - 6);
             if (LambdaReifier.isLambdaClassToReify(className)) {
                 reifyLambdaClass(className, os.toByteArray());
             }
         }
-    } // end of ClassCastException
+    }
 }
