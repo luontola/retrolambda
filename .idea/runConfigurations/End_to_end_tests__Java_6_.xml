@@ -2,7 +2,17 @@
   <configuration default="false" name="End-to-end tests (Java 6)" type="MavenRunConfiguration" factoryName="Maven">
     <MavenSettings>
       <option name="myGeneralSettings" />
-      <option name="myRunnerSettings" />
+      <option name="myRunnerSettings">
+        <MavenRunnerSettings>
+          <option name="jreName" value="1.6" />
+          <option name="mavenProperties">
+            <map />
+          </option>
+          <option name="runMavenInBackground" value="true" />
+          <option name="skipTests" value="false" />
+          <option name="vmOptions" value="" />
+        </MavenRunnerSettings>
+      </option>
       <option name="myRunnerParameters">
         <MavenRunnerParameters>
           <option name="profiles">
