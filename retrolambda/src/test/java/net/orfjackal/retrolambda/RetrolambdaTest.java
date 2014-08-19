@@ -15,7 +15,7 @@ import java.util.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 
-public class MainTest {
+public class RetrolambdaTest {
 
     @Rule
     public final TemporaryFolder tempDir = new TemporaryFolder();
@@ -48,7 +48,7 @@ public class MainTest {
 
     @Test
     public void by_default_visits_all_files_recursively() throws IOException {
-        Main.visitFiles(inputDir, null, visitor);
+        Retrolambda.visitFiles(inputDir, null, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1, file2, fileInSubdir));
     }
@@ -57,7 +57,7 @@ public class MainTest {
     public void when_included_files_is_set_then_visits_only_those_files() throws IOException {
         List<Path> includedFiles = Arrays.asList(file1, fileInSubdir);
 
-        Main.visitFiles(inputDir, includedFiles, visitor);
+        Retrolambda.visitFiles(inputDir, includedFiles, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1, fileInSubdir));
     }
@@ -66,7 +66,7 @@ public class MainTest {
     public void ignores_included_files_that_are_outside_the_input_directory() throws IOException {
         List<Path> includedFiles = Arrays.asList(file1, outsider);
 
-        Main.visitFiles(inputDir, includedFiles, visitor);
+        Retrolambda.visitFiles(inputDir, includedFiles, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1));
     }
