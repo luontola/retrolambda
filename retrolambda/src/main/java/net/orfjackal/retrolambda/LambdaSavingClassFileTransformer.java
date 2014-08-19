@@ -7,17 +7,14 @@ package net.orfjackal.retrolambda;
 import org.objectweb.asm.ClassReader;
 
 import java.lang.instrument.*;
-import java.nio.file.*;
 import java.security.ProtectionDomain;
 
 public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
 
-    private final Path outputDir;
-    private final int targetVersion;
+    private final LambdaClassSaver lambdaClassSaver;
 
-    public LambdaSavingClassFileTransformer(Path outputDir, int targetVersion) {
-        this.outputDir = outputDir;
-        this.targetVersion = targetVersion;
+    public LambdaSavingClassFileTransformer(LambdaClassSaver lambdaClassSaver) {
+        this.lambdaClassSaver = lambdaClassSaver;
     }
 
     @Override
@@ -27,24 +24,7 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
             // but we can read it from the bytecode where the name still exists.
             className = new ClassReader(classfileBuffer).getClassName();
         }
-        if (LambdaReifier.isLambdaClassToReify(className)) {
-            reifyLambdaClass(className, classfileBuffer);
-        }
+        lambdaClassSaver.saveIfLambda(className, classfileBuffer);
         return null;
-    }
-
-    private void reifyLambdaClass(String className, byte[] classfileBuffer) {
-        try {
-            System.out.println("Saving lambda class: " + className);
-            byte[] backportedBytecode = LambdaClassBackporter.transform(classfileBuffer, targetVersion);
-            Path savePath = outputDir.resolve(className + ".class");
-            Files.createDirectories(savePath.getParent());
-            Files.write(savePath, backportedBytecode);
-
-        } catch (Throwable t) {
-            // print to stdout to keep in sync with other log output
-            System.out.println("ERROR: Failed to backport lambda class: " + className);
-            t.printStackTrace(System.out);
-        }
     }
 }

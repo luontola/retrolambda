@@ -18,13 +18,11 @@ import java.util.Set;
 
 public class LambdaClassDumper implements AutoCloseable {
 
-    private final Path outputDir;
-    private final int targetVersion;
+    private final LambdaClassSaver lambdaClassSaver;
     private Field dumperField;
 
-    public LambdaClassDumper(Path outputDir, int targetVersion) {
-        this.outputDir = outputDir;
-        this.targetVersion = targetVersion;
+    public LambdaClassDumper(LambdaClassSaver lambdaClassSaver) {
+        this.lambdaClassSaver = lambdaClassSaver;
     }
 
     public void install() {
@@ -68,21 +66,6 @@ public class LambdaClassDumper implements AutoCloseable {
         Constructor<?> c = dumper.getDeclaredConstructor(Path.class);
         c.setAccessible(true);
         return c.newInstance(dumpDir);
-    }
-
-    private void reifyLambdaClass(String className, byte[] classfileBuffer) {
-        try {
-            System.out.println("Saving lambda class: " + className);
-            byte[] backportedBytecode = LambdaClassBackporter.transform(classfileBuffer, targetVersion);
-            Path savePath = outputDir.resolve(className + ".class");
-            Files.createDirectories(savePath.getParent());
-            Files.write(savePath, backportedBytecode);
-
-        } catch (Throwable t) {
-            // print to stdout to keep in sync with other log output
-            System.out.println("ERROR: Failed to backport lambda class: " + className);
-            t.printStackTrace(System.out);
-        }
     }
 
 
@@ -157,10 +140,8 @@ public class LambdaClassDumper implements AutoCloseable {
         @Override
         public void close() {
             String className = path.toString();
-            className = className.substring(0, className.length() - 6);
-            if (LambdaReifier.isLambdaClassToReify(className)) {
-                reifyLambdaClass(className, os.toByteArray());
-            }
+            className = className.substring(0, className.lastIndexOf(".class"));
+            lambdaClassSaver.saveIfLambda(className, os.toByteArray());
         }
     }
 }
