@@ -52,7 +52,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <minimizeJar>true</minimizeJar>
+                    <!-- <minimizeJar>true</minimizeJar>  --> <!-- http://jira.codehaus.org/browse/MSHADE-174 -->
                     <relocations>
                         <relocation>
                             <pattern>org.objectweb.asm</pattern>
