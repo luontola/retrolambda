@@ -4,6 +4,9 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.defaultmethods.ClassModifier;
+import net.orfjackal.retrolambda.defaultmethods.Helpers;
+import net.orfjackal.retrolambda.defaultmethods.InterfaceModifier;
 import org.objectweb.asm.*;
 
 import java.lang.reflect.Field;
@@ -16,9 +19,10 @@ public class LambdaUsageBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         resetLambdaClassSequenceNumber();
-
         ClassWriter stage2 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
+		ClassModifier stage3 = new ClassModifier(targetVersion, stage2);
+		InterfaceModifier stage4 = new InterfaceModifier(stage3, targetVersion);
+        InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage4, targetVersion);
         new ClassReader(bytecode).accept(stage1, 0);
         return stage2.toByteArray();
     }
@@ -63,22 +67,6 @@ public class LambdaUsageBackporter {
         public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
             if (isBridgeMethodOnInterface(access)) {
                 return null; // remove the bridge method; Java 7 didn't use them
-            }
-            if (isNonAbstractMethodOnInterface(access)
-                    && !isClassInitializerMethod(name, desc, access)) {
-                // In case we have missed a case of Java 8 producing non-abstract methods
-                // on interfaces, we have this warning here to get a bug report sooner.
-                // Not allowed by Java 7:
-                // - default methods
-                // - static methods
-                // - bridge methods
-                // Allowed by Java 7:
-                // - class initializer methods (for initializing constants)
-                System.out.println("WARNING: Method '" + name + "' of interface '" + className + "' is non-abstract! " +
-                        "This will probably fail to run on Java 7 and below. " +
-                        "If you get this warning _without_ using Java 8's default methods, " +
-                        "please report a bug at https://github.com/orfjackal/retrolambda/issues " +
-                        "together with an SSCCE (http://www.sscce.org/)");
             }
             MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
             return new InvokeDynamicInsnConvertingMethodVisitor(mv, this);
@@ -158,7 +146,7 @@ public class LambdaUsageBackporter {
         }
 
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
-            Class<?> invoker = loadClass(context.className);
+            Class<?> invoker = Helpers.loadClass(context.className);
             Handle implMethod = (Handle) bsmArgs[1];
             Handle bridgeMethod = context.getLambdaBridgeMethod(implMethod);
 
@@ -166,14 +154,5 @@ public class LambdaUsageBackporter {
                     invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
         }
-
-        private static Class<?> loadClass(String className) {
-            try {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                return cl.loadClass(className.replace('/', '.'));
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
+	}
 }
