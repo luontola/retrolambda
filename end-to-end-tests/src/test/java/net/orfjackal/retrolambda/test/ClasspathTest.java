@@ -11,6 +11,7 @@ import java.util.Arrays;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNotNull;
 
 public class ClasspathTest {
 
@@ -44,5 +45,16 @@ public class ClasspathTest {
             }
         }
         new RequiresMainClassesInTestClasspath().foo();
+    }
+
+    /**
+     * This is to reproduce a bug where trying to backport a development
+     * version of JavaFX classes fails because the same classes also exist in
+     * the JRE's extension directory and Retrolambda accidentally loads the
+     * old built-in class instead of the new class that is being transformed.
+     */
+    @Test
+    public void prefers_classes_in_explicit_classpath_over_classes_in_the_JRE() {
+        assertNotNull(getClass().getResource("/com/sun/javafx/application/LauncherImpl$$Lambda$1.class"));
     }
 }

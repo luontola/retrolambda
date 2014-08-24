@@ -30,7 +30,7 @@ public class Retrolambda {
             return;
         }
 
-        Thread.currentThread().setContextClassLoader(new URLClassLoader(asUrls(classpath)));
+        Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(new LambdaClassSaver(outputDir, bytecodeVersion))) {
             if (!PreMain.isAgentLoaded()) {

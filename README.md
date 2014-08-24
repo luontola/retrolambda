@@ -149,6 +149,12 @@ package-private.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed a crash when trying backport classes that are part of the JRE, but
+  the JRE's class differs from the class being backported
+  ([Issue #29](https://github.com/orfjackal/retrolambda/issues/29))
+
 ### Retrolambda 1.6.0 (2014-08-20)
 
 - Does not anymore require the use of a Java agent
