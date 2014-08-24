@@ -85,7 +85,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.6.0</version>
+    <version>1.6.1</version>
     <executions>
         <execution>
             <goals>
@@ -149,7 +149,7 @@ package-private.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 1.6.1 (2014-08-25)
 
 - Fixed a crash when trying backport classes that are part of the JRE, but
   the JRE's class differs from the class being backported
