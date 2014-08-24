@@ -39,19 +39,6 @@ public class Main {
 
         try {
             Thread.currentThread().setContextClassLoader(new URLClassLoader(asUrls(classpath)));
-			/**
-			 * {
-				@Override
-				public Class<?> loadClass(String name) throws ClassNotFoundException {
-					Class<?> loadedClass = findLoadedClass(name);
-					if(loadedClass != null) {
-						return loadedClass;
-					} else {
-						return super.loadClass(name);
-					}
-				}
-			}
-			 */
 
             visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
                 @Override

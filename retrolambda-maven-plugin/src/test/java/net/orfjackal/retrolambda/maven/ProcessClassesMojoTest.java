@@ -49,7 +49,7 @@ public class ProcessClassesMojoTest {
         assertThat(mojo.getJavaCommand(), is(new File(System.getProperty("java.home"), "bin/java").getAbsolutePath()));
     }
 
-/*    @Test
+    @Test
     public void java_command_from_toolchain_overrides_the_current_jvm() {
         toolchainManager.setJdkToolChain(new FakeJavaToolChain("jdk-from-toolchain"));
 
@@ -66,7 +66,7 @@ public class ProcessClassesMojoTest {
         verify(log).warn("Toolchains are ignored, 'java8home' parameter is set to jdk-from-local-configuration");
     }
 
-*/
+
     private static class FakeToolchainManager implements ToolchainManager {
 
         private final Map<String, Toolchain> toolChainsByType = new HashMap<String, Toolchain>();
