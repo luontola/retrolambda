@@ -87,12 +87,12 @@ public class DefaultMethodsTest {
 	public void primitives_run() {
 		Primitives p = new Primitives() {
 		};
-		assertThat("booleans ok", p.aBoolean());
-		assertThat("ints ok", p.anInt() == 1);
-		assertThat("shorts ok", p.aShort() == 2);
-		assertThat("longs ok", p.aLong() == 1L << 50);
-		assertThat("floats ok", p.aFloat() == 0f);
-		assertThat("doubles ok", p.aDouble() == 0.0);
+		assertThat(p.aBoolean(), is(true));
+		assertThat(p.anInt(), is(1));
+		assertThat(p.aShort(), is((short)2));
+		assertThat(p.aLong(), is(1L << 50));
+		assertThat(p.aFloat(), is(0f));
+		assertThat(p.aDouble(), is(0.0));
 		p.aVoid(); // would crash
 	}
 
