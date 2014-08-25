@@ -151,8 +151,8 @@ Version History
 
 ### Retrolambda 1.6.1 (2014-08-25)
 
-- Fixed a crash when trying backport classes that are part of the JRE, but
-  the JRE's class differs from the class being backported
+- Fixed a crash when trying backport classes which are nominally the same
+  as those included in the JRE, but which have different bytecode
   ([Issue #29](https://github.com/orfjackal/retrolambda/issues/29))
 
 ### Retrolambda 1.6.0 (2014-08-20)
