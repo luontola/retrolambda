@@ -68,4 +68,4 @@ set-project-version "$NEXT_VERSION"
 git add -u
 git commit -m "Prepare for next development iteration"
 
-$SCRIPTS/publish.sh "$APP_NAME $RELEASE_VERSION"
+$SCRIPTS/publish.sh "$APP_NAME $RELEASE_VERSION" "$RELEASE_VERSION"
