@@ -39,6 +39,15 @@ public class DefaultMethodsTest {
         String foo(); // refined return type
     }
 
+
+    @Test
+    public void will_return_right_string() {
+        boolean sameStrings = new Child2() {
+
+        }.method().equals("Child2");
+        assertThat("they are equal", sameStrings);
+    }
+
     public interface Parent2 {
         default Object method() {
             return "Parent";
@@ -52,15 +61,21 @@ public class DefaultMethodsTest {
         }
     }
 
-    @Test
-    public void will_return_right_string() {
-        boolean sameStrings = new Child2() {
 
-        }.method().equals("Child2");
-        assertThat("they are equal", sameStrings);
+    @Test
+    public void primitives_run() {
+        Primitives p = new Primitives() {
+        };
+        assertThat(p.aBoolean(), is(true));
+        assertThat(p.anInt(), is(1));
+        assertThat(p.aShort(), is((short) 2));
+        assertThat(p.aLong(), is(1L << 50));
+        assertThat(p.aFloat(), is(0f));
+        assertThat(p.aDouble(), is(0.0));
+        p.aVoid(); // would crash
     }
 
-    interface Primitives {
+    public interface Primitives {
         default int anInt() {
             return 1;
         }
@@ -89,28 +104,6 @@ public class DefaultMethodsTest {
         }
     }
 
-    @Test
-    public void primitives_run() {
-        Primitives p = new Primitives() {
-        };
-        assertThat(p.aBoolean(), is(true));
-        assertThat(p.anInt(), is(1));
-        assertThat(p.aShort(), is((short) 2));
-        assertThat(p.aLong(), is(1L << 50));
-        assertThat(p.aFloat(), is(0f));
-        assertThat(p.aDouble(), is(0.0));
-        p.aVoid(); // would crash
-    }
-
-    interface Chaining {
-        default String myString() {
-            return "Interface";
-        }
-
-        default String join(Chaining other) {
-            return myString() + other.myString();
-        }
-    }
 
     @Test
     public void anonymous_instances() {
@@ -130,18 +123,16 @@ public class DefaultMethodsTest {
         assertThat("Anonymous override equals", c1.join(anon).equals("InterfaceAnon"));
     }
 
-    interface DeepParent {
-        default int level() {
-            return 1;
+    public interface Chaining {
+        default String myString() {
+            return "Interface";
+        }
+
+        default String join(Chaining other) {
+            return myString() + other.myString();
         }
     }
 
-    interface DeepChild extends DeepParent {
-        @Override
-        default int level() {
-            return DeepParent.super.level() + 1;
-        }
-    }
 
     @Test
     public void test_override_primitive() {
@@ -158,6 +149,30 @@ public class DefaultMethodsTest {
         assertThat("super call interface works", d2.level() == 3);
     }
 
+    public interface DeepParent {
+        default int level() {
+            return 1;
+        }
+    }
+
+    public interface DeepChild extends DeepParent {
+        @Override
+        default int level() {
+            return DeepParent.super.level() + 1;
+        }
+    }
+
+
+    @Test
+    public void will_handle_override_proprly() {
+        class C implements Conflict1, Conflict2 {
+            public String confl() {
+                return Conflict1.super.confl() + Conflict2.super.confl();
+            }
+        }
+        assertThat("Handles method conflict", new C().confl().equals("12"));
+    }
+
     interface Conflict1 {
         default String confl() {
             return "1";
@@ -170,23 +185,6 @@ public class DefaultMethodsTest {
         }
     }
 
-    @Test
-    public void will_handle_override_proprly() {
-        class C implements Conflict1, Conflict2 {
-            public String confl() {
-                return Conflict1.super.confl() + Conflict2.super.confl();
-            }
-        }
-        assertThat("Handles method conflict", new C().confl().equals("12"));
-    }
-
-    interface DeepParent2 {
-        int anInt();
-
-        default int method(DeepParent2 p1, DeepParent2 p2, DeepParent2 p3) {
-            return p1.anInt() + p2.anInt() + p3.anInt() + anInt();
-        }
-    }
 
     @Test
     public void will_handle_long_paramlist() {
@@ -199,10 +197,29 @@ public class DefaultMethodsTest {
         assertThat("Long call parameter list works", dp.method(dp, dp, dp) == 8);
     }
 
+    public interface DeepParent2 {
+        int anInt();
+
+        default int method(DeepParent2 p1, DeepParent2 p2, DeepParent2 p3) {
+            return p1.anInt() + p2.anInt() + p3.anInt() + anInt();
+        }
+    }
+
+
     @Test
     public void will_handle_lambda() {
         DeepParent2 dp = () -> 2;
         assertThat("Long call parameter list with lambda works", dp.method(dp, dp, dp) == 8);
+    }
+
+
+    @Test
+    public void handles_bridge_methods() {
+        StringBridge sb = new StringBridge() {
+        };
+        assertThat("returns true", sb.compare());
+        BridgeTest<String> sb2 = sb;
+        assertThat("still returns true", sb2.max("A", "B", String.CASE_INSENSITIVE_ORDER).equals("B"));
     }
 
     interface BridgeTest<T> {
@@ -217,35 +234,6 @@ public class DefaultMethodsTest {
         }
     }
 
-    @Test
-    public void handles_bridge_methods() {
-        StringBridge sb = new StringBridge() {
-        };
-        assertThat("returns true", sb.compare());
-        BridgeTest<String> sb2 = sb;
-        assertThat("still returns true", sb2.max("A", "B", String.CASE_INSENSITIVE_ORDER).equals("B"));
-    }
-
-    interface MiddleParent {
-        default int anInt() {
-            return 1;
-        }
-    }
-
-    interface Middle2Parent extends MiddleParent {
-        @Override
-        default int anInt() {
-            return 2;
-        }
-    }
-
-    interface Middle3aParent extends MiddleParent, Middle2Parent {
-
-    }
-
-    interface Middle3bParent extends Middle2Parent, MiddleParent {
-
-    }
 
     @Test
     public void right_method_chosen() {
@@ -258,35 +246,25 @@ public class DefaultMethodsTest {
         }.anInt(), is(2));
     }
 
-    interface Top<T> {
-        T anObject();
-
+    public interface MiddleParent {
         default int anInt() {
             return 1;
         }
     }
 
-    interface SubTop<T extends CharSequence> extends Top<T> {
+    public interface Middle2Parent extends MiddleParent {
+        @Override
         default int anInt() {
-            return Top.super.anInt() + 1;
+            return 2;
         }
     }
 
-    interface SubSub extends SubTop<String> {
-        default int anInt() {
-            return SubTop.super.anInt() + 1;
-        }
-
-        default String anObject() {
-            return "0";
-        }
+    public interface Middle3aParent extends MiddleParent, Middle2Parent {
     }
 
-    interface SubSub2 extends SubTop<String> {
-        default String anObject() {
-            return "1";
-        }
+    public interface Middle3bParent extends Middle2Parent, MiddleParent {
     }
+
 
     @Test
     public void yet_another_deep_hiearchy_test_with_bridges() {
@@ -305,15 +283,36 @@ public class DefaultMethodsTest {
         assertThat("is instanceof string", top.anObject() instanceof String);
     }
 
-    interface DefaultToStatic {
-        default int ifMeth() {
-            return staticMeth();
-        }
+    public interface Top<T> {
+        T anObject();
 
-        static int staticMeth() {
-            return 3;
+        default int anInt() {
+            return 1;
         }
     }
+
+    public interface SubTop<T extends CharSequence> extends Top<T> {
+        default int anInt() {
+            return Top.super.anInt() + 1;
+        }
+    }
+
+    public interface SubSub extends SubTop<String> {
+        default int anInt() {
+            return SubTop.super.anInt() + 1;
+        }
+
+        default String anObject() {
+            return "0";
+        }
+    }
+
+    public interface SubSub2 extends SubTop<String> {
+        default String anObject() {
+            return "1";
+        }
+    }
+
 
     @Test
     public void call_static_methods_from_default() {
@@ -321,5 +320,15 @@ public class DefaultMethodsTest {
         };
         assertThat(i.ifMeth(), is(3));
         assertThat(DefaultToStatic.staticMeth(), is(3));
+    }
+
+    public interface DefaultToStatic {
+        default int ifMeth() {
+            return staticMeth();
+        }
+
+        static int staticMeth() {
+            return 3;
+        }
     }
 }
