@@ -28,19 +28,34 @@ public class DefaultMethodsTest {
     }
 
     @Test
-    public void default_method_overridden_in_class() {
-        DefaultMethods obj = new DefaultMethods() {
-            @Override
-            public String foo() {
-                return "overridden";
-            }
-        };
-        assertThat(obj.foo(), is("overridden"));
+    public void default_method_overridden_in_current_class() {
+        assertThat(new DefaultMethodOverridingClass().foo(), is("overridden"));
+    }
+
+    @Test
+    public void default_method_overridden_in_parent_class() {
+        class C extends DefaultMethodOverridingClass {
+        }
+        assertThat(new C().foo(), is("overridden"));
+    }
+
+    @Test
+    public void default_method_overridden_in_parent_class_and_implements_interface_explicitly() {
+        class C extends DefaultMethodOverridingClass implements DefaultMethods {
+        }
+        assertThat(new C().foo(), is("overridden"));
     }
 
     private interface DefaultMethods {
         default String foo() {
             return "original";
+        }
+    }
+
+    private class DefaultMethodOverridingClass implements DefaultMethods {
+        @Override
+        public String foo() {
+            return "overridden";
         }
     }
 
