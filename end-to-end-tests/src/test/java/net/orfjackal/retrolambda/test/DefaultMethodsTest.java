@@ -14,11 +14,14 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeThat;
 
-@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef"})
+@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef", "RedundantCast"})
 public class DefaultMethodsTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
+
+
+    // Inheriting & Overriding
 
     @Test
     public void default_method_inherited_from_interface() {
@@ -81,6 +84,53 @@ public class DefaultMethodsTest {
     }
 
 
+    /**
+     * Based on the example in <a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-9.4.1">JLS §9.4.1</a>
+     * (Interfaces - Inheritance and Overriding)
+     */
+    @Test
+    public void inheriting_same_default_methods_through_many_parent_interfaces() {
+        assertThat(new InheritsOriginal() {
+        }.foo(), is("original"));
+
+        assertThat(new InheritsOverridden() {
+        }.foo(), is("overridden"));
+
+        assertThat(new InheritsOverriddenAndOriginal() {
+        }.foo(), is("overridden"));
+
+        assertThat(new InheritsOriginalAndOverridden() {
+        }.foo(), is("overridden"));
+    }
+
+    private interface SuperOriginal {
+        default String foo() {
+            return "original";
+        }
+    }
+
+    private interface SuperOverridden extends SuperOriginal {
+        @Override
+        default String foo() {
+            return "overridden";
+        }
+    }
+
+    private interface InheritsOriginal extends SuperOriginal {
+    }
+
+    private interface InheritsOverridden extends SuperOverridden {
+    }
+
+    private interface InheritsOverriddenAndOriginal extends SuperOverridden, InheritsOriginal {
+    }
+
+    private interface InheritsOriginalAndOverridden extends InheritsOriginal, SuperOverridden {
+    }
+
+
+    // Bridge Methods
+
     @Test
     public void default_method_type_refined_in_child_interface() {
         RefineChild child = new RefineChild() {
@@ -91,6 +141,19 @@ public class DefaultMethodsTest {
         };
         assertThat("direct call", child.foo(), is("refined"));
         assertThat("bridged call", ((RefineParent) child).foo(), is((Object) "refined"));
+    }
+
+    @Test
+    public void default_method_type_refined_in_implementing_class() {
+        class C implements RefineParent {
+            @Override
+            public String foo() {
+                return "refined";
+            }
+        }
+        C obj = new C();
+        assertThat("direct call", obj.foo(), is("refined"));
+        assertThat("bridged call", ((RefineParent) obj).foo(), is((Object) "refined"));
     }
 
     private interface RefineParent {
@@ -106,10 +169,46 @@ public class DefaultMethodsTest {
 
 
     @Test
-    public void default_method_overridden_and_refined_in_child_interface() {
+    public void default_method_argument_type_refined_in_child_interface() {
+        RefineArgChild child = new RefineArgChild() {
+        };
+        assertThat("direct call", child.foo("42"), is("refined 42"));
+        assertThat("bridged call", ((RefineArgParent<String>) child).foo("42"), is((Object) "refined 42"));
+    }
+
+    @Test
+    public void default_method_argument_type_refined_in_implementing_class() {
+        class C implements RefineArgParent<String> {
+            @Override
+            public String foo(String arg) {
+                return "refined " + arg;
+            }
+        }
+        C obj = new C();
+        assertThat("direct call", obj.foo("42"), is("refined 42"));
+        assertThat("bridged call", ((RefineArgParent<String>) obj).foo("42"), is((Object) "refined 42"));
+    }
+
+    private interface RefineArgParent<T> {
+        default String foo(T arg) {
+            return "original " + arg;
+        }
+    }
+
+    private interface RefineArgChild extends RefineArgParent<String> {
+        @Override
+        default String foo(String arg) {
+            return "refined " + arg;
+        }
+    }
+
+
+    @Test
+    public void default_method_type_refined_and_overridden_in_child_interface() {
         OverrideRefineChild child = new OverrideRefineChild() {
         };
-        assertThat(child.foo(), is("overridden and refined"));
+        assertThat("direct call", child.foo(), is("overridden and refined"));
+        assertThat("bridged call", ((OverrideRefineParent) child).foo(), is((Object) "overridden and refined"));
     }
 
     private interface OverrideRefineParent {
@@ -125,6 +224,8 @@ public class DefaultMethodsTest {
         }
     }
 
+
+    // Primitive Types & Void
 
     @Test
     public void default_methods_of_primitive_type() {
@@ -207,6 +308,8 @@ public class DefaultMethodsTest {
     }
 
 
+    // Calling Super
+
     @Test
     public void default_methods_calling_super() {
         SuperCallChild child = new SuperCallChild() {
@@ -268,6 +371,8 @@ public class DefaultMethodsTest {
     }
 
 
+    // Misc
+
     @Test
     public void default_methods_calling_other_interface_methods() {
         CallOtherMethods obj = new CallOtherMethods() {
@@ -288,6 +393,9 @@ public class DefaultMethodsTest {
     }
 
 
+    /**
+     * Backporting default methods should not interact badly with backporting lambdas.
+     */
     @Test
     public void lambdas_with_default_methods() {
         CallOtherMethods lambda = () -> 2;
@@ -297,50 +405,9 @@ public class DefaultMethodsTest {
 
 
     /**
-     * Based on the example in <a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-9.4.1">JLS §9.4.1</a>
-     * (Interfaces - Inheritance and Overriding)
+     * We're unable to backport default methods if we cannot modify the interface,
+     * e.g. if it's part of the standard library or a third-party library.
      */
-    @Test
-    public void inheriting_same_default_methods_through_many_parent_interfaces() {
-        assertThat(new InheritsOriginal() {
-        }.foo(), is("original"));
-
-        assertThat(new InheritsOverridden() {
-        }.foo(), is("overridden"));
-
-        assertThat(new InheritsOverriddenAndOriginal() {
-        }.foo(), is("overridden"));
-
-        assertThat(new InheritsOriginalAndOverridden() {
-        }.foo(), is("overridden"));
-    }
-
-    private interface SuperOriginal {
-        default String foo() {
-            return "original";
-        }
-    }
-
-    private interface SuperOverridden extends SuperOriginal {
-        @Override
-        default String foo() {
-            return "overridden";
-        }
-    }
-
-    private interface InheritsOriginal extends SuperOriginal {
-    }
-
-    private interface InheritsOverridden extends SuperOverridden {
-    }
-
-    private interface InheritsOverriddenAndOriginal extends SuperOverridden, InheritsOriginal {
-    }
-
-    private interface InheritsOriginalAndOverridden extends InheritsOriginal, SuperOverridden {
-    }
-
-
     @Test
     public void default_methods_of_library_interfaces_are_ignored_silently() {
         Iterable<String> it = new Iterable<String>() {
