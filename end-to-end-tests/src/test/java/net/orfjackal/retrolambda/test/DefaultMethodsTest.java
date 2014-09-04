@@ -4,331 +4,355 @@
 
 package net.orfjackal.retrolambda.test;
 
-import org.junit.Test;
+import org.apache.commons.lang.SystemUtils;
+import org.junit.*;
+import org.junit.rules.ExpectedException;
 
-import java.util.Comparator;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assume.assumeThat;
 
+@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef"})
 public class DefaultMethodsTest {
 
-    /**
-     * JDK 8 adds a bridge method to an interface when it overrides a method
-     * from the parent interface and refines its return type. This uses Java 8's
-     * default methods feature, which won't work on Java 7 and below, so we have
-     * to remove it for it - this makes the bytecode same as what JDK 7 produces.
-     */
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
+
     @Test
-    public void will_remove_bridge_methods_from_interfaces() {
-        class Foo implements Child {
+    public void default_method_inherited_from_interface() {
+        DefaultMethods obj = new DefaultMethods() {
+        };
+        assertThat(obj.foo(), is("original"));
+    }
+
+    @Test
+    public void default_method_overridden_in_class() {
+        DefaultMethods obj = new DefaultMethods() {
             @Override
             public String foo() {
-                return "foo";
+                return "overridden";
             }
+        };
+        assertThat(obj.foo(), is("overridden"));
+    }
+
+    private interface DefaultMethods {
+        default String foo() {
+            return "original";
         }
-        assertThat("direct call", new Foo().foo(), is("foo"));
-        assertThat("bridged call", ((Parent) new Foo()).foo(), is((Object) "foo"));
-    }
-
-    public interface Parent {
-        Object foo();
-    }
-
-    public interface Child extends Parent {
-        String foo(); // refined return type
     }
 
 
     @Test
-    public void will_return_right_string() {
-        boolean sameStrings = new Child2() {
-
-        }.method().equals("Child2");
-        assertThat("they are equal", sameStrings);
+    public void default_method_overridden_in_child_interface() {
+        OverrideChild child = new OverrideChild() {
+        };
+        assertThat(child.foo(), is("overridden"));
     }
 
-    public interface Parent2 {
-        default Object method() {
-            return "Parent";
+    private interface OverrideParent {
+        default String foo() {
+            return "original";
         }
     }
 
-    public interface Child2 extends Parent2 {
+    private interface OverrideChild extends OverrideParent {
         @Override
-        default String method() {
-            return "Child2";
+        default String foo() {
+            return "overridden";
         }
     }
 
 
     @Test
-    public void primitives_run() {
+    public void default_method_type_refined_in_child_interface() {
+        RefineChild child = new RefineChild() {
+            @Override
+            public String foo() {
+                return "refined";
+            }
+        };
+        assertThat("direct call", child.foo(), is("refined"));
+        assertThat("bridged call", ((RefineParent) child).foo(), is((Object) "refined"));
+    }
+
+    private interface RefineParent {
+        default Object foo() {
+            return "original";
+        }
+    }
+
+    private interface RefineChild extends RefineParent {
+        @Override
+        String foo();
+    }
+
+
+    @Test
+    public void default_method_overridden_and_refined_in_child_interface() {
+        OverrideRefineChild child = new OverrideRefineChild() {
+        };
+        assertThat(child.foo(), is("overridden and refined"));
+    }
+
+    private interface OverrideRefineParent {
+        default Object foo() {
+            return "original";
+        }
+    }
+
+    private interface OverrideRefineChild extends OverrideRefineParent {
+        @Override
+        default String foo() {
+            return "overridden and refined";
+        }
+    }
+
+
+    @Test
+    public void default_methods_of_primitive_type() {
         Primitives p = new Primitives() {
         };
-        assertThat(p.aBoolean(), is(true));
-        assertThat(p.anInt(), is(1));
-        assertThat(p.aShort(), is((short) 2));
-        assertThat(p.aLong(), is(1L << 50));
-        assertThat(p.aFloat(), is(0f));
-        assertThat(p.aDouble(), is(0.0));
-        p.aVoid(); // would crash
+        assertThat("boolean", p.getBoolean(), is(true));
+        assertThat("byte", p.getByte(), is((byte) 2));
+        assertThat("short", p.getShort(), is((short) 3));
+        assertThat("int", p.getInt(), is(4));
+        assertThat("long", p.getLong(), is(5L));
+        assertThat("float", p.getFloat(), is(6.0f));
+        assertThat("double", p.getDouble(), is(7.0));
+        assertThat("char", p.getChar(), is('a'));
     }
 
-    public interface Primitives {
-        default int anInt() {
-            return 1;
-        }
-
-        default short aShort() {
-            return 2;
-        }
-
-        default long aLong() {
-            return 1L << 50;
-        }
-
-        default boolean aBoolean() {
+    private interface Primitives {
+        default boolean getBoolean() {
             return true;
         }
 
-        default float aFloat() {
-            return 0f;
+        default byte getByte() {
+            return 2;
         }
 
-        default double aDouble() {
-            return 0.0;
+        default short getShort() {
+            return 3;
         }
 
-        default void aVoid() {
-        }
-    }
-
-
-    @Test
-    public void anonymous_instances() {
-        Chaining c1 = new Chaining() {
-
-        };
-        Chaining c2 = new Chaining() {
-
-        };
-        assertThat("Strings equals", c1.join(c2).equals("InterfaceInterface"));
-        Chaining anon = new Chaining() {
-            @Override
-            public String myString() {
-                return "Anon";
-            }
-        };
-        assertThat("Anonymous override equals", c1.join(anon).equals("InterfaceAnon"));
-    }
-
-    public interface Chaining {
-        default String myString() {
-            return "Interface";
+        default int getInt() {
+            return 4;
         }
 
-        default String join(Chaining other) {
-            return myString() + other.myString();
+        default long getLong() {
+            return 5L;
+        }
+
+        default float getFloat() {
+            return 6.0f;
+        }
+
+        default double getDouble() {
+            return 7.0;
+        }
+
+        default char getChar() {
+            return 'a';
         }
     }
 
 
     @Test
-    public void test_override_primitive() {
-        DeepChild d1 = new DeepChild() {
-
+    public void default_methods_of_void_type() {
+        modifiedByVoidMethod = 1;
+        Voids v = new Voids() {
         };
-        assertThat("override works", d1.level() == 2);
-        DeepChild d2 = new DeepChild() {
-            @Override
-            public int level() {
-                return 1 + DeepChild.super.level();
-            }
-        };
-        assertThat("super call interface works", d2.level() == 3);
+        v.run();
+        assertThat(modifiedByVoidMethod, is(2));
     }
 
-    public interface DeepParent {
-        default int level() {
+    private static int modifiedByVoidMethod;
+
+    private interface Voids {
+        default void run() {
+            modifiedByVoidMethod++;
+        }
+    }
+
+
+    @Test
+    public void default_methods_with_primitive_arguments() {
+        PrimitiveArgs p = new PrimitiveArgs() {
+        };
+        assertThat(p.sum(true, (byte) 2, (short) 3, 4, 5, 6, 7, (char) 8), is(36));
+    }
+
+    private interface PrimitiveArgs {
+        default int sum(boolean bool, byte b, short s, int i, long l, float f, double d, char c) {
+            return (int) ((bool ? 1 : 0) + b + s + i + l + f + d + c);
+        }
+    }
+
+
+    @Test
+    public void default_methods_calling_super() {
+        SuperCallChild child = new SuperCallChild() {
+        };
+        assertThat(child.callSuper(), is(11));
+    }
+
+    @Test
+    public void default_methods_called_with_super() {
+        class C implements SuperCallChild {
+            @Override
+            public int callSuper() {
+                return 100 + SuperCallChild.super.callSuper();
+            }
+
+            public int siblingCallingSuper() {
+                return 1000 + SuperCallChild.super.callSuper();
+            }
+        }
+        assertThat(new C().callSuper(), is(111));
+        assertThat(new C().siblingCallingSuper(), is(1011));
+    }
+
+    private interface SuperCallParent {
+        default int callSuper() {
             return 1;
         }
     }
 
-    public interface DeepChild extends DeepParent {
+    private interface SuperCallChild extends SuperCallParent {
         @Override
-        default int level() {
-            return DeepParent.super.level() + 1;
+        default int callSuper() {
+            return 10 + SuperCallParent.super.callSuper();
         }
     }
 
 
     @Test
-    public void will_handle_override_proprly() {
+    public void inheriting_unrelated_default_methods() {
         class C implements Conflict1, Conflict2 {
-            public String confl() {
-                return Conflict1.super.confl() + Conflict2.super.confl();
+            @Override
+            public String conflict() {
+                return Conflict1.super.conflict() + Conflict2.super.conflict();
             }
         }
-        assertThat("Handles method conflict", new C().confl().equals("12"));
+        assertThat(new C().conflict(), is("ab"));
     }
 
-    interface Conflict1 {
-        default String confl() {
-            return "1";
+    private interface Conflict1 {
+        default String conflict() {
+            return "a";
         }
     }
 
-    interface Conflict2 {
-        default String confl() {
-            return "2";
+    private interface Conflict2 {
+        default String conflict() {
+            return "b";
         }
     }
 
 
     @Test
-    public void will_handle_long_paramlist() {
-        DeepParent2 dp = new DeepParent2() {
+    public void default_methods_calling_other_interface_methods() {
+        CallOtherMethods obj = new CallOtherMethods() {
             @Override
-            public int anInt() {
+            public int foo() {
                 return 2;
             }
         };
-        assertThat("Long call parameter list works", dp.method(dp, dp, dp) == 8);
+        assertThat(obj.callsFoo(), is(12));
     }
 
-    public interface DeepParent2 {
-        int anInt();
+    private interface CallOtherMethods {
+        int foo();
 
-        default int method(DeepParent2 p1, DeepParent2 p2, DeepParent2 p3) {
-            return p1.anInt() + p2.anInt() + p3.anInt() + anInt();
+        default int callsFoo() {
+            return foo() + 10;
         }
     }
 
 
     @Test
-    public void will_handle_lambda() {
-        DeepParent2 dp = () -> 2;
-        assertThat("Long call parameter list with lambda works", dp.method(dp, dp, dp) == 8);
+    public void lambdas_with_default_methods() {
+        CallOtherMethods lambda = () -> 2;
+        assertThat(lambda.foo(), is(2));
+        assertThat(lambda.callsFoo(), is(12));
     }
 
 
+    /**
+     * Based on the example in <a href="http://docs.oracle.com/javase/specs/jls/se8/html/jls-9.html#jls-9.4.1">JLS §9.4.1</a>
+     * (Interfaces - Inheritance and Overriding)
+     */
     @Test
-    public void handles_bridge_methods() {
-        StringBridge sb = new StringBridge() {
-        };
-        assertThat("returns true", sb.compare());
-        BridgeTest<String> sb2 = sb;
-        assertThat("still returns true", sb2.max("A", "B", String.CASE_INSENSITIVE_ORDER).equals("B"));
+    public void inheriting_same_default_methods_through_many_parent_interfaces() {
+        assertThat(new InheritsOriginal() {
+        }.foo(), is("original"));
+
+        assertThat(new InheritsOverridden() {
+        }.foo(), is("overridden"));
+
+        assertThat(new InheritsOverriddenAndOriginal() {
+        }.foo(), is("overridden"));
+
+        assertThat(new InheritsOriginalAndOverridden() {
+        }.foo(), is("overridden"));
     }
 
-    interface BridgeTest<T> {
-        default T max(T t1, T t2, Comparator<? super T> comparator) {
-            return comparator.compare(t1, t2) > 0 ? t1 : t2;
+    private interface SuperOriginal {
+        default String foo() {
+            return "original";
         }
     }
 
-    interface StringBridge extends BridgeTest<String> {
-        default boolean compare() {
-            return max("A", "B", String.CASE_INSENSITIVE_ORDER).equals("B");
-        }
-    }
-
-
-    @Test
-    public void right_method_chosen() {
-        assertThat(new Middle3aParent() {
-
-        }.anInt(), is(2));
-
-        assertThat(new Middle3bParent() {
-
-        }.anInt(), is(2));
-    }
-
-    public interface MiddleParent {
-        default int anInt() {
-            return 1;
-        }
-    }
-
-    public interface Middle2Parent extends MiddleParent {
+    private interface SuperOverridden extends SuperOriginal {
         @Override
-        default int anInt() {
-            return 2;
+        default String foo() {
+            return "overridden";
         }
     }
 
-    public interface Middle3aParent extends MiddleParent, Middle2Parent {
+    private interface InheritsOriginal extends SuperOriginal {
     }
 
-    public interface Middle3bParent extends Middle2Parent, MiddleParent {
+    private interface InheritsOverridden extends SuperOverridden {
+    }
+
+    private interface InheritsOverriddenAndOriginal extends SuperOverridden, InheritsOriginal {
+    }
+
+    private interface InheritsOriginalAndOverridden extends InheritsOriginal, SuperOverridden {
     }
 
 
     @Test
-    public void yet_another_deep_hiearchy_test_with_bridges() {
-        assertThat(new SubSub2() {
-
-        }.anInt(), is(2));
-
-        assertThat(new SubSub() {
-
-        }.anInt(), is(3));
-        SubSub sub = new SubSub() {
-
+    public void default_methods_of_library_interfaces_are_ignored_silently() {
+        Iterable<String> it = new Iterable<String>() {
+            @Override
+            public Iterator<String> iterator() {
+                return Collections.emptyIterator();
+            }
         };
-        assertThat(sub.anInt(), is(3));
-        Top<?> top = sub;
-        assertThat("is instanceof string", top.anObject() instanceof String);
+
+        assertThat(it.iterator(), is(Collections.<String>emptyIterator()));
     }
-
-    public interface Top<T> {
-        T anObject();
-
-        default int anInt() {
-            return 1;
-        }
-    }
-
-    public interface SubTop<T extends CharSequence> extends Top<T> {
-        default int anInt() {
-            return Top.super.anInt() + 1;
-        }
-    }
-
-    public interface SubSub extends SubTop<String> {
-        default int anInt() {
-            return SubTop.super.anInt() + 1;
-        }
-
-        default String anObject() {
-            return "0";
-        }
-    }
-
-    public interface SubSub2 extends SubTop<String> {
-        default String anObject() {
-            return "1";
-        }
-    }
-
 
     @Test
-    public void call_static_methods_from_default() {
-        DefaultToStatic i = new DefaultToStatic() {
-        };
-        assertThat(i.ifMeth(), is(3));
-        assertThat(DefaultToStatic.staticMeth(), is(3));
-    }
+    public void trying_to_use_default_methods_of_library_interfaces_causes_NoSuchMethodError() {
+        assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
 
-    public interface DefaultToStatic {
-        default int ifMeth() {
-            return staticMeth();
+        class C implements Iterable<String> {
+            @Override
+            public Iterator<String> iterator() {
+                return Collections.emptyIterator();
+            }
         }
 
-        static int staticMeth() {
-            return 3;
-        }
+        thrown.expect(NoSuchMethodError.class);
+        thrown.expectMessage("spliterator");
+        // Called directly on the class (invokevirtual) instead of the interface (invokeinterface),
+        // to make sure that no method was inserted to the class (in which case this call would not fail)
+        new C().spliterator();
     }
 }

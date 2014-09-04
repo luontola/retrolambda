@@ -22,6 +22,12 @@
             <version>11.0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
