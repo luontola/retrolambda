@@ -19,25 +19,22 @@ public class LambdaClassBackporter {
         ClassVisitor next = writer;
         if (FeatureToggles.DEFAULT_METHODS == 1) {
             next = new ClassModifier(targetVersion, next);
-            next = new LambdaClassVisitor(next, targetVersion);
-        } else {
-            next = new LambdaClassVisitor(next, targetVersion);
         }
+        next = new LambdaClassVisitor(next);
+        next = new LowerBytecodeVersion(next, targetVersion);
         new ClassReader(bytecode).accept(next, 0);
         return writer.toByteArray();
     }
 
     private static class LambdaClassVisitor extends ClassVisitor {
-        private final int targetVersion;
         private String lambdaClass;
         private Type constructor;
         private Handle implMethod;
         private Handle bridgeMethod;
         private LambdaFactoryMethod factoryMethod;
 
-        public LambdaClassVisitor(ClassVisitor cv, int targetVersion) {
-            super(ASM5, cv);
-            this.targetVersion = targetVersion;
+        public LambdaClassVisitor(ClassVisitor next) {
+            super(ASM5, next);
         }
 
         @Override
@@ -48,9 +45,6 @@ public class LambdaClassBackporter {
             bridgeMethod = LambdaReifier.getLambdaBridgeMethod();
             factoryMethod = LambdaReifier.getLambdaFactoryMethod();
 
-            if (version > targetVersion) {
-                version = targetVersion;
-            }
             if (superName.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)) {
                 superName = JAVA_LANG_OBJECT;
             }
@@ -62,10 +56,10 @@ public class LambdaClassBackporter {
             if (name.equals("<init>")) {
                 constructor = Type.getMethodType(desc);
             }
-            MethodVisitor mv = super.visitMethod(access, name, desc, signature, exceptions);
-            mv = new MagicLambdaRemovingMethodVisitor(mv);
-            mv = new PrivateMethodInvocationFixingMethodVisitor(mv, this);
-            return mv;
+            MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
+            next = new MagicLambdaRemovingMethodVisitor(next);
+            next = new PrivateMethodInvocationFixingMethodVisitor(next, this);
+            return next;
         }
 
         @Override
@@ -129,8 +123,8 @@ public class LambdaClassBackporter {
 
     private static class MagicLambdaRemovingMethodVisitor extends MethodVisitor {
 
-        public MagicLambdaRemovingMethodVisitor(MethodVisitor mv) {
-            super(ASM5, mv);
+        public MagicLambdaRemovingMethodVisitor(MethodVisitor next) {
+            super(ASM5, next);
         }
 
         @Override
@@ -150,8 +144,8 @@ public class LambdaClassBackporter {
         private final Handle implMethod;
         private final Handle bridgeMethod;
 
-        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor mv, LambdaClassVisitor context) {
-            super(ASM5, mv);
+        public PrivateMethodInvocationFixingMethodVisitor(MethodVisitor next, LambdaClassVisitor context) {
+            super(ASM5, next);
             this.implMethod = context.implMethod;
             this.bridgeMethod = context.bridgeMethod;
         }

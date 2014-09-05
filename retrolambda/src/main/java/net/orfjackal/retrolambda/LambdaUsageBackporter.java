@@ -22,15 +22,14 @@ public class LambdaUsageBackporter {
         if (FeatureToggles.DEFAULT_METHODS == 1) {
             next = new ClassModifier(targetVersion, next);
             next = new InterfaceModifier(next, targetVersion);
-            next = new InvokeDynamicInsnConverter(next, targetVersion);
         } else if (FeatureToggles.DEFAULT_METHODS == 2) {
             next = new RemoveDefaultMethods(next);
             next = new InvokeStaticInterfaceMethodConverter(next);
-            next = new InvokeDynamicInsnConverter(next, targetVersion);
         } else {
             next = new InvokeStaticInterfaceMethodConverter(next);
-            next = new InvokeDynamicInsnConverter(next, targetVersion);
         }
+        next = new InvokeDynamicInsnConverter(next);
+        next = new LowerBytecodeVersion(next, targetVersion);
         reader.accept(next, 0);
         return writer.toByteArray();
     }
@@ -51,21 +50,16 @@ public class LambdaUsageBackporter {
 
 
     private static class InvokeDynamicInsnConverter extends ClassVisitor {
-        private final int targetVersion;
         private int classAccess;
         String className;
         private final Map<Handle, Handle> lambdaBridgesToImplMethods = new LinkedHashMap<>();
 
-        public InvokeDynamicInsnConverter(ClassVisitor next, int targetVersion) {
+        public InvokeDynamicInsnConverter(ClassVisitor next) {
             super(ASM5, next);
-            this.targetVersion = targetVersion;
         }
 
         @Override
         public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-            if (version > targetVersion) {
-                version = targetVersion;
-            }
             super.visit(version, access, name, signature, superName, interfaces);
             this.classAccess = access;
             this.className = name;
@@ -156,8 +150,8 @@ public class LambdaUsageBackporter {
     private static class InvokeDynamicInsnConvertingMethodVisitor extends MethodVisitor {
         private final InvokeDynamicInsnConverter context;
 
-        public InvokeDynamicInsnConvertingMethodVisitor(MethodVisitor mv, InvokeDynamicInsnConverter context) {
-            super(ASM5, mv);
+        public InvokeDynamicInsnConvertingMethodVisitor(MethodVisitor next, InvokeDynamicInsnConverter context) {
+            super(ASM5, next);
             this.context = context;
         }
 
