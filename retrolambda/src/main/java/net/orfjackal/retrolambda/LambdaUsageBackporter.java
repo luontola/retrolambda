@@ -23,6 +23,10 @@ public class LambdaUsageBackporter {
             next = new ClassModifier(targetVersion, next);
             next = new InterfaceModifier(next, targetVersion);
             next = new InvokeDynamicInsnConverter(next, targetVersion);
+        } else if (FeatureToggles.DEFAULT_METHODS == 2) {
+            next = new RemoveDefaultMethods(next);
+            next = new InvokeStaticInterfaceMethodConverter(next);
+            next = new InvokeDynamicInsnConverter(next, targetVersion);
         } else {
             next = new InvokeStaticInterfaceMethodConverter(next);
             next = new InvokeDynamicInsnConverter(next, targetVersion);
