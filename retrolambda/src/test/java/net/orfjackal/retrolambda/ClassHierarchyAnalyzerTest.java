@@ -21,17 +21,26 @@ public class ClassHierarchyAnalyzerTest {
     private final ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
 
     @Test
+    public void separates_interfaces_from_classes() {
+        analyze(Interface.class);
+        analyze(InterfaceImplementer.class);
+
+        assertThat(getInterfaces(), is(classList(Interface.class)));
+        assertThat(getClasses(), is(classList(InterfaceImplementer.class)));
+    }
+
+    @Test
     public void no_parent_interfaces() {
         analyze(Interface.class);
 
-        assertThat(getInterfaces(Interface.class), is(empty()));
+        assertThat(getInterfacesOf(Interface.class), is(empty()));
     }
 
     @Test
     public void immediate_interfaces_implemented_by_a_class() {
         analyze(InterfaceImplementer.class);
 
-        assertThat(getInterfaces(InterfaceImplementer.class), is(asList((Class<?>) Interface.class)));
+        assertThat(getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
     }
 
     private interface Interface {
@@ -41,31 +50,50 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
-    // helpers
+    // API wrappers
 
     private void analyze(Class<?> clazz) {
         byte[] bytecode = readBytecode(clazz);
         analyzer.analyze(bytecode);
     }
 
-    private static byte[] readBytecode(Class<?> clazz) {
-        try (InputStream in = clazz.getResourceAsStream("/" + Type.getType(clazz).getInternalName() + ".class")) {
-            return ByteStreams.toByteArray(in);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    private List<Class<?>> getInterfaces() {
+        return toClassList(analyzer.getInterfaces());
     }
 
-    private List<Class<?>> getInterfaces(Class<?> clazz) {
-        return analyzer.getInterfaces(Type.getType(clazz)).stream()
+    private List<Class<?>> getClasses() {
+        return toClassList(analyzer.getClasses());
+    }
+
+    private List<Class<?>> getInterfacesOf(Class<?> clazz) {
+        return toClassList(analyzer.getInterfacesOf(Type.getType(clazz)));
+    }
+
+
+    // other helpers
+
+    private static List<Class<?>> toClassList(List<Type> types) {
+        return types.stream()
                 .map(ClassHierarchyAnalyzerTest::toClass)
                 .collect(toList());
+    }
+
+    private static List<Class<?>> classList(Class<?>... aClass) {
+        return asList(aClass);
     }
 
     private static Class<?> toClass(Type type) {
         try {
             return Class.forName(type.getClassName());
         } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static byte[] readBytecode(Class<?> clazz) {
+        try (InputStream in = clazz.getResourceAsStream("/" + Type.getType(clazz).getInternalName() + ".class")) {
+            return ByteStreams.toByteArray(in);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }

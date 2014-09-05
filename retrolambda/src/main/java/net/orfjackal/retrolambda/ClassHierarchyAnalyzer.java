@@ -10,19 +10,37 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
+import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 
 public class ClassHierarchyAnalyzer {
 
+    private final List<Type> interfaces = new ArrayList<>();
+    private final List<Type> classes = new ArrayList<>();
     private final Map<Type, List<Type>> interfacesByImplementer = new HashMap<>();
 
     public void analyze(byte[] bytecode) {
         ClassReader cr = new ClassReader(bytecode);
-        Type implementer = classNameToType(cr.getClassName());
+        Type clazz = classNameToType(cr.getClassName());
+
+        if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
+            interfaces.add(clazz);
+        } else {
+            classes.add(clazz);
+        }
+
         List<Type> interfaces = classNamesToTypes(cr.getInterfaces());
-        interfacesByImplementer.put(implementer, interfaces);
+        interfacesByImplementer.put(clazz, interfaces);
     }
 
-    public List<Type> getInterfaces(Type type) {
+    public List<Type> getInterfaces() {
+        return interfaces;
+    }
+
+    public List<Type> getClasses() {
+        return classes;
+    }
+
+    public List<Type> getInterfacesOf(Type type) {
         return interfacesByImplementer.get(type);
     }
 
