@@ -16,14 +16,14 @@ public class LambdaClassBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        ClassVisitor next = writer;
         if (FeatureToggles.DEFAULT_METHODS == 1) {
-            ClassModifier stage2 = new ClassModifier(targetVersion, writer);
-            LambdaClassVisitor stage1 = new LambdaClassVisitor(stage2, targetVersion);
-            new ClassReader(bytecode).accept(stage1, 0);
+            next = new ClassModifier(targetVersion, next);
+            next = new LambdaClassVisitor(next, targetVersion);
         } else {
-            LambdaClassVisitor stage1 = new LambdaClassVisitor(writer, targetVersion);
-            new ClassReader(bytecode).accept(stage1, 0);
+            next = new LambdaClassVisitor(next, targetVersion);
         }
+        new ClassReader(bytecode).accept(next, 0);
         return writer.toByteArray();
     }
 
