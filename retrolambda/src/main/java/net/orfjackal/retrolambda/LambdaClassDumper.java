@@ -35,7 +35,8 @@ public class LambdaClassDumper implements AutoCloseable {
             Path p = new VirtualPath("");
             dumperField.set(null, newProxyClassesDumper(p));
         } catch (Exception e) {
-            throw new RuntimeException("Cannot initialize dumper", e);
+            throw new IllegalStateException("Cannot initialize dumper; unexpected JDK implementation. " +
+                    "Please run Retrolambda using the Java agent (enable forking in the Maven plugin).", e);
         }
     }
 
