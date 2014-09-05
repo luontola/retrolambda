@@ -16,13 +16,12 @@ public class LambdaClassBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        if (FeatureToggles.DEFAULT_METHODS == 0) {
-            LambdaClassVisitor stage1 = new LambdaClassVisitor(writer, targetVersion);
-            new ClassReader(bytecode).accept(stage1, 0);
-        }
         if (FeatureToggles.DEFAULT_METHODS == 1) {
             ClassModifier stage2 = new ClassModifier(targetVersion, writer);
             LambdaClassVisitor stage1 = new LambdaClassVisitor(stage2, targetVersion);
+            new ClassReader(bytecode).accept(stage1, 0);
+        } else {
+            LambdaClassVisitor stage1 = new LambdaClassVisitor(writer, targetVersion);
             new ClassReader(bytecode).accept(stage1, 0);
         }
         return writer.toByteArray();

@@ -18,14 +18,13 @@ public class LambdaUsageBackporter {
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         resetLambdaClassSequenceNumber();
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        if (FeatureToggles.DEFAULT_METHODS == 0) {
-            InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(writer, targetVersion);
-            new ClassReader(bytecode).accept(stage1, 0);
-        }
         if (FeatureToggles.DEFAULT_METHODS == 1) {
             ClassModifier stage3 = new ClassModifier(targetVersion, writer);
             InterfaceModifier stage2 = new InterfaceModifier(stage3, targetVersion);
             InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
+            new ClassReader(bytecode).accept(stage1, 0);
+        } else {
+            InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(writer, targetVersion);
             new ClassReader(bytecode).accept(stage1, 0);
         }
         return writer.toByteArray();
