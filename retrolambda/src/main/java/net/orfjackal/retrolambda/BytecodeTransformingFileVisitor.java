@@ -1,4 +1,4 @@
-// Copyright © 2013 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,12 +10,10 @@ import java.nio.file.attribute.BasicFileAttributes;
 
 public abstract class BytecodeTransformingFileVisitor extends SimpleFileVisitor<Path> {
 
-    private final Path inputDir;
-    private final Path outputDir;
+    private final ClassSaver saver;
 
-    public BytecodeTransformingFileVisitor(Path inputDir, Path outputDir) {
-        this.inputDir = inputDir;
-        this.outputDir = outputDir;
+    public BytecodeTransformingFileVisitor(ClassSaver saver) {
+        this.saver = saver;
     }
 
     @Override
@@ -23,10 +21,7 @@ public abstract class BytecodeTransformingFileVisitor extends SimpleFileVisitor<
         if (isJavaClass(inputFile)) {
             byte[] originalBytes = Files.readAllBytes(inputFile);
             byte[] transformedBytes = transform(originalBytes);
-
-            Path outputFile = outputDir.resolve(inputDir.relativize(inputFile));
-            Files.createDirectories(outputFile.getParent());
-            Files.write(outputFile, transformedBytes);
+            saver.save(transformedBytes);
         }
         return FileVisitResult.CONTINUE;
     }

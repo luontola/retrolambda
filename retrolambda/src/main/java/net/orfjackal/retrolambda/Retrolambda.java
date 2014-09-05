@@ -36,7 +36,8 @@ public class Retrolambda {
             if (!PreMain.isAgentLoaded()) {
                 dumper.install();
             }
-            visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(inputDir, outputDir) {
+            ClassSaver saver = new ClassSaver(outputDir);
+            visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(saver) {
                 @Override
                 protected byte[] transform(byte[] bytecode) {
                     return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
