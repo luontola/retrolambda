@@ -167,13 +167,22 @@ public class LambdaUsageBackporter {
         }
 
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
-            Class<?> invoker = Helpers.loadClass(context.className);
+            Class<?> invoker = loadClass(context.className);
             Handle implMethod = (Handle) bsmArgs[1];
             Handle bridgeMethod = context.getLambdaBridgeMethod(implMethod);
 
             LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, bridgeMethod,
                     invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
+        }
+
+        private static Class<?> loadClass(String className) {
+            try {
+                ClassLoader cl = Thread.currentThread().getContextClassLoader();
+                return cl.loadClass(className.replace('/', '.'));
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }

@@ -4,15 +4,23 @@
 
 package net.orfjackal.retrolambda.test;
 
-import org.junit.Test;
+import org.apache.commons.lang.SystemUtils;
+import org.junit.*;
+import org.junit.rules.ExpectedException;
 
+import java.util.Comparator;
 import java.util.concurrent.Callable;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
+import static org.junit.Assume.assumeThat;
 
 @SuppressWarnings("Convert2MethodRef")
 public class InterfaceStaticMethodsTest {
+
+    @Rule
+    public final ExpectedException thrown = ExpectedException.none();
 
     @Test
     public void static_methods_on_interfaces() {
@@ -56,5 +64,32 @@ public class InterfaceStaticMethodsTest {
         static String staticMethodWithArgs(String s, int a, long b) {
             return s + a + b;
         }
+    }
+
+    /**
+     * Calling a {@code InterfaceMethodref} constant pool entry with {@code invokestatic}
+     * is not allowed in Java 7 bytecode. It'll fail at class loading time with
+     * "VerifyError: Illegal type at constant pool entry"
+     */
+    @Test
+    public void calling_static_methods_of_library_interfaces__new_interface() {
+        assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
+
+        thrown.expect(NoClassDefFoundError.class);
+        thrown.expectMessage("java.util.stream.Stream");
+        // We don't want this call to prevent loading this whole test class,
+        // it should only fail when this line is executed
+        Stream.of(1, 2, 3);
+    }
+
+    @Test
+    public void calling_static_methods_of_library_interfaces__new_method_on_old_interface() {
+        assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
+
+        thrown.expect(NoSuchMethodError.class);
+        thrown.expectMessage("naturalOrder");
+        // We don't want this call to prevent loading this whole test class,
+        // it should only fail when this line is executed
+        Comparator.naturalOrder();
     }
 }
