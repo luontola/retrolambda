@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.defaultmethods.ClassModifier;
 import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.*;
@@ -15,7 +16,15 @@ public class LambdaClassBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        new ClassReader(bytecode).accept(new LambdaClassVisitor(writer, targetVersion), 0);
+        if (FeatureToggles.DEFAULT_METHODS == 0) {
+            LambdaClassVisitor stage1 = new LambdaClassVisitor(writer, targetVersion);
+            new ClassReader(bytecode).accept(stage1, 0);
+        }
+        if (FeatureToggles.DEFAULT_METHODS == 1) {
+            ClassModifier stage2 = new ClassModifier(targetVersion, writer);
+            LambdaClassVisitor stage1 = new LambdaClassVisitor(stage2, targetVersion);
+            new ClassReader(bytecode).accept(stage1, 0);
+        }
         return writer.toByteArray();
     }
 
@@ -27,8 +36,8 @@ public class LambdaClassBackporter {
         private Handle bridgeMethod;
         private LambdaFactoryMethod factoryMethod;
 
-        public LambdaClassVisitor(ClassWriter cw, int targetVersion) {
-            super(ASM5, cw);
+        public LambdaClassVisitor(ClassVisitor cv, int targetVersion) {
+            super(ASM5, cv);
             this.targetVersion = targetVersion;
         }
 

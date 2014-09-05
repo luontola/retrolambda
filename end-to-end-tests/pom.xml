@@ -22,6 +22,12 @@
             <version>11.0.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -80,6 +86,28 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>no-default-methods</id>
+            <activation>
+                <property>
+                    <name>!env.DEFAULT_METHODS</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <testExcludes>
+                                <pattern>**/DefaultMethodsTest.java</pattern>
+                                <pattern>**/InterfaceStaticMethodsTest.java</pattern>
+                            </testExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
         <profile>
             <id>eclipse</id>
             <build>

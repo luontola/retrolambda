@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.defaultmethods.*;
 import org.objectweb.asm.*;
 
 import java.lang.reflect.Field;
@@ -16,11 +17,18 @@ public class LambdaUsageBackporter {
 
     public static byte[] transform(byte[] bytecode, int targetVersion) {
         resetLambdaClassSequenceNumber();
-
-        ClassWriter stage2 = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
-        new ClassReader(bytecode).accept(stage1, 0);
-        return stage2.toByteArray();
+        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+        if (FeatureToggles.DEFAULT_METHODS == 0) {
+            InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(writer, targetVersion);
+            new ClassReader(bytecode).accept(stage1, 0);
+        }
+        if (FeatureToggles.DEFAULT_METHODS == 1) {
+            ClassModifier stage3 = new ClassModifier(targetVersion, writer);
+            InterfaceModifier stage2 = new InterfaceModifier(stage3, targetVersion);
+            InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
+            new ClassReader(bytecode).accept(stage1, 0);
+        }
+        return writer.toByteArray();
     }
 
     private static void resetLambdaClassSequenceNumber() {
@@ -64,7 +72,8 @@ public class LambdaUsageBackporter {
             if (isBridgeMethodOnInterface(access)) {
                 return null; // remove the bridge method; Java 7 didn't use them
             }
-            if (isNonAbstractMethodOnInterface(access)
+            if (FeatureToggles.DEFAULT_METHODS == 0
+                    && isNonAbstractMethodOnInterface(access)
                     && !isClassInitializerMethod(name, desc, access)) {
                 // In case we have missed a case of Java 8 producing non-abstract methods
                 // on interfaces, we have this warning here to get a bug report sooner.
@@ -158,22 +167,13 @@ public class LambdaUsageBackporter {
         }
 
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
-            Class<?> invoker = loadClass(context.className);
+            Class<?> invoker = Helpers.loadClass(context.className);
             Handle implMethod = (Handle) bsmArgs[1];
             Handle bridgeMethod = context.getLambdaBridgeMethod(implMethod);
 
             LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, bridgeMethod,
                     invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
-        }
-
-        private static Class<?> loadClass(String className) {
-            try {
-                ClassLoader cl = Thread.currentThread().getContextClassLoader();
-                return cl.loadClass(className.replace('/', '.'));
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException(e);
-            }
         }
     }
 }
