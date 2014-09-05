@@ -15,7 +15,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaUsageBackporter {
 
-    public static byte[] transform(byte[] bytecode, int targetVersion) {
+    public static byte[] transform(ClassReader reader, int targetVersion) {
         resetLambdaClassSequenceNumber();
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassVisitor next = writer;
@@ -31,7 +31,7 @@ public class LambdaUsageBackporter {
             next = new InvokeStaticInterfaceMethodConverter(next);
             next = new InvokeDynamicInsnConverter(next, targetVersion);
         }
-        new ClassReader(bytecode).accept(next, 0);
+        reader.accept(next, 0);
         return writer.toByteArray();
     }
 

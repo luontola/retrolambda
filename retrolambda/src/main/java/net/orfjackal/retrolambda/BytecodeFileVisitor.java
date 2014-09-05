@@ -8,25 +8,17 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public abstract class BytecodeTransformingFileVisitor extends SimpleFileVisitor<Path> {
-
-    private final ClassSaver saver;
-
-    public BytecodeTransformingFileVisitor(ClassSaver saver) {
-        this.saver = saver;
-    }
+public abstract class BytecodeFileVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path inputFile, BasicFileAttributes attrs) throws IOException {
         if (isJavaClass(inputFile)) {
-            byte[] originalBytes = Files.readAllBytes(inputFile);
-            byte[] transformedBytes = transform(originalBytes);
-            saver.save(transformedBytes);
+            visit(Files.readAllBytes(inputFile));
         }
         return FileVisitResult.CONTINUE;
     }
 
-    protected abstract byte[] transform(byte[] bytecode);
+    protected abstract void visit(byte[] bytecode);
 
     private static boolean isJavaClass(Path file) {
         return file.getFileName().toString().endsWith(".class");

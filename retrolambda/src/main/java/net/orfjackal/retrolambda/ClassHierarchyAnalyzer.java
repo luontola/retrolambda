@@ -14,8 +14,8 @@ import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 
 public class ClassHierarchyAnalyzer {
 
-    private final List<Type> interfaces = new ArrayList<>();
-    private final List<Type> classes = new ArrayList<>();
+    private final List<ClassReader> interfaces = new ArrayList<>();
+    private final List<ClassReader> classes = new ArrayList<>();
     private final Map<Type, List<Type>> interfacesByImplementer = new HashMap<>();
 
     public void analyze(byte[] bytecode) {
@@ -23,20 +23,20 @@ public class ClassHierarchyAnalyzer {
         Type clazz = classNameToType(cr.getClassName());
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
-            interfaces.add(clazz);
+            interfaces.add(cr);
         } else {
-            classes.add(clazz);
+            classes.add(cr);
         }
 
         List<Type> interfaces = classNamesToTypes(cr.getInterfaces());
         interfacesByImplementer.put(clazz, interfaces);
     }
 
-    public List<Type> getInterfaces() {
+    public List<ClassReader> getInterfaces() {
         return interfaces;
     }
 
-    public List<Type> getClasses() {
+    public List<ClassReader> getClasses() {
         return classes;
     }
 

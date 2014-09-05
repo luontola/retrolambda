@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda;
 
 import com.google.common.io.ByteStreams;
 import org.junit.Test;
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 
 import java.io.*;
 import java.util.List;
@@ -58,21 +58,27 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     private List<Class<?>> getInterfaces() {
-        return toClassList(analyzer.getInterfaces());
+        return readersToClasses(analyzer.getInterfaces());
     }
 
     private List<Class<?>> getClasses() {
-        return toClassList(analyzer.getClasses());
+        return readersToClasses(analyzer.getClasses());
     }
 
     private List<Class<?>> getInterfacesOf(Class<?> clazz) {
-        return toClassList(analyzer.getInterfacesOf(Type.getType(clazz)));
+        return typesToClasses(analyzer.getInterfacesOf(Type.getType(clazz)));
     }
 
 
     // other helpers
 
-    private static List<Class<?>> toClassList(List<Type> types) {
+    private static List<Class<?>> readersToClasses(List<ClassReader> readers) {
+        return readers.stream()
+                .map(ClassHierarchyAnalyzerTest::toClass)
+                .collect(toList());
+    }
+
+    private static List<Class<?>> typesToClasses(List<Type> types) {
         return types.stream()
                 .map(ClassHierarchyAnalyzerTest::toClass)
                 .collect(toList());
@@ -80,6 +86,14 @@ public class ClassHierarchyAnalyzerTest {
 
     private static List<Class<?>> classList(Class<?>... aClass) {
         return asList(aClass);
+    }
+
+    private static Class<?> toClass(ClassReader reader) {
+        try {
+            return Class.forName(reader.getClassName().replace('/', '.'));
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static Class<?> toClass(Type type) {

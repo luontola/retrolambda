@@ -4,6 +4,8 @@
 
 package net.orfjackal.retrolambda;
 
+import org.objectweb.asm.ClassReader;
+
 import java.io.IOException;
 import java.net.*;
 import java.nio.file.*;
@@ -36,13 +38,22 @@ public class Retrolambda {
             if (!PreMain.isAgentLoaded()) {
                 dumper.install();
             }
-            ClassSaver saver = new ClassSaver(outputDir);
-            visitFiles(inputDir, includedFiles, new BytecodeTransformingFileVisitor(saver) {
+
+            ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
+            visitFiles(inputDir, includedFiles, new BytecodeFileVisitor() {
                 @Override
-                protected byte[] transform(byte[] bytecode) {
-                    return LambdaUsageBackporter.transform(bytecode, bytecodeVersion);
+                protected void visit(byte[] bytecode) {
+                    analyzer.analyze(bytecode);
                 }
             });
+
+            ClassSaver saver = new ClassSaver(outputDir);
+            for (ClassReader reader : analyzer.getInterfaces()) {
+                saver.save(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+            }
+            for (ClassReader reader : analyzer.getClasses()) {
+                saver.save(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+            }
         }
     }
 
