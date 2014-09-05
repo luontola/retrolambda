@@ -7,6 +7,7 @@ package net.orfjackal.retrolambda;
 import org.objectweb.asm.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
@@ -26,7 +27,7 @@ public class ClassHierarchyAnalyzer {
     }
 
     private static List<Type> classNamesToTypes(String[] interfaces) {
-        return Arrays.asList(interfaces).stream() // TODO: use Stream.of() once it's supported
+        return Stream.of(interfaces)
                 .map(ClassHierarchyAnalyzer::classNameToType)
                 .collect(toList());
     }

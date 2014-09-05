@@ -24,7 +24,8 @@ public class LambdaUsageBackporter {
             InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
             new ClassReader(bytecode).accept(stage1, 0);
         } else {
-            InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(writer, targetVersion);
+            InvokeStaticInterfaceMethodConverter stage2 = new InvokeStaticInterfaceMethodConverter(writer);
+            InvokeDynamicInsnConverter stage1 = new InvokeDynamicInsnConverter(stage2, targetVersion);
             new ClassReader(bytecode).accept(stage1, 0);
         }
         return writer.toByteArray();
