@@ -6,6 +6,7 @@ package net.orfjackal.retrolambda;
 
 public class FeatureToggles {
 
+    // TODO: default methods; remove this toggle and all other related TODOs
     public static final int DEFAULT_METHODS = parseInt(System.getenv("DEFAULT_METHODS"), 0);
 
     private static int parseInt(String value, int defaultValue) {

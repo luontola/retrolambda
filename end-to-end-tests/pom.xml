@@ -87,6 +87,7 @@
 
     <profiles>
         <profile>
+            <!-- TODO: default methods; remove this profile -->
             <id>no-default-methods</id>
             <activation>
                 <property>
