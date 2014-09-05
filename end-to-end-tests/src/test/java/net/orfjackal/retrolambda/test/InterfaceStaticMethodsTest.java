@@ -76,7 +76,7 @@ public class InterfaceStaticMethodsTest {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
 
         thrown.expect(NoClassDefFoundError.class);
-        thrown.expectMessage("java.util.stream.Stream");
+        thrown.expectMessage("java/util/stream/Stream");
         // We don't want this call to prevent loading this whole test class,
         // it should only fail when this line is executed
         Stream.of(1, 2, 3);
@@ -86,8 +86,8 @@ public class InterfaceStaticMethodsTest {
     public void calling_static_methods_of_library_interfaces__new_method_on_old_interface() {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
 
-        thrown.expect(NoSuchMethodError.class);
-        thrown.expectMessage("naturalOrder");
+        thrown.expect(IncompatibleClassChangeError.class);
+        thrown.expectMessage("Found interface java.util.Comparator, but class was expected");
         // We don't want this call to prevent loading this whole test class,
         // it should only fail when this line is executed
         Comparator.naturalOrder();
