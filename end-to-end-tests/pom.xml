@@ -86,6 +86,28 @@
 
     <profiles>
         <profile>
+            <id>no-default-methods</id>
+            <activation>
+                <property>
+                    <name>!env.DEFAULT_METHODS</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <testExcludes>
+                                <pattern>**/DefaultMethodsTest.java</pattern>
+                                <pattern>**/InterfaceStaticMethodsTest.java</pattern>
+                            </testExcludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>eclipse</id>
             <build>
                 <plugins>
