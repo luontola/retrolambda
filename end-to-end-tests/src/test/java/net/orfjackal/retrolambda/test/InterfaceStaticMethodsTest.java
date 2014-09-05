@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 
+@SuppressWarnings("Convert2MethodRef")
 public class InterfaceStaticMethodsTest {
 
     @Test
@@ -32,6 +33,12 @@ public class InterfaceStaticMethodsTest {
 
     @Test
     public void calling_static_methods_on_interfaces_from_lambdas() throws Exception {
+        Callable<Integer> c = () -> Interface.staticMethod();
+        assertThat(c.call(), is(42));
+    }
+
+    @Test
+    public void calling_static_methods_on_interfaces_from_method_references() throws Exception {
         Callable<Integer> c = Interface::staticMethod;
         assertThat(c.call(), is(42));
     }
