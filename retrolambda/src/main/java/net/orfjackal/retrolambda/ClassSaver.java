@@ -18,6 +18,9 @@ public class ClassSaver {
     }
 
     public void save(byte[] bytecode) throws IOException {
+        if (bytecode == null) {
+            return;
+        }
         ClassReader cr = new ClassReader(bytecode);
         Path outputFile = outputDir.resolve(cr.getClassName() + ".class");
         Files.createDirectories(outputFile.getParent());

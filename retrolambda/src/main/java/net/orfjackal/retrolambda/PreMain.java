@@ -15,7 +15,8 @@ public class PreMain {
         Config config = new Config(System.getProperties());
         int bytecodeVersion = config.getBytecodeVersion();
         Path outputDir = config.getOutputDir();
-        inst.addTransformer(new LambdaSavingClassFileTransformer(new LambdaClassSaver(outputDir, bytecodeVersion)));
+        ClassSaver saver = new ClassSaver(outputDir);
+        inst.addTransformer(new LambdaSavingClassFileTransformer(new LambdaClassSaver(saver, bytecodeVersion)));
         agentLoaded = true;
     }
 

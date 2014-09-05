@@ -23,8 +23,9 @@ public class LambdaUsageBackporter {
             next = new ClassModifier(targetVersion, next);
             next = new InterfaceModifier(next, targetVersion);
         } else if (FeatureToggles.DEFAULT_METHODS == 2) {
-            next = new RemoveDefaultMethods(next);
-            next = new InvokeStaticInterfaceMethodConverter(next);
+            next = new RemoveDefaultMethods(next); // TODO: only needed for interfaces - skip else?
+            next = new InvokeStaticInterfaceMethodConverter(next); // TODO: is this still needed after static methods are moved to companion class?
+            next = new ApplyMethodRelocations(next);
         } else {
             next = new InvokeStaticInterfaceMethodConverter(next);
         }

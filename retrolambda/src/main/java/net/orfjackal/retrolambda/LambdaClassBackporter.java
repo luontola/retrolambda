@@ -19,6 +19,8 @@ public class LambdaClassBackporter {
         ClassVisitor next = writer;
         if (FeatureToggles.DEFAULT_METHODS == 1) {
             next = new ClassModifier(targetVersion, next);
+        } else if (FeatureToggles.DEFAULT_METHODS == 2) {
+            next = new ApplyMethodRelocations(next);
         }
         next = new LambdaClassVisitor(next);
         next = new LowerBytecodeVersion(next, targetVersion);

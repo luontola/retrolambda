@@ -34,7 +34,8 @@ public class Retrolambda {
 
         Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));
 
-        try (LambdaClassDumper dumper = new LambdaClassDumper(new LambdaClassSaver(outputDir, bytecodeVersion))) {
+        ClassSaver saver = new ClassSaver(outputDir);
+        try (LambdaClassDumper dumper = new LambdaClassDumper(new LambdaClassSaver(saver, bytecodeVersion))) {
             if (!PreMain.isAgentLoaded()) {
                 dumper.install();
             }
@@ -47,12 +48,19 @@ public class Retrolambda {
                 }
             });
 
-            ClassSaver saver = new ClassSaver(outputDir);
+            List<byte[]> transformed = new ArrayList<>();
             for (ClassReader reader : analyzer.getInterfaces()) {
-                saver.save(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+                transformed.add(InterfaceCompanionBackporter.transform(reader, bytecodeVersion));
+                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion));
             }
             for (ClassReader reader : analyzer.getClasses()) {
-                saver.save(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+            }
+
+            // We need to load some of the classes (for calling the lambda metafactory)
+            // so we need to take care not to modify any bytecode before loading them.
+            for (byte[] bytecode : transformed) {
+                saver.save(bytecode);
             }
         }
     }

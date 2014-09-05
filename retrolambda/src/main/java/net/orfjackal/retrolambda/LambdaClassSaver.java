@@ -4,15 +4,13 @@
 
 package net.orfjackal.retrolambda;
 
-import java.nio.file.*;
-
 public class LambdaClassSaver {
 
-    private final Path outputDir;
+    private final ClassSaver saver;
     private final int bytecodeVersion;
 
-    public LambdaClassSaver(Path outputDir, int bytecodeVersion) {
-        this.outputDir = outputDir;
+    public LambdaClassSaver(ClassSaver saver, int bytecodeVersion) {
+        this.saver = saver;
         this.bytecodeVersion = bytecodeVersion;
     }
 
@@ -22,13 +20,10 @@ public class LambdaClassSaver {
         }
     }
 
-    private void reifyLambdaClass(String className, byte[] originalBytecode) {
+    private void reifyLambdaClass(String className, byte[] bytecode) {
         try {
             System.out.println("Saving lambda class: " + className);
-            byte[] backportedBytecode = LambdaClassBackporter.transform(originalBytecode, bytecodeVersion);
-            Path savePath = outputDir.resolve(className + ".class");
-            Files.createDirectories(savePath.getParent());
-            Files.write(savePath, backportedBytecode);
+            saver.save(LambdaClassBackporter.transform(bytecode, bytecodeVersion));
 
         } catch (Throwable t) {
             // print to stdout to keep in sync with other log output
