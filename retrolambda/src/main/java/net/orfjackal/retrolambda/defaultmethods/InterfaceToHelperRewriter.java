@@ -8,21 +8,24 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 
 /**
-* Created by arneball on 2014-08-24.
-*/
+ * Created by arneball on 2014-08-24.
+ */
 class InterfaceToHelperRewriter extends MethodVisitor implements Opcodes {
-	public InterfaceToHelperRewriter(MethodVisitor mv) {
-		super(ASM5, mv);
-	}
+    public InterfaceToHelperRewriter(MethodVisitor mv) {
+        super(ASM5, mv);
+    }
 
-	@Override
-	public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-		if(opcode == INVOKESPECIAL && itf){
-			super.visitMethodInsn(INVOKESTATIC, owner + "$helper", name, Helpers.addParam(desc, owner), false);
-		} else if(opcode == INVOKESTATIC && itf) {
-			super.visitMethodInsn(INVOKESTATIC, owner + "$helper", name + "$static", desc, false);
-		} else {
-			super.visitMethodInsn(opcode, owner, name, desc, itf);
-		}
-	}
+    @Override
+    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+        boolean belongsToUs = Helpers.interfaceBelongsToUs(owner);
+        String newOwner = belongsToUs ? owner + "$helper" : owner;
+        if (opcode == INVOKESPECIAL && itf) {
+            super.visitMethodInsn(INVOKESTATIC, newOwner, name, Helpers.addParam(desc, owner), false);
+        } else if (opcode == INVOKESTATIC && itf) {
+            String newName = belongsToUs ? name + "$static" : name;
+            super.visitMethodInsn(INVOKESTATIC, newOwner, newName, desc, false);
+        } else {
+            super.visitMethodInsn(opcode, owner, name, desc, itf);
+        }
+    }
 }
