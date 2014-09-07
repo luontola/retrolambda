@@ -149,6 +149,11 @@ package-private.
 Version History
 ---------------
 
+### Upcoming
+
+- Backports static methods on interfaces
+  ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
+
 ### Retrolambda 1.6.1 (2014-08-25)
 
 - Fixed a crash when trying backport classes which are nominally the same
