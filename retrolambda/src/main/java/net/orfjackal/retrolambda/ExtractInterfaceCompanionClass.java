@@ -10,19 +10,20 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class ExtractInterfaceCompanionClass extends ClassVisitor {
 
-    public ExtractInterfaceCompanionClass(ClassVisitor next) {
+    private final String companion;
+
+    public ExtractInterfaceCompanionClass(ClassVisitor next, String companion) {
         super(ASM5, next);
+        this.companion = companion;
     }
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        // TODO: "make it right"
-        if (name.equals("net/orfjackal/retrolambda/test/InterfaceStaticMethodsTest$Interface")) {
-            name += "$";
-            access &= ~ACC_INTERFACE;
-            access &= ~ACC_ABSTRACT;
-        }
-        // TODO: remove abstract methods
+        name = companion;
+        access &= ~ACC_INTERFACE;
+        access &= ~ACC_ABSTRACT;
         super.visit(version, access, name, signature, superName, interfaces);
     }
+
+    // TODO: remove abstract methods
 }

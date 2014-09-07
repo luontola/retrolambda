@@ -7,4 +7,6 @@ package net.orfjackal.retrolambda;
 public interface MethodRelocations {
 
     MethodRef getMethodLocation(MethodRef original);
+
+    String getCompanionClass(String className);
 }

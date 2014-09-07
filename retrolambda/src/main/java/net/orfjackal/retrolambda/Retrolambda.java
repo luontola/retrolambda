@@ -53,10 +53,10 @@ public class Retrolambda {
             List<byte[]> transformed = new ArrayList<>();
             for (ClassReader reader : analyzer.getInterfaces()) {
                 transformed.add(InterfaceCompanionBackporter.transform(reader, bytecodeVersion, analyzer));
-                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion, analyzer));
+                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion, analyzer)); // TODO: extract InterfaceBackporter
             }
             for (ClassReader reader : analyzer.getClasses()) {
-                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion, analyzer));
+                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion, analyzer)); // TODO: extract ClassBackporter
             }
 
             // We need to load some of the classes (for calling the lambda metafactory)

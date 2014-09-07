@@ -18,6 +18,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     private final List<ClassReader> classes = new ArrayList<>();
     private final Map<Type, List<Type>> interfacesByImplementer = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
+    private final Map<String, String> companionClasses = new HashMap<>();
 
     public void analyze(byte[] bytecode) {
         ClassReader cr = new ClassReader(bytecode);
@@ -54,6 +55,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
                     relocatedMethods.put(
                             new MethodRef(owner, name, desc),
                             new MethodRef(companion, name, desc));
+                    companionClasses.put(owner, companion);
                 }
                 return null;
             }
@@ -75,6 +77,11 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public MethodRef getMethodLocation(MethodRef original) {
         return relocatedMethods.getOrDefault(original, original);
+    }
+
+    @Override
+    public String getCompanionClass(String className) {
+        return companionClasses.get(className);
     }
 
     private static List<Type> classNamesToTypes(String[] interfaces) {

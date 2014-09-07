@@ -105,6 +105,18 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
+    @Test
+    public void companion_class_is_needed_when_methods_are_moved_there() {
+        analyze(Interface.class);
+        analyze(InterfaceMethodTypes.class);
+        analyze(ClassMethodTypes.class);
+
+        assertThat("Interface", analyzer.getCompanionClass(Type.getInternalName(Interface.class)), is(nullValue()));
+        assertThat("InterfaceMethodTypes", analyzer.getCompanionClass(Type.getInternalName(InterfaceMethodTypes.class)), is(Type.getInternalName(InterfaceMethodTypes$.class)));
+        assertThat("ClassMethodTypes", analyzer.getCompanionClass(Type.getInternalName(ClassMethodTypes.class)), is(nullValue()));
+    }
+
+
     // API wrappers
 
     private void analyze(Class<?> clazz) {

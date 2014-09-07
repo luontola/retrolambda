@@ -9,12 +9,14 @@ import org.objectweb.asm.*;
 public class InterfaceCompanionBackporter {
 
     public static byte[] transform(ClassReader reader, int targetVersion, MethodRelocations methodRelocations) {
+        String companion;
         if (FeatureToggles.DEFAULT_METHODS == 2
-                && isInterface(reader)) {
+                && isInterface(reader)
+                && (companion = methodRelocations.getCompanionClass(reader.getClassName())) != null) {
             ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
             ClassVisitor next = writer;
             next = new ApplyMethodRelocations(next, methodRelocations);
-            next = new ExtractInterfaceCompanionClass(next);
+            next = new ExtractInterfaceCompanionClass(next, companion);
             next = new InvokeStaticInterfaceMethodConverter(next);
             next = new LowerBytecodeVersion(next, targetVersion);
             reader.accept(next, 0);
