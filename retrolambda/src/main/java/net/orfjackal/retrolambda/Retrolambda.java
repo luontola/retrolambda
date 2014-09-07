@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.defaultmethods.Helpers;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
@@ -30,6 +31,10 @@ public class Retrolambda {
         if (!Files.isDirectory(inputDir)) {
             System.out.println("Nothing to do; not a directory: " + inputDir);
             return;
+        }
+
+        if (FeatureToggles.DEFAULT_METHODS == 1) {
+            Helpers.config = config;
         }
 
         Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));

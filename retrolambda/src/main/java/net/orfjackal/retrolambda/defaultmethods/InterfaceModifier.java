@@ -4,18 +4,13 @@
 
 package net.orfjackal.retrolambda.defaultmethods;
 
-import net.orfjackal.retrolambda.Config;
 import org.objectweb.asm.*;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import java.nio.file.*;
+import java.util.*;
+import java.util.stream.*;
 
 /**
  * Created by arneball on 2014-08-12.
@@ -69,7 +64,7 @@ public class InterfaceModifier extends ClassVisitor implements Opcodes {
 
     @Override
     public void visitEnd() {
-        Path newPath = new Config(System.getProperties()).getOutputDir();
+        Path newPath = Helpers.config.getOutputDir();
         ArrayList<Method> allMethods = Stream.of(interfaces)
                 .map(Helpers::loadClass)
                 .flatMap(c -> Stream.of(c.getMethods()))

@@ -7,14 +7,10 @@ package net.orfjackal.retrolambda.defaultmethods;
 import net.orfjackal.retrolambda.Config;
 import org.objectweb.asm.Type;
 
-import java.io.File;
 import java.lang.reflect.Method;
 import java.net.*;
-import java.nio.file.Path;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.*;
+import java.util.regex.*;
+import java.util.stream.Stream;
 
 import static org.objectweb.asm.Type.*;
 
@@ -23,6 +19,7 @@ import static org.objectweb.asm.Type.*;
  */
 public class Helpers {
     private static final Pattern pattern = Pattern.compile("\\((.*)\\)(.*)");
+    public static Config config; // XXX: hack for passing in the Config from main
 
     public static String addParam(String desc, String className) {
         Matcher m = pattern.matcher(desc);
@@ -69,12 +66,13 @@ public class Helpers {
 
     private static class InputFilesClassLoader extends URLClassLoader {
         private static final InputFilesClassLoader INSTANCE = create();
+
         private InputFilesClassLoader(URL inputFiles) {
-            super(new URL[]{ inputFiles });
+            super(new URL[]{inputFiles});
         }
 
         private static InputFilesClassLoader create() {
-            Config config = new Config(System.getProperties());
+            Config config = Helpers.config;
             System.out.println("INCLUDED FILES " + config.getInputDir());
             try {
                 URL inputFiles = config.getInputDir().toUri().toURL();
