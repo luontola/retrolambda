@@ -8,10 +8,16 @@ public class LambdaClassSaver {
 
     private final ClassSaver saver;
     private final int bytecodeVersion;
+    private MethodRelocations methodRelocations;
 
-    public LambdaClassSaver(ClassSaver saver, int bytecodeVersion) {
+    public LambdaClassSaver(ClassSaver saver, int bytecodeVersion, MethodRelocations methodRelocations) {
         this.saver = saver;
         this.bytecodeVersion = bytecodeVersion;
+        this.methodRelocations = methodRelocations;
+    }
+
+    public void setMethodRelocations(MethodRelocations methodRelocations) {
+        this.methodRelocations = methodRelocations;
     }
 
     public void saveIfLambda(String className, byte[] bytecode) {
@@ -23,7 +29,7 @@ public class LambdaClassSaver {
     private void reifyLambdaClass(String className, byte[] bytecode) {
         try {
             System.out.println("Saving lambda class: " + className);
-            saver.save(LambdaClassBackporter.transform(bytecode, bytecodeVersion));
+            saver.save(LambdaClassBackporter.transform(bytecode, bytecodeVersion, methodRelocations));
 
         } catch (Throwable t) {
             // print to stdout to keep in sync with other log output

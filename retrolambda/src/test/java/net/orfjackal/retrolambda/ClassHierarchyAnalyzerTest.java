@@ -16,6 +16,7 @@ import static java.util.stream.Collectors.toList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
+@SuppressWarnings("UnusedDeclaration")
 public class ClassHierarchyAnalyzerTest {
 
     private final ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
@@ -47,6 +48,60 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     private class InterfaceImplementer implements Interface {
+    }
+
+
+    @Test
+    public void abstract_methods_on_interfaces_are_not_relocated() {
+        analyze(InterfaceMethodTypes.class);
+
+        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "abstractMethod", "()V");
+        MethodRef target = analyzer.getMethodLocation(source);
+
+        assertThat(target, is(source));
+    }
+
+    @Test
+    public void static_methods_on_interfaces_are_relocated_to_companion_classes() {
+        analyze(InterfaceMethodTypes.class);
+
+        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "staticMethod", "()V");
+        MethodRef target = analyzer.getMethodLocation(source);
+
+        assertThat(target, is(new MethodRef(InterfaceMethodTypes$.class, "staticMethod", "()V")));
+    }
+
+    @Test
+    public void static_methods_on_classes_are_not_relocated() {
+        analyze(ClassMethodTypes.class);
+
+        MethodRef source = new MethodRef(ClassMethodTypes.class, "staticMethod", "()V");
+        MethodRef target = analyzer.getMethodLocation(source);
+
+        assertThat(target, is(source));
+    }
+
+    private interface InterfaceMethodTypes {
+        void abstractMethod();
+
+        default void defaultMethod() {
+        }
+
+        static void staticMethod() {
+        }
+    }
+
+    private interface InterfaceMethodTypes$ {
+    }
+
+    private static abstract class ClassMethodTypes {
+        public abstract void abstractMethod();
+
+        public void instanceMethod() {
+        }
+
+        public static void staticMethod() {
+        }
     }
 
 

@@ -10,17 +10,23 @@ import java.nio.file.Path;
 public class PreMain {
 
     private static boolean agentLoaded = false;
+    private static LambdaClassSaver lambdaClassSaver;
 
     public static void premain(String agentArgs, Instrumentation inst) {
         Config config = new Config(System.getProperties());
         int bytecodeVersion = config.getBytecodeVersion();
         Path outputDir = config.getOutputDir();
         ClassSaver saver = new ClassSaver(outputDir);
-        inst.addTransformer(new LambdaSavingClassFileTransformer(new LambdaClassSaver(saver, bytecodeVersion)));
+        lambdaClassSaver = new LambdaClassSaver(saver, bytecodeVersion, null); // MethodRelocations will be set by main
+        inst.addTransformer(new LambdaSavingClassFileTransformer(lambdaClassSaver));
         agentLoaded = true;
     }
 
     public static boolean isAgentLoaded() {
         return agentLoaded;
+    }
+
+    public static void setMethodRelocations(MethodRelocations methodRelocations) {
+        lambdaClassSaver.setMethodRelocations(methodRelocations);
     }
 }

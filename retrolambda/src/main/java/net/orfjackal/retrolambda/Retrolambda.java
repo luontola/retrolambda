@@ -34,13 +34,15 @@ public class Retrolambda {
 
         Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));
 
+        ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
         ClassSaver saver = new ClassSaver(outputDir);
-        try (LambdaClassDumper dumper = new LambdaClassDumper(new LambdaClassSaver(saver, bytecodeVersion))) {
-            if (!PreMain.isAgentLoaded()) {
+        try (LambdaClassDumper dumper = new LambdaClassDumper(new LambdaClassSaver(saver, bytecodeVersion, analyzer))) {
+            if (PreMain.isAgentLoaded()) {
+                PreMain.setMethodRelocations(analyzer);
+            } else {
                 dumper.install();
             }
 
-            ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
             visitFiles(inputDir, includedFiles, new BytecodeFileVisitor() {
                 @Override
                 protected void visit(byte[] bytecode) {
@@ -50,11 +52,11 @@ public class Retrolambda {
 
             List<byte[]> transformed = new ArrayList<>();
             for (ClassReader reader : analyzer.getInterfaces()) {
-                transformed.add(InterfaceCompanionBackporter.transform(reader, bytecodeVersion));
-                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+                transformed.add(InterfaceCompanionBackporter.transform(reader, bytecodeVersion, analyzer));
+                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion, analyzer));
             }
             for (ClassReader reader : analyzer.getClasses()) {
-                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion));
+                transformed.add(LambdaUsageBackporter.transform(reader, bytecodeVersion, analyzer));
             }
 
             // We need to load some of the classes (for calling the lambda metafactory)

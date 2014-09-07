@@ -15,7 +15,7 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaUsageBackporter {
 
-    public static byte[] transform(ClassReader reader, int targetVersion) {
+    public static byte[] transform(ClassReader reader, int targetVersion, MethodRelocations methodRelocations) {
         resetLambdaClassSequenceNumber();
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassVisitor next = writer;
@@ -24,8 +24,8 @@ public class LambdaUsageBackporter {
             next = new InterfaceModifier(next, targetVersion);
         } else if (FeatureToggles.DEFAULT_METHODS == 2) {
             next = new RemoveDefaultMethods(next); // TODO: only needed for interfaces - skip else?
-            next = new InvokeStaticInterfaceMethodConverter(next); // TODO: is this still needed after static methods are moved to companion class?
-            next = new ApplyMethodRelocations(next);
+            next = new ApplyMethodRelocations(next, methodRelocations);
+            next = new InvokeStaticInterfaceMethodConverter(next);
         } else {
             next = new InvokeStaticInterfaceMethodConverter(next);
         }

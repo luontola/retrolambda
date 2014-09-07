@@ -14,13 +14,13 @@ public class LambdaClassBackporter {
     private static final String SINGLETON_FIELD_NAME = "instance";
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
 
-    public static byte[] transform(byte[] bytecode, int targetVersion) {
+    public static byte[] transform(byte[] bytecode, int targetVersion, MethodRelocations methodRelocations) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassVisitor next = writer;
         if (FeatureToggles.DEFAULT_METHODS == 1) {
             next = new ClassModifier(targetVersion, next);
         } else if (FeatureToggles.DEFAULT_METHODS == 2) {
-            next = new ApplyMethodRelocations(next);
+            next = new ApplyMethodRelocations(next, methodRelocations);
         }
         next = new LambdaClassVisitor(next);
         next = new LowerBytecodeVersion(next, targetVersion);

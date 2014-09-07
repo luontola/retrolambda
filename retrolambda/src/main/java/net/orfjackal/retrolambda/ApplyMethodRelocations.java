@@ -4,14 +4,19 @@
 
 package net.orfjackal.retrolambda;
 
+import com.google.common.base.Preconditions;
 import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.ASM5;
 
 public class ApplyMethodRelocations extends ClassVisitor {
 
-    public ApplyMethodRelocations(ClassVisitor next) {
+    private final MethodRelocations methodRelocations;
+
+    public ApplyMethodRelocations(ClassVisitor next, MethodRelocations methodRelocations) {
         super(ASM5, next);
+        this.methodRelocations = methodRelocations;
+        Preconditions.checkNotNull(methodRelocations);
     }
 
     @Override
@@ -24,7 +29,7 @@ public class ApplyMethodRelocations extends ClassVisitor {
         return new ApplyRenamesMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions));
     }
 
-    private static class ApplyRenamesMethodVisitor extends MethodVisitor {
+    private class ApplyRenamesMethodVisitor extends MethodVisitor {
 
         public ApplyRenamesMethodVisitor(MethodVisitor next) {
             super(Opcodes.ASM5, next);
@@ -32,20 +37,8 @@ public class ApplyMethodRelocations extends ClassVisitor {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            // TODO: "make it right"
-            if (owner.equals("net/orfjackal/retrolambda/test/InterfaceStaticMethodsTest$Interface")
-                    && name.equals("staticMethod")
-                    && desc.equals("()I")) {
-                owner += "$";
-                itf = false;
-            }
-            if (owner.equals("net/orfjackal/retrolambda/test/InterfaceStaticMethodsTest$Interface")
-                    && name.equals("staticMethodWithArgs")
-                    && desc.equals("(Ljava/lang/String;IJ)Ljava/lang/String;")) {
-                owner += "$";
-                itf = false;
-            }
-            super.visitMethodInsn(opcode, owner, name, desc, itf);
+            MethodRef ref = methodRelocations.getMethodLocation(new MethodRef(owner, name, desc));
+            super.visitMethodInsn(opcode, ref.owner, ref.name, ref.desc, itf);
         }
     }
 }

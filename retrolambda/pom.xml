@@ -23,7 +23,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
@@ -96,6 +95,10 @@
                             <pattern>org.objectweb.asm</pattern>
                             <shadedPattern>net.orfjackal.retrolambda.asm</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>com.google</pattern>
+                            <shadedPattern>net.orfjackal.retrolambda.google</shadedPattern>
+                        </relocation>
                     </relocations>
                     <filters>
                         <filter>
@@ -103,6 +106,13 @@
                             <excludes>
                                 <exclude>**/*.html</exclude>
                                 <exclude>**/*.dtd</exclude>
+                                <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
+                            <artifact>com.google.guava:guava</artifact>
+                            <excludes>
+                                <exclude>META-INF/**</exclude>
                             </excludes>
                         </filter>
                     </filters>
