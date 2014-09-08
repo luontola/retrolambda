@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda;
 
 import org.objectweb.asm.*;
+import org.objectweb.asm.tree.MethodNode;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -26,10 +27,9 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         if (isInterface && isDefaultMethod(access)) {
             MethodVisitor next = super.visitMethod(access | ACC_ABSTRACT, name, desc, signature, exceptions);
-            // TODO: annotations
-            return null;
+            return new RemoveMethodBody(next, access, name, desc, signature, exceptions);
         } else if (isInterface && isStaticMethod(access)) {
-            return null;
+            return null; // TODO: move to another class for more cohesion
         } else {
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
@@ -42,5 +42,22 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
 
     private static boolean isStaticMethod(int access) {
         return Flags.hasFlag(access, ACC_STATIC);
+    }
+
+
+    private static class RemoveMethodBody extends MethodNode {
+        private final MethodVisitor next;
+
+        private RemoveMethodBody(MethodVisitor next, int access, String name, String desc, String signature, String[] exceptions) {
+            super(ASM5, access, name, desc, signature, exceptions);
+            this.next = next;
+        }
+
+        @Override
+        public void visitEnd() {
+            super.visitEnd();
+            instructions.clear();
+            super.accept(next);
+        }
     }
 }
