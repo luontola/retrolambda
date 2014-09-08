@@ -9,11 +9,11 @@ import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.ASM5;
 
-public class ApplyMethodRelocations extends ClassVisitor {
+public class UpdateRelocatedMethodInvocations extends ClassVisitor {
 
     private final MethodRelocations methodRelocations;
 
-    public ApplyMethodRelocations(ClassVisitor next, MethodRelocations methodRelocations) {
+    public UpdateRelocatedMethodInvocations(ClassVisitor next, MethodRelocations methodRelocations) {
         super(ASM5, next);
         this.methodRelocations = methodRelocations;
         Preconditions.checkNotNull(methodRelocations);
@@ -26,12 +26,12 @@ public class ApplyMethodRelocations extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        return new ApplyRenamesMethodVisitor(super.visitMethod(access, name, desc, signature, exceptions));
+        return new UpdateMethodCalls(super.visitMethod(access, name, desc, signature, exceptions));
     }
 
-    private class ApplyRenamesMethodVisitor extends MethodVisitor {
+    private class UpdateMethodCalls extends MethodVisitor {
 
-        public ApplyRenamesMethodVisitor(MethodVisitor next) {
+        public UpdateMethodCalls(MethodVisitor next) {
             super(Opcodes.ASM5, next);
         }
 

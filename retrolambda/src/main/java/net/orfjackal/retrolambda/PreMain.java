@@ -5,20 +5,14 @@
 package net.orfjackal.retrolambda;
 
 import java.lang.instrument.Instrumentation;
-import java.nio.file.Path;
 
 public class PreMain {
 
+    private static final LambdaClassSaverAgent agent = new LambdaClassSaverAgent();
     private static boolean agentLoaded = false;
-    private static LambdaClassSaver lambdaClassSaver;
 
     public static void premain(String agentArgs, Instrumentation inst) {
-        Config config = new Config(System.getProperties());
-        int bytecodeVersion = config.getBytecodeVersion();
-        Path outputDir = config.getOutputDir();
-        ClassSaver saver = new ClassSaver(outputDir);
-        lambdaClassSaver = new LambdaClassSaver(saver, bytecodeVersion, null); // MethodRelocations will be set by main
-        inst.addTransformer(new LambdaSavingClassFileTransformer(lambdaClassSaver));
+        inst.addTransformer(agent);
         agentLoaded = true;
     }
 
@@ -26,7 +20,7 @@ public class PreMain {
         return agentLoaded;
     }
 
-    public static void setMethodRelocations(MethodRelocations methodRelocations) {
-        lambdaClassSaver.setMethodRelocations(methodRelocations);
+    public static void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver) {
+        agent.setLambdaClassSaver(lambdaClassSaver);
     }
 }

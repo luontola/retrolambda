@@ -4,20 +4,16 @@
 
 package net.orfjackal.retrolambda;
 
+import org.objectweb.asm.ClassReader;
+
 public class LambdaClassSaver {
 
     private final ClassSaver saver;
-    private final int bytecodeVersion;
-    private MethodRelocations methodRelocations;
+    private final Transformers transformers;
 
-    public LambdaClassSaver(ClassSaver saver, int bytecodeVersion, MethodRelocations methodRelocations) {
+    public LambdaClassSaver(ClassSaver saver, Transformers transformers) {
         this.saver = saver;
-        this.bytecodeVersion = bytecodeVersion;
-        this.methodRelocations = methodRelocations;
-    }
-
-    public void setMethodRelocations(MethodRelocations methodRelocations) {
-        this.methodRelocations = methodRelocations;
+        this.transformers = transformers;
     }
 
     public void saveIfLambda(String className, byte[] bytecode) {
@@ -29,7 +25,7 @@ public class LambdaClassSaver {
     private void reifyLambdaClass(String className, byte[] bytecode) {
         try {
             System.out.println("Saving lambda class: " + className);
-            saver.save(LambdaClassBackporter.transform(bytecode, bytecodeVersion, methodRelocations));
+            saver.save(transformers.backportLambdaClass(new ClassReader(bytecode)));
 
         } catch (Throwable t) {
             // print to stdout to keep in sync with other log output

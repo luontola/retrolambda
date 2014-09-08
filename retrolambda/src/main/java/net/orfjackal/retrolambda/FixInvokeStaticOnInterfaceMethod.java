@@ -8,9 +8,9 @@ import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.*;
 
-public class InvokeStaticInterfaceMethodConverter extends ClassVisitor {
+public class FixInvokeStaticOnInterfaceMethod extends ClassVisitor {
 
-    public InvokeStaticInterfaceMethodConverter(ClassVisitor next) {
+    public FixInvokeStaticOnInterfaceMethod(ClassVisitor next) {
         super(ASM5, next);
     }
 

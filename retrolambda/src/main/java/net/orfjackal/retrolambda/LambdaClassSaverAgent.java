@@ -9,11 +9,11 @@ import org.objectweb.asm.ClassReader;
 import java.lang.instrument.*;
 import java.security.ProtectionDomain;
 
-public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
+public class LambdaClassSaverAgent implements ClassFileTransformer {
 
-    private final LambdaClassSaver lambdaClassSaver;
+    private LambdaClassSaver lambdaClassSaver;
 
-    public LambdaSavingClassFileTransformer(LambdaClassSaver lambdaClassSaver) {
+    public void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver) {
         this.lambdaClassSaver = lambdaClassSaver;
     }
 
@@ -24,7 +24,9 @@ public class LambdaSavingClassFileTransformer implements ClassFileTransformer {
             // but we can read it from the bytecode where the name still exists.
             className = new ClassReader(classfileBuffer).getClassName();
         }
-        lambdaClassSaver.saveIfLambda(className, classfileBuffer);
+        if (lambdaClassSaver != null) {
+            lambdaClassSaver.saveIfLambda(className, classfileBuffer);
+        }
         return null;
     }
 }
