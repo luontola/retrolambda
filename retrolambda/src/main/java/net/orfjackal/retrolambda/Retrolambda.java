@@ -5,6 +5,9 @@
 package net.orfjackal.retrolambda;
 
 import net.orfjackal.retrolambda.defaultmethods.Helpers;
+import net.orfjackal.retrolambda.files.*;
+import net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer;
+import net.orfjackal.retrolambda.lambdas.*;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;

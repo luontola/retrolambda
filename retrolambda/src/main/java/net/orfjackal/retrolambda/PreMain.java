@@ -4,6 +4,8 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.lambdas.*;
+
 import java.lang.instrument.Instrumentation;
 
 public class PreMain {

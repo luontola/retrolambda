@@ -5,6 +5,8 @@
 package net.orfjackal.retrolambda;
 
 import net.orfjackal.retrolambda.defaultmethods.*;
+import net.orfjackal.retrolambda.interfaces.*;
+import net.orfjackal.retrolambda.lambdas.*;
 import org.objectweb.asm.*;
 
 public class Transformers {

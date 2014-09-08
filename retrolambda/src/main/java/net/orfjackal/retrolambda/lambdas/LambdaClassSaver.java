@@ -2,8 +2,10 @@
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
-package net.orfjackal.retrolambda;
+package net.orfjackal.retrolambda.lambdas;
 
+import net.orfjackal.retrolambda.Transformers;
+import net.orfjackal.retrolambda.files.ClassSaver;
 import org.objectweb.asm.ClassReader;
 
 public class LambdaClassSaver {

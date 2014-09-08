@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda;
 
 import com.google.common.io.ByteStreams;
+import net.orfjackal.retrolambda.interfaces.*;
 import org.junit.Test;
 import org.objectweb.asm.*;
 
