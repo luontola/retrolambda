@@ -23,7 +23,7 @@ public class LambdaUsageBackporter {
             next = new ClassModifier(targetVersion, next);
             next = new InterfaceModifier(next, targetVersion);
         } else if (FeatureToggles.DEFAULT_METHODS == 2) {
-            next = new RemoveDefaultMethods(next); // TODO: only needed for interfaces - skip else?
+            next = new RemoveDefaultMethodBodies(next); // TODO: only needed for interfaces - skip else?
             next = new ApplyMethodRelocations(next, methodRelocations);
             next = new InvokeStaticInterfaceMethodConverter(next);
         } else {

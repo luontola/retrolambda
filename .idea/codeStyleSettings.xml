@@ -24,6 +24,7 @@
         <option name="WHILE_BRACE_FORCE" value="3" />
         <option name="FOR_BRACE_FORCE" value="3" />
         <option name="FIELD_ANNOTATION_WRAP" value="0" />
+        <ClojureCodeStyleSettings />
         <XML>
           <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
         </XML>

@@ -5,16 +5,18 @@
 package net.orfjackal.retrolambda.test;
 
 import org.apache.commons.lang.SystemUtils;
+import org.hamcrest.*;
 import org.junit.*;
 import org.junit.rules.ExpectedException;
 
+import java.lang.annotation.*;
 import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeThat;
 
-@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef", "RedundantCast"})
+@SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef", "RedundantCast", "UnusedDeclaration"})
 public class DefaultMethodsTest {
 
     @Rule
@@ -392,7 +394,6 @@ public class DefaultMethodsTest {
         }
     }
 
-
     /**
      * Backporting default methods should not interact badly with backporting lambdas.
      */
@@ -436,5 +437,64 @@ public class DefaultMethodsTest {
         // Called directly on the class (invokevirtual) instead of the interface (invokeinterface),
         // to make sure that no method was inserted to the class (in which case this call would not fail)
         new C().spliterator();
+    }
+
+    /**
+     * A naive method for removing method bodies would easily also remove their annotations,
+     * because in ASM method annotations are expressed as calls on the MethodVisitor.
+     */
+    @Test
+    @SuppressWarnings("unchecked")
+    public void keeps_annotations_on_interface_methods() throws Exception {
+        assertThat("interface", AnnotatedInterface.class.getAnnotations(),
+                arrayContaining(someAnnotation(1)));
+
+        assertThat("abstract method", AnnotatedInterface.class.getMethod("annotatedAbstractMethod").getAnnotations(),
+                arrayContaining(someAnnotation(2)));
+
+        assertThat("default method", AnnotatedInterface.class.getMethod("annotatedDefaultMethod").getAnnotations(),
+                arrayContaining(someAnnotation(3)));
+
+        assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
+        assertThat("static method", companionOf(AnnotatedInterface.class).getMethod("annotatedStaticMethod").getAnnotations(),
+                arrayContaining(someAnnotation(4)));
+    }
+
+    @SomeAnnotation(1)
+    private interface AnnotatedInterface {
+
+        @SomeAnnotation(2)
+        void annotatedAbstractMethod();
+
+        @SomeAnnotation(3)
+        default void annotatedDefaultMethod() {
+        }
+
+        @SomeAnnotation(4)
+        public static void annotatedStaticMethod() {
+        }
+    }
+
+    @Retention(value = RetentionPolicy.RUNTIME)
+    private @interface SomeAnnotation {
+        int value();
+    }
+
+    private static Matcher<Annotation> someAnnotation(int value) {
+        return new TypeSafeMatcher<Annotation>() {
+            @Override
+            protected boolean matchesSafely(Annotation item) {
+                return item instanceof SomeAnnotation && ((SomeAnnotation) item).value() == value;
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("@SomeAnnotation(" + value + ")");
+            }
+        };
+    }
+
+    private static Class<?> companionOf(Class<?> itf) throws ClassNotFoundException {
+        return Class.forName(itf.getName() + "$");
     }
 }
