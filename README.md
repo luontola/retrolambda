@@ -124,7 +124,7 @@ You will need Java 8 for compiling and also for generating Javadocs.
 Known Limitations
 -----------------
 
-Does not backport the use of Java 8 APIs.
+Does not backport Java 8 APIs.
 
 Does not backport Java 8 language features other than lambda expressions.
 
@@ -138,12 +138,6 @@ May break if a future JDK 8 build stops generating a new class for each
 `invokedynamic` call. Retrolambda works so that it captures the bytecode
 that `java.lang.invoke.LambdaMetafactory` generates dynamically, so
 optimizations to that mechanism may break Retrolambda.
-
-Does not implement JDK 8's safety measure of using `invokespecial` to call
-lambda implementation methods that are private instance methods (such as
-when the lambda accesses an instance variable, or the lambda is a method
-reference to a private instance method), but instead makes those methods
-package-private.
 
 
 Version History
