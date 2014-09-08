@@ -11,25 +11,15 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class RemoveDefaultMethodBodies extends ClassVisitor {
 
-    private boolean isInterface;
-
     public RemoveDefaultMethodBodies(ClassVisitor next) {
         super(ASM5, next);
     }
 
     @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        isInterface = Flags.hasFlag(access, ACC_INTERFACE);
-        super.visit(version, access, name, signature, superName, interfaces);
-    }
-
-    @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (isInterface && isDefaultMethod(access)) {
+        if (isDefaultMethod(access)) {
             MethodVisitor next = super.visitMethod(access | ACC_ABSTRACT, name, desc, signature, exceptions);
             return new RemoveMethodBody(next, access, name, desc, signature, exceptions);
-        } else if (isInterface && isStaticMethod(access)) {
-            return null; // TODO: move to another class for more cohesion
         } else {
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
@@ -39,11 +29,6 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
         return !Flags.hasFlag(access, ACC_ABSTRACT)
                 && !Flags.hasFlag(access, ACC_STATIC);
     }
-
-    private static boolean isStaticMethod(int access) {
-        return Flags.hasFlag(access, ACC_STATIC);
-    }
-
 
     private static class RemoveMethodBody extends MethodNode {
         private final MethodVisitor next;

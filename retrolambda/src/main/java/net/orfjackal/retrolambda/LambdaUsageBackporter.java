@@ -23,7 +23,10 @@ public class LambdaUsageBackporter {
             next = new ClassModifier(targetVersion, next);
             next = new InterfaceModifier(next, targetVersion);
         } else if (FeatureToggles.DEFAULT_METHODS == 2) {
-            next = new RemoveDefaultMethodBodies(next); // TODO: only needed for interfaces - skip else?
+            if (isInterface(reader)) {
+                next = new RemoveStaticMethods(next);
+                next = new RemoveDefaultMethodBodies(next);
+            }
             next = new ApplyMethodRelocations(next, methodRelocations);
             next = new InvokeStaticInterfaceMethodConverter(next);
         } else {
@@ -47,6 +50,10 @@ public class LambdaUsageBackporter {
                     "but please file a bug report and tell on which JDK version this happened.");
             t.printStackTrace(System.out);
         }
+    }
+
+    private static boolean isInterface(ClassReader reader) {
+        return Flags.hasFlag(reader.getAccess(), ACC_INTERFACE);
     }
 
 
