@@ -51,11 +51,23 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
+    // Method relocations
+
     @Test
     public void abstract_methods_on_interfaces_are_not_relocated() {
         analyze(InterfaceMethodTypes.class);
 
         MethodRef source = new MethodRef(InterfaceMethodTypes.class, "abstractMethod", "()V");
+        MethodRef target = analyzer.getMethodLocation(source);
+
+        assertThat(target, is(source));
+    }
+
+    @Test
+    public void default_methods_on_interfaces_are_not_relocated() {
+        analyze(InterfaceMethodTypes.class);
+
+        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "defaultMethod", "()V");
         MethodRef target = analyzer.getMethodLocation(source);
 
         assertThat(target, is(source));
