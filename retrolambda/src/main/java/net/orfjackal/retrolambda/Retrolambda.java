@@ -16,6 +16,63 @@ import java.nio.file.*;
 import java.util.*;
 
 public class Retrolambda {
+    /** Public method exposed to external users of the module to backport
+     * content of a classfile into pre-JDK8 format. Primarilly eliminate
+     * use of invokeDynamic instruction for all lambda invocations. Also
+     * do something with interface static and defender methods.
+     * 
+     * @param bytecodeVersion version of bytecode to generate
+     * @param classes class loader to use when loading other classes related to the 
+     *   one being backported
+     * @param arr the bytes of a classfile to backport
+     * @return newly generated classes as well as updated content overriding
+     *    already existing classes
+     */
+    
+    public static Map<String, byte[]> reify(
+        int bytecodeVersion, ClassLoader classes, byte[] arr
+    ) {
+        Map<String, byte[]> classFiles = new HashMap<>();
+        ClassSaver saver = new ClassSaver(null) {
+            @Override
+            public void save(byte[] bytecode) throws IOException {
+                if (bytecode == null) {
+                    return;
+                }
+                ClassReader cr = new ClassReader(bytecode);
+                classFiles.put(cr.getClassName(), bytecode);
+            }
+        };
+        ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
+        Transformers transformers = new Transformers(bytecodeVersion, analyzer);
+        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(saver, transformers);
+        ClassLoader prev = Thread.currentThread().getContextClassLoader();
+        try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {
+            Thread.currentThread().setContextClassLoader(classes);
+            dumper.install();
+
+            analyzer.analyze(arr);
+
+            for (ClassReader reader : analyzer.getInterfaces()) {
+                byte[] companion = transformers.extractInterfaceCompanion(reader);
+                ClassReader cr = new ClassReader(companion);
+                classFiles.put(cr.getClassName(), companion);
+
+                byte[] replace = transformers.backportInterface(reader);
+                ClassReader rcr = new ClassReader(replace);
+                classFiles.put(rcr.getClassName(), replace);
+            }
+            for (ClassReader reader : analyzer.getClasses()) {
+                byte[] replace = transformers.backportClass(reader);
+                ClassReader rcr = new ClassReader(replace);
+                classFiles.put(rcr.getClassName(), replace);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(prev);
+        }
+        return classFiles;
+    }
+    
 
     public static void run(Config config) throws Throwable {
         int bytecodeVersion = config.getBytecodeVersion();
