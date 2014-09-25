@@ -33,8 +33,3 @@ mvn clean deploy \
     --errors \
     -P sonatype-oss-release \
     -DaltDeploymentRepository="staging::default::file:staging"
-
-mvn nexus-staging:deploy-staged-repository \
-    --errors \
-    -DrepositoryDirectory=staging \
-    -DstagingDescription="$DESCRIPTION"
