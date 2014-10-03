@@ -10,9 +10,12 @@ mvn nexus-staging:deploy-staged-repository \
     -DrepositoryDirectory=staging \
     -DstagingDescription="$DESCRIPTION"
 
+REPOSITORY_ID=`sed -n -r 's/stagingRepository\.id=(\w+)/\1/p' staging/*.properties`
+
 mvn nexus-staging:release \
     --errors \
     -DaltStagingDirectory=staging \
+    -DstagingRepositoryId="$REPOSITORY_ID" \
     -DstagingDescription="$DESCRIPTION"
 
 git push origin HEAD
