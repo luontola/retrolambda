@@ -28,6 +28,15 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- See net.orfjackal.retrolambda.test.ClasspathTest#ignores_classes_in_explicit_classpath_that_are_under_the_java_package -->
+        <dependency>
+            <groupId>net.orfjackal.retrolambda</groupId>
+            <artifactId>java-lang-dummies</artifactId>
+            <version>1</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/test/lib/java-lang-dummies.jar</systemPath>
+        </dependency>
+
     </dependencies>
 
     <build>

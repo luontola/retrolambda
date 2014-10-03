@@ -147,6 +147,8 @@ Version History
 
 - Backports static methods on interfaces
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
+- Fixed a crash when trying backport Android classes
+  ([Issue #34](https://github.com/orfjackal/retrolambda/issues/34))
 
 ### Retrolambda 1.6.1 (2014-08-25)
 

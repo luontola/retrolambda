@@ -7,10 +7,12 @@ package net.orfjackal.retrolambda.test;
 import org.hamcrest.*;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertNotNull;
 
 public class ClasspathTest {
@@ -65,7 +67,11 @@ public class ClasspathTest {
      * contains {@code java.*} classes.
      */
     @Test
-    public void ignores_classes_in_explicit_classpath_that_are_under_the_java_package() {
-        assertNotNull(getClass().getResource("/java/lang/Math.class"));
+    public void ignores_classes_in_explicit_classpath_that_are_under_the_java_package() throws IOException {
+        // We have a JAR on the classpath that contains dummy version of java.lang.Object,
+        // the same way as android.jar, which causes Retrolambda to try loading that class
+        // because the classes to be backported extend it implicitly.
+        List<URL> resources = Collections.list(getClass().getClassLoader().getResources("java/lang/Object.class"));
+        assertThat(resources, (Matcher) hasItem(hasToString(containsString("java-lang-dummies.jar"))));
     }
 }

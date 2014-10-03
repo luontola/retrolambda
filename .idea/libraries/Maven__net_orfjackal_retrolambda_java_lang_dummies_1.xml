@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="Maven: net.orfjackal.retrolambda:java-lang-dummies:1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/end-to-end-tests/src/test/lib/java-lang-dummies.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

@@ -14,6 +14,9 @@ public class NonDelegatingClassLoader extends URLClassLoader {
 
     @Override
     public Class<?> loadClass(String name) throws ClassNotFoundException {
+        if (name.startsWith("java.")) { // the java.* classes can only be loaded by the bootstrap class loader
+            return super.loadClass(name);
+        }
         Class<?> c = findLoadedClass(name);
         if (c != null) {
             return c;
