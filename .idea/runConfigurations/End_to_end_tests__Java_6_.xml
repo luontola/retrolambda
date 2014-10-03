@@ -22,6 +22,7 @@
             <list>
               <option value="clean" />
               <option value="verify" />
+              <option value="-e" />
             </list>
           </option>
           <option name="profilesMap">
