@@ -57,4 +57,15 @@ public class ClasspathTest {
     public void prefers_classes_in_explicit_classpath_over_classes_in_the_JRE() {
         assertNotNull(getClass().getResource("/com/sun/javafx/application/LauncherImpl$$Lambda$1.class"));
     }
+
+    /**
+     * Classes in the {@code java.*} packages can be loaded only by the bootstrap
+     * class loader, so we must not try to load them with our custom class loader.
+     * This situation arises when backporting Android applications, because android.jar
+     * contains {@code java.*} classes.
+     */
+    @Test
+    public void ignores_classes_in_explicit_classpath_that_are_under_the_java_package() {
+        assertNotNull(getClass().getResource("/java/lang/Math.class"));
+    }
 }

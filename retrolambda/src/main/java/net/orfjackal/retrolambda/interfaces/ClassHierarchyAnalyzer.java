@@ -23,7 +23,12 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     public void analyze(byte[] bytecode) {
         ClassReader cr = new ClassReader(bytecode);
-        Type clazz = classNameToType(cr.getClassName());
+        String className = cr.getClassName();
+        if (className.startsWith("java/")) {
+            // the JVM disallows user classes in java.* packages, so don't even try backporting them
+            return;
+        }
+        Type clazz = classNameToType(className);
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
             interfaces.add(cr);
