@@ -85,7 +85,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.6.2</version>
+    <version>1.7.0</version>
     <executions>
         <execution>
             <goals>
@@ -141,6 +141,9 @@ Version History
 
 - Backports static methods on interfaces
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
+
+### Retrolambda 1.7.0 (2014-10-21)
+
 - Support for serializable lambdas
   ([Issue #35](https://github.com/orfjackal/retrolambda/issues/35))
 
