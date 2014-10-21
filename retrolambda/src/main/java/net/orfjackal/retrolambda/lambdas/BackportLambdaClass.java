@@ -42,6 +42,9 @@ public class BackportLambdaClass extends ClassVisitor {
         if (name.equals("<init>")) {
             constructor = Type.getMethodType(desc);
         }
+        if (LambdaNaming.isSerializationHook(access, name, desc)) {
+            return null; // remove serialization hooks; we serialize lambda instances as-is
+        }
         MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
         next = new RemoveMagicLambdaConstructorCall(next);
         next = new BridgePrivateMethodInvocations(next);

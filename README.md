@@ -128,12 +128,6 @@ Does not backport Java 8 APIs.
 
 Does not backport Java 8 language features other than lambda expressions.
 
-Does not support serializable lambda expressions. Implementing support for
-them would technically be possible, but it would require projects to have a
-runtime dependency on a library which would contain a backported copy of
-the `java.lang.invoke.SerializedLambda` class. If you really need it, make
-a feature request. ;-)
-
 May break if a future JDK 8 build stops generating a new class for each
 `invokedynamic` call. Retrolambda works so that it captures the bytecode
 that `java.lang.invoke.LambdaMetafactory` generates dynamically, so
@@ -147,6 +141,8 @@ Version History
 
 - Backports static methods on interfaces
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
+- Support for serializable lambdas
+  ([Issue #35](https://github.com/orfjackal/retrolambda/issues/35))
 
 ### Retrolambda 1.6.2 (2014-10-03)
 

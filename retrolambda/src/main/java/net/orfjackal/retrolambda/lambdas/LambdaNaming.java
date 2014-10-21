@@ -4,7 +4,11 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
+import net.orfjackal.retrolambda.Flags;
+
 import java.util.regex.Pattern;
+
+import static org.objectweb.asm.Opcodes.*;
 
 public class LambdaNaming {
 
@@ -15,4 +19,16 @@ public class LambdaNaming {
      * Java 8 produces at runtime classes named {@code EnclosingClass$$Lambda$1}
      */
     public static final Pattern LAMBDA_CLASS = Pattern.compile("^.+\\$\\$Lambda\\$\\d+$");
+
+    public static boolean isSerializationHook(int access, String name, String desc) {
+        return name.equals("writeReplace")
+                && desc.equals("()Ljava/lang/Object;")
+                && Flags.hasFlag(access, ACC_PRIVATE);
+    }
+
+    public static boolean isDeserializationHook(int access, String name, String desc) {
+        return name.equals("$deserializeLambda$")
+                && desc.equals("(Ljava/lang/invoke/SerializedLambda;)Ljava/lang/Object;")
+                && Flags.hasFlag(access, ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC);
+    }
 }

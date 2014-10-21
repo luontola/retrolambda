@@ -51,6 +51,9 @@ public class BackportLambdaInvocations extends ClassVisitor {
         if (isBridgeMethodOnInterface(access)) {
             return null; // remove the bridge method; Java 7 didn't use them
         }
+        if (LambdaNaming.isDeserializationHook(access, name, desc)) {
+            return null; // remove serialization hooks; we serialize lambda instances as-is
+        }
         if (FeatureToggles.DEFAULT_METHODS == 0
                 && isNonAbstractMethodOnInterface(access)
                 && !isClassInitializerMethod(name, desc, access)) {
