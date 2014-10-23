@@ -4,10 +4,10 @@ Retrolambda: Use Lambdas on Java 7
 
 Just as there was [Retroweaver](http://retroweaver.sourceforge.net/) et al.
 for running Java 5 code with generics on Java 1.4, **Retrolambda** lets you
-run Java 8 code with lambda expressions on Java 7 or lower. It does this by
-transforming your Java 8 compiled bytecode so that it can run on a Java 7
-runtime. After the transformation they are just a bunch of normal .class
-files, without adding any runtime dependencies.
+run Java 8 code with lambda expressions and method references on Java 7 or
+lower. It does this by transforming your Java 8 compiled bytecode so that
+it can run on a Java 7 runtime. After the transformation they are just a
+bunch of normal .class files, without adding any runtime dependencies.
 
 Adventurous developers may use Retrolambda to backport lambda expressions
 even to Java 6 or Java 5. And if you reach Java 5, there are [other
@@ -247,5 +247,5 @@ Version History
 
 ### Retrolambda 1.0.0 (2013-07-23)
 
-- Backports lambda expressions and method handles to Java 7 and older
+- Backports lambda expressions and method references to Java 7 and older
 - Tested to work with JDK 8 Early Access Build b99 (2013-07-19)
