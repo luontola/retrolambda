@@ -141,6 +141,8 @@ Version History
 
 - Backports static methods on interfaces
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
+  - *Experimental! Can be enabled with the enviroment variable
+    DEFAULT_METHODS=2*
 
 ### Retrolambda 1.7.0 (2014-10-21)
 
