@@ -23,7 +23,42 @@ article about how to do it](http://zserge.com/blog/android-lambda.html).
 User Guide
 ----------
 
-### Getting Started
+Retrolambda can be run as a [Maven plugin](#maven-plugin),
+[Gradle plugin](#gradle-plugin) or
+[command line application](#command-line-application). Also have a look at
+[some tips for using Retrolambda effectively](#tips).
+
+
+### Maven Plugin
+
+To run Retrolambda using Maven, add the following to your pom.xml:
+
+```xml
+<plugin>
+    <groupId>net.orfjackal.retrolambda</groupId>
+    <artifactId>retrolambda-maven-plugin</artifactId>
+    <version>1.7.0</version>
+    <executions>
+        <execution>
+            <goals>
+                <goal>process-main</goal>
+                <goal>process-test</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+See the [plugin documentation](http://orfjackal.github.io/retrolambda/retrolambda-maven-plugin/plugin-info.html)
+for all possible parameters. There is also a usage example in [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
+
+
+### Gradle Plugin
+
+[Gradle Retrolamba Plugin](https://github.com/evant/gradle-retrolambda) is developed by Evan Tatarka. See its site for usage instructions.
+
+
+### Command Line Application
 
 [Download](https://oss.sonatype.org/content/groups/public/net/orfjackal/retrolambda/retrolambda/)
 the latest `retrolambda.jar` from Maven Central.
@@ -34,9 +69,7 @@ Run Retrolambda, using Java 8, on the class files produced by JDK 8. Run
 `java -jar retrolambda.jar` without any additional options to see the
 instructions (for your convenience they are also shown below).
 
-Your class files should now run on Java 7. Be sure to run comprehensive tests
-on Java 7, in case the code accidentally uses Java 8 APIs or language features
-that Retrolambda doesn't backport.
+Your class files should now run on Java 7 or older.
 
 ```
 Usage: java -Dretrolambda.inputDir=? -Dretrolambda.classpath=? [-javaagent:retrolambda.jar] -jar retrolambda.jar
@@ -79,41 +112,16 @@ stopping to work between Java releases.
 ```
 
 
-### Maven Plugin
-
-To run Retrolambda using Maven, add the following to your pom.xml:
-
-```xml
-<plugin>
-    <groupId>net.orfjackal.retrolambda</groupId>
-    <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.7.0</version>
-    <executions>
-        <execution>
-            <goals>
-                <goal>process-main</goal>
-                <goal>process-test</goal>
-            </goals>
-        </execution>
-    </executions>
-</plugin>
-```
-
-See the [plugin documentation](http://orfjackal.github.io/retrolambda/retrolambda-maven-plugin/plugin-info.html)
-for all possible parameters. There is also a usage example in [end-to-end-tests/pom.xml](https://github.com/orfjackal/retrolambda/blob/master/end-to-end-tests/pom.xml)
-
-
-### Gradle Plugin
-
-[Gradle Retrolamba Plugin](https://github.com/evant/gradle-retrolambda) is developed by Evan Tatarka. See its site for usage instructions.
-
-
 ### Tips
 
+Be sure to run comprehensive tests on your target JVM version (e.g. Java
+7), in case the code accidentally uses Java 8 APIs or language features
+that Retrolambda doesn't backport.
+
 During development, inside an IDE, it's the easiest to use Java 8, without
-Retrolamba, to compile and run tests. But in your continuous integration build
-you should run tests using the target Java version. For example, you can
-configure Maven Surefire Plugin to run tests
+Retrolamba, to compile and run tests. But in your continuous integration
+and release builds you should run all tests using the target Java version.
+For example, you can configure Maven Surefire Plugin to run tests
 [using a different JVM](http://maven.apache.org/surefire/maven-surefire-plugin/test-mojo.html#jvm).
 
 I recommend setting up environment variables JAVA8_HOME, JAVA7_HOME etc. and
@@ -121,6 +129,7 @@ referring to those variables in the build configuration, instead of relying on
 what happens to be the default Java version in JAVA_HOME.
 
 You will need Java 8 for compiling and also for generating Javadocs.
+JDK 7's Javadoc tool will fail for some valid Java 8 code.
 
 
 Known Limitations
