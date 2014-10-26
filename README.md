@@ -2,6 +2,8 @@
 Retrolambda: Use Lambdas on Java 7
 ==================================
 
+[![Retrolambda presentation video](resources/presentation-preview.png)](https://www.youtube.com/watch?v=DUdhfPh9V_s)
+
 Just as there was [Retroweaver](http://retroweaver.sourceforge.net/) et al.
 for running Java 5 code with generics on Java 1.4, **Retrolambda** lets you
 run Java 8 code with lambda expressions and method references on Java 7 or
