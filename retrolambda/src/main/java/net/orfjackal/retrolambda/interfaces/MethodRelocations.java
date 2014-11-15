@@ -4,11 +4,15 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
+import java.util.List;
+
 public interface MethodRelocations {
 
     MethodRef getMethodCallTarget(MethodRef original);
 
     MethodRef getMethodDefaultImplementation(MethodRef interfaceMethod);
+
+    List<MethodRef> getInterfaceMethods(String interfaceName);
 
     String getCompanionClass(String className);
 }

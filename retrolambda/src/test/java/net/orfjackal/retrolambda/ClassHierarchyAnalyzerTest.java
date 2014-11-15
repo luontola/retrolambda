@@ -23,30 +23,41 @@ public class ClassHierarchyAnalyzerTest {
     private final ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
 
     @Test
-    public void separates_interfaces_from_classes() {
+    public void finds_interfaces_and_classes_separately() {
         analyze(Interface.class,
                 InterfaceImplementer.class);
 
-        assertThat(getInterfaces(), is(classList(Interface.class)));
-        assertThat(getClasses(), is(classList(InterfaceImplementer.class)));
+        assertThat("interfaces", getInterfaces(), is(classList(Interface.class)));
+        assertThat("classes", getClasses(), is(classList(InterfaceImplementer.class)));
     }
 
     @Test
-    public void no_parent_interfaces() {
-        analyze(Interface.class);
+    public void finds_implemented_interfaces() {
+        analyze(Interface.class,
+                ChildInterface.class,
+                InterfaceImplementer.class);
 
-        assertThat(getInterfacesOf(Interface.class), is(empty()));
+        assertThat("Interface", getInterfacesOf(Interface.class), is(empty()));
+        assertThat("ChildInterface", getInterfacesOf(ChildInterface.class), is(Arrays.asList(Interface.class)));
+        assertThat("InterfaceImplementer", getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
     }
 
     @Test
-    public void immediate_interfaces_implemented_by_a_class() {
-        analyze(InterfaceImplementer.class);
+    public void finds_interface_methods() {
+        analyze(InterfaceMethodTypes.class);
 
-        assertThat(getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
+        assertThat(analyzer.getInterfaceMethods(Type.getType(InterfaceMethodTypes.class).getInternalName()),
+                containsInAnyOrder(
+                        new MethodRef(InterfaceMethodTypes.class, "abstractMethod", "()V"),
+                        new MethodRef(InterfaceMethodTypes.class, "defaultMethod", "()V")));
+
     }
 
     private interface Interface {
         void abstractMethod();
+    }
+
+    private interface ChildInterface extends Interface {
     }
 
     private class InterfaceImplementer implements Interface {

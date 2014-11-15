@@ -20,6 +20,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     private final List<ClassReader> interfaces = new ArrayList<>();
     private final List<ClassReader> classes = new ArrayList<>();
     private final Map<Type, List<Type>> interfacesByImplementer = new HashMap<>(); // TODO: could use just String instead of Type
+    private final Map<String, List<MethodRef>> methodsByInterface = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
     private final Map<String, String> companionClasses = new HashMap<>();
@@ -59,16 +60,22 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
                 if (isAbstractMethod(access)) {
                     methodDefaultImpls.put(method, ABSTRACT_METHOD);
+                    saveInterfaceMethod(method);
 
                 } else if (isDefaultMethod(access)) {
                     methodDefaultImpls.put(method, new MethodRef(companion, name, desc));
                     companionClasses.put(owner, companion);
+                    saveInterfaceMethod(method);
 
                 } else if (isStaticMethod(access)) {
                     relocatedMethods.put(method, new MethodRef(companion, name, desc));
                     companionClasses.put(owner, companion);
                 }
                 return null;
+            }
+
+            private void saveInterfaceMethod(MethodRef method) {
+                methodsByInterface.computeIfAbsent(method.owner, key -> new ArrayList<>()).add(method);
             }
 
             private boolean isAbstractMethod(int access) {
@@ -121,6 +128,11 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             }
         }
         return null;
+    }
+
+    @Override
+    public List<MethodRef> getInterfaceMethods(String interfaceName) {
+        return methodsByInterface.getOrDefault(interfaceName, Collections.emptyList());
     }
 
     @Override
