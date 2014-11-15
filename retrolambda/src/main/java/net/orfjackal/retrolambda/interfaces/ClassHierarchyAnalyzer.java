@@ -102,7 +102,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     public List<Type> getInterfacesOf(Type type) {
-        return interfacesByImplementer.get(type);
+        return interfacesByImplementer.getOrDefault(type, Collections.emptyList());
     }
 
     @Override
@@ -132,7 +132,14 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     @Override
     public List<MethodRef> getInterfaceMethods(String interfaceName) {
-        return methodsByInterface.getOrDefault(interfaceName, Collections.emptyList());
+        Set<MethodRef> results = new LinkedHashSet<>();
+        results.addAll(methodsByInterface.getOrDefault(interfaceName, Collections.emptyList()));
+        for (Type parent : getInterfacesOf(Type.getObjectType(interfaceName))) {
+            for (MethodRef parentMethod : getInterfaceMethods(parent.getInternalName())) {
+                results.add(parentMethod.withOwner(interfaceName));
+            }
+        }
+        return new ArrayList<>(results);
     }
 
     @Override
