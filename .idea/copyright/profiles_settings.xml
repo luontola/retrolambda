@@ -1,6 +1,5 @@
 <component name="CopyrightManager">
   <settings default="Apache 2.0">
-    <module2copyright />
     <LanguageOptions name="CSS">
       <option name="fileTypeOverride" value="1" />
     </LanguageOptions>

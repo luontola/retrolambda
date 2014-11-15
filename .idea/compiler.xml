@@ -22,8 +22,11 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="1.8">
+      <module name="end-to-end-tests" target="1.8" />
+      <module name="parent" target="1.8" />
+      <module name="project" target="1.8" />
+      <module name="retrolambda" target="1.8" />
       <module name="retrolambda-maven-plugin" target="1.6" />
     </bytecodeTargetLevel>
   </component>
 </project>
-
