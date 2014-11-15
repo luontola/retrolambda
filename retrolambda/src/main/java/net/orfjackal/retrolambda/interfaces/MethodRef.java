@@ -4,10 +4,14 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import com.google.common.base.Objects;
-import org.objectweb.asm.Type;
+import com.google.common.base.MoreObjects;
+import org.objectweb.asm.*;
+
+import java.util.Objects;
 
 public final class MethodRef {
+
+    // TODO: replace MethodRef with ASM's Handle
 
     public final String owner;
     public final String name;
@@ -27,6 +31,10 @@ public final class MethodRef {
         return new MethodRef(newOwner, name, desc);
     }
 
+    public Handle toHandle(int tag) {
+        return new Handle(tag, owner, name, desc);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof MethodRef)) {
@@ -40,12 +48,12 @@ public final class MethodRef {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(owner, name, desc);
+        return Objects.hash(owner, name, desc);
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
+        return MoreObjects.toStringHelper(this)
                 .addValue(owner)
                 .addValue(name)
                 .addValue(desc)

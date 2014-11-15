@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
+import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
 
 import java.util.*;
@@ -49,21 +50,6 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
 
     private void generateDefaultImplementation(MethodRef interfaceMethod) {
         MethodRef impl = methodRelocations.getMethodDefaultImplementation(interfaceMethod);
-
-        // TODO: duplicates net.orfjackal.retrolambda.lambdas.BackportLambdaInvocations.generateLambdaAccessMethod()
-        // - replace MethodRef with Handle
-
-        MethodVisitor mv = super.visitMethod(ACC_PUBLIC | ACC_SYNTHETIC,
-                interfaceMethod.name, interfaceMethod.desc, null, null);
-        mv.visitCode();
-        int varIndex = 0;
-        for (Type type : Type.getArgumentTypes(impl.desc)) {
-            mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
-            varIndex += type.getSize();
-        }
-        mv.visitMethodInsn(INVOKESTATIC, impl.owner, impl.name, impl.desc, false);
-        mv.visitInsn(Type.getReturnType(interfaceMethod.desc).getOpcode(IRETURN));
-        mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
-        mv.visitEnd();
+        Bytecode.generateDelegateMethod(cv, ACC_PUBLIC | ACC_SYNTHETIC, interfaceMethod.toHandle(H_INVOKEVIRTUAL), impl.toHandle(H_INVOKESTATIC));
     }
 }

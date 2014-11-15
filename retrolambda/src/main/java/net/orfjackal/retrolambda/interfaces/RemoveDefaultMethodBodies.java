@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.Flags;
+import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.MethodNode;
 

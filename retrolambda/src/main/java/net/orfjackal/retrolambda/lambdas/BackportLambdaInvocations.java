@@ -4,7 +4,8 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
-import net.orfjackal.retrolambda.*;
+import net.orfjackal.retrolambda.FeatureToggles;
+import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
 import java.lang.reflect.Field;
@@ -109,24 +110,9 @@ public class BackportLambdaInvocations extends ClassVisitor {
         for (Map.Entry<Handle, Handle> entry : lambdaAccessToImplMethods.entrySet()) {
             Handle accessMethod = entry.getKey();
             Handle implMethod = entry.getValue();
-            generateLambdaAccessMethod(accessMethod, implMethod);
+            Bytecode.generateDelegateMethod(cv, ACC_STATIC | ACC_SYNTHETIC, accessMethod, implMethod);
         }
         super.visitEnd();
-    }
-
-    private void generateLambdaAccessMethod(Handle access, Handle impl) {
-        MethodVisitor mv = super.visitMethod(ACC_STATIC | ACC_SYNTHETIC,
-                access.getName(), access.getDesc(), null, null);
-        mv.visitCode();
-        int varIndex = 0;
-        for (Type type : Type.getArgumentTypes(access.getDesc())) {
-            mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
-            varIndex += type.getSize();
-        }
-        mv.visitMethodInsn(Handles.getOpcode(impl), impl.getOwner(), impl.getName(), impl.getDesc(), impl.getTag() == H_INVOKEINTERFACE);
-        mv.visitInsn(Type.getReturnType(access.getDesc()).getOpcode(IRETURN));
-        mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
-        mv.visitEnd();
     }
 
 

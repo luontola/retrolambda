@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
-import net.orfjackal.retrolambda.Flags;
+import net.orfjackal.retrolambda.util.Flags;
 
 import java.util.regex.Pattern;
 
