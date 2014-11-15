@@ -8,5 +8,7 @@ public interface MethodRelocations {
 
     MethodRef getMethodCallTarget(MethodRef original);
 
+    MethodRef getMethodDefaultImplementation(MethodRef interfaceMethod);
+
     String getCompanionClass(String className);
 }

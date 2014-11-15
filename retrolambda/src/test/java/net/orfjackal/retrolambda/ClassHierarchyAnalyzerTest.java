@@ -10,7 +10,7 @@ import org.junit.Test;
 import org.objectweb.asm.*;
 
 import java.io.*;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -24,8 +24,8 @@ public class ClassHierarchyAnalyzerTest {
 
     @Test
     public void separates_interfaces_from_classes() {
-        analyze(Interface.class);
-        analyze(InterfaceImplementer.class);
+        analyze(Interface.class,
+                InterfaceImplementer.class);
 
         assertThat(getInterfaces(), is(classList(Interface.class)));
         assertThat(getClasses(), is(classList(InterfaceImplementer.class)));
@@ -46,9 +46,13 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     private interface Interface {
+        void abstractMethod();
     }
 
     private class InterfaceImplementer implements Interface {
+        @Override
+        public void abstractMethod() {
+        }
     }
 
 
@@ -118,23 +122,114 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
+    // Default method implementations
+
+    @Test
+    public void abstract_methods_have_no_implementation() {
+        analyze(HasDefaultMethods.class);
+
+        MethodRef method = new MethodRef(HasDefaultMethods.class, "abstractMethod", "()V");
+        MethodRef impl = analyzer.getMethodDefaultImplementation(method);
+
+        assertThat(impl, is(nullValue()));
+    }
+
+    @Test
+    public void default_method_implementation_is_moved_to_companion_class() {
+        analyze(HasDefaultMethods.class);
+
+        MethodRef method = new MethodRef(HasDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef impl = analyzer.getMethodDefaultImplementation(method);
+
+        assertThat(impl, is(new MethodRef(HasDefaultMethods$.class, "defaultMethod", "()V")));
+    }
+
+    @Test
+    public void default_method_implementations_are_inherited_from_parent_interface() {
+        analyze(HasDefaultMethods.class,
+                DoesNotOverrideDefaultMethods.class);
+
+        MethodRef method = new MethodRef(DoesNotOverrideDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef impl = analyzer.getMethodDefaultImplementation(method);
+
+        assertThat(impl, is(new MethodRef(HasDefaultMethods$.class, "defaultMethod", "()V")));
+    }
+
+    @Test
+    public void overridden_default_method_implementation_is_moved_to_companion_class() {
+        analyze(HasDefaultMethods.class,
+                OverridesDefaultMethods.class);
+
+        MethodRef method = new MethodRef(OverridesDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef impl = analyzer.getMethodDefaultImplementation(method);
+
+        assertThat(impl, is(new MethodRef(OverridesDefaultMethods$.class, "defaultMethod", "()V")));
+    }
+
+    @Test
+    public void abstracted_default_method_implementations_are_again_abstract() {
+        analyze(HasDefaultMethods.class,
+                AbstractsDefaultMethods.class);
+
+        MethodRef method = new MethodRef(AbstractsDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef impl = analyzer.getMethodDefaultImplementation(method);
+
+        assertThat(impl, is(nullValue()));
+    }
+
+    private interface HasDefaultMethods {
+        void abstractMethod();
+
+        default void defaultMethod() {
+        }
+    }
+
+    private interface HasDefaultMethods$ {
+    }
+
+    private interface DoesNotOverrideDefaultMethods extends HasDefaultMethods {
+    }
+
+    private interface OverridesDefaultMethods extends HasDefaultMethods {
+        @Override
+        default void defaultMethod() {
+        }
+    }
+
+    private interface OverridesDefaultMethods$ {
+    }
+
+    private interface AbstractsDefaultMethods extends HasDefaultMethods {
+        @Override
+        void defaultMethod();
+    }
+
+
+    // Companion class
+
     @Test
     public void companion_class_is_needed_when_methods_are_moved_there() {
-        analyze(Interface.class);
-        analyze(InterfaceMethodTypes.class);
-        analyze(ClassMethodTypes.class);
+        analyze(Interface.class,
+                InterfaceMethodTypes.class,
+                HasDefaultMethods.class,
+                ClassMethodTypes.class);
 
         assertThat("Interface", analyzer.getCompanionClass(Type.getInternalName(Interface.class)), is(nullValue()));
         assertThat("InterfaceMethodTypes", analyzer.getCompanionClass(Type.getInternalName(InterfaceMethodTypes.class)), is(Type.getInternalName(InterfaceMethodTypes$.class)));
+        assertThat("HasDefaultMethods", analyzer.getCompanionClass(Type.getInternalName(HasDefaultMethods.class)), is(Type.getInternalName(HasDefaultMethods$.class)));
         assertThat("ClassMethodTypes", analyzer.getCompanionClass(Type.getInternalName(ClassMethodTypes.class)), is(nullValue()));
     }
 
 
     // API wrappers
 
-    private void analyze(Class<?> clazz) {
-        byte[] bytecode = readBytecode(clazz);
-        analyzer.analyze(bytecode);
+    private void analyze(Class<?>... classes) {
+        List<Class<?>> inAnyOrder = new ArrayList<>(Arrays.asList(classes));
+        Collections.shuffle(inAnyOrder);
+        for (Class<?> clazz : inAnyOrder) {
+            byte[] bytecode = readBytecode(clazz);
+            analyzer.analyze(bytecode);
+        }
     }
 
     private List<Class<?>> getInterfaces() {

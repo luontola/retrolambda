@@ -23,6 +23,10 @@ public final class MethodRef {
         this.desc = desc;
     }
 
+    public MethodRef withOwner(String newOwner) {
+        return new MethodRef(newOwner, name, desc);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof MethodRef)) {
