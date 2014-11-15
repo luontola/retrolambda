@@ -18,6 +18,7 @@ public class InterfaceBridgeMethodsTest {
      * to remove it for it - this makes the bytecode same as what JDK 7 produces.
      */
     @Test
+    @SuppressWarnings("Convert2Lambda")
     public void will_remove_bridge_methods_from_interfaces() {
         BridgeChild child = new BridgeChild() {
             @Override

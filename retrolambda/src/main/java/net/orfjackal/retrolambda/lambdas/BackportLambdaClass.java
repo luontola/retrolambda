@@ -16,7 +16,7 @@ public class BackportLambdaClass extends ClassVisitor {
     private String lambdaClass;
     private Type constructor;
     private Handle implMethod;
-    private Handle bridgeMethod;
+    private Handle accessMethod;
     private LambdaFactoryMethod factoryMethod;
 
     public BackportLambdaClass(ClassVisitor next) {
@@ -28,7 +28,7 @@ public class BackportLambdaClass extends ClassVisitor {
         lambdaClass = name;
         LambdaReifier.setLambdaClass(lambdaClass);
         implMethod = LambdaReifier.getLambdaImplMethod();
-        bridgeMethod = LambdaReifier.getLambdaBridgeMethod();
+        accessMethod = LambdaReifier.getLambdaAccessMethod();
         factoryMethod = LambdaReifier.getLambdaFactoryMethod();
 
         if (superName.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)) {
@@ -47,7 +47,7 @@ public class BackportLambdaClass extends ClassVisitor {
         }
         MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
         next = new RemoveMagicLambdaConstructorCall(next);
-        next = new BridgePrivateMethodInvocations(next);
+        next = new CallPrivateImplMethodsViaAccessMethods(next);
         return next;
     }
 
@@ -128,9 +128,9 @@ public class BackportLambdaClass extends ClassVisitor {
         }
     }
 
-    private class BridgePrivateMethodInvocations extends MethodVisitor {
+    private class CallPrivateImplMethodsViaAccessMethods extends MethodVisitor {
 
-        public BridgePrivateMethodInvocations(MethodVisitor next) {
+        public CallPrivateImplMethodsViaAccessMethods(MethodVisitor next) {
             super(ASM5, next);
         }
 
@@ -139,16 +139,16 @@ public class BackportLambdaClass extends ClassVisitor {
             // Java 8's lambda classes get away with calling private virtual methods
             // by using invokespecial because the JVM relaxes the bytecode validation
             // of the lambda classes it generates. We must however call them through
-            // a non-private bridge method which we have generated.
+            // a non-private access method which we have generated.
             if (owner.equals(implMethod.getOwner())
                     && name.equals(implMethod.getName())
                     && desc.equals(implMethod.getDesc())) {
                 super.visitMethodInsn(
-                        Handles.getOpcode(bridgeMethod),
-                        bridgeMethod.getOwner(),
-                        bridgeMethod.getName(),
-                        bridgeMethod.getDesc(),
-                        bridgeMethod.getTag() == H_INVOKEINTERFACE);
+                        Handles.getOpcode(accessMethod),
+                        accessMethod.getOwner(),
+                        accessMethod.getName(),
+                        accessMethod.getDesc(),
+                        accessMethod.getTag() == H_INVOKEINTERFACE);
             } else {
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
             }

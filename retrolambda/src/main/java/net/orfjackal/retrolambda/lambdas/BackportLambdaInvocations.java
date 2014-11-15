@@ -17,7 +17,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
 
     private int classAccess;
     private String className;
-    private final Map<Handle, Handle> lambdaBridgesToImplMethods = new LinkedHashMap<>();
+    private final Map<Handle, Handle> lambdaAccessToImplMethods = new LinkedHashMap<>();
 
     public BackportLambdaInvocations(ClassVisitor next) {
         super(ASM5, next);
@@ -90,41 +90,41 @@ public class BackportLambdaInvocations extends ClassVisitor {
                 Flags.hasFlag(methodAccess, ACC_STATIC);
     }
 
-    Handle getLambdaBridgeMethod(Handle implMethod) {
+    Handle getLambdaAccessMethod(Handle implMethod) {
         if (!implMethod.getOwner().equals(className)) {
             return implMethod;
         }
-        // TODO: do not generate a bridge method if the impl method is not private (probably not implementable with a single pass)
-        String name = "access$lambda$" + lambdaBridgesToImplMethods.size();
+        // TODO: do not generate an access method if the impl method is not private (probably not implementable with a single pass)
+        String name = "access$lambda$" + lambdaAccessToImplMethods.size();
         String desc = implMethod.getTag() == H_INVOKESTATIC
                 ? implMethod.getDesc()
                 : Types.prependArgumentType(Type.getType("L" + className + ";"), implMethod.getDesc());
-        Handle bridgeMethod = new Handle(H_INVOKESTATIC, className, name, desc);
-        lambdaBridgesToImplMethods.put(bridgeMethod, implMethod);
-        return bridgeMethod;
+        Handle accessMethod = new Handle(H_INVOKESTATIC, className, name, desc);
+        lambdaAccessToImplMethods.put(accessMethod, implMethod);
+        return accessMethod;
     }
 
     @Override
     public void visitEnd() {
-        for (Map.Entry<Handle, Handle> entry : lambdaBridgesToImplMethods.entrySet()) {
-            Handle bridgeMethod = entry.getKey();
+        for (Map.Entry<Handle, Handle> entry : lambdaAccessToImplMethods.entrySet()) {
+            Handle accessMethod = entry.getKey();
             Handle implMethod = entry.getValue();
-            generateLambdaBridgeMethod(bridgeMethod, implMethod);
+            generateLambdaAccessMethod(accessMethod, implMethod);
         }
         super.visitEnd();
     }
 
-    private void generateLambdaBridgeMethod(Handle bridge, Handle impl) {
-        MethodVisitor mv = super.visitMethod(ACC_STATIC | ACC_SYNTHETIC | ACC_BRIDGE,
-                bridge.getName(), bridge.getDesc(), null, null);
+    private void generateLambdaAccessMethod(Handle access, Handle impl) {
+        MethodVisitor mv = super.visitMethod(ACC_STATIC | ACC_SYNTHETIC,
+                access.getName(), access.getDesc(), null, null);
         mv.visitCode();
         int varIndex = 0;
-        for (Type type : Type.getArgumentTypes(bridge.getDesc())) {
+        for (Type type : Type.getArgumentTypes(access.getDesc())) {
             mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
             varIndex += type.getSize();
         }
         mv.visitMethodInsn(Handles.getOpcode(impl), impl.getOwner(), impl.getName(), impl.getDesc(), impl.getTag() == H_INVOKEINTERFACE);
-        mv.visitInsn(Type.getReturnType(bridge.getDesc()).getOpcode(IRETURN));
+        mv.visitInsn(Type.getReturnType(access.getDesc()).getOpcode(IRETURN));
         mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
         mv.visitEnd();
     }
@@ -148,9 +148,9 @@ public class BackportLambdaInvocations extends ClassVisitor {
         private void backportLambda(String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
             Class<?> invoker = loadClass(className);
             Handle implMethod = (Handle) bsmArgs[1];
-            Handle bridgeMethod = getLambdaBridgeMethod(implMethod);
+            Handle accessMethod = getLambdaAccessMethod(implMethod);
 
-            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, bridgeMethod,
+            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, accessMethod,
                     invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
         }

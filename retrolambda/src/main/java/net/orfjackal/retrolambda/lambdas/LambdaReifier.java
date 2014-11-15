@@ -18,16 +18,16 @@ public class LambdaReifier {
     // We expect only one class being processed at a time, so it should
     // be an error if these collections contain more than one element.
     private static final BlockingDeque<Handle> currentLambdaImplMethod = new LinkedBlockingDeque<>(1);
-    private static final BlockingDeque<Handle> currentLambdaBridgeMethod = new LinkedBlockingDeque<>(1);
+    private static final BlockingDeque<Handle> currentLambdaAccessMethod = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Class<?>> currentInvoker = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Type> currentInvokedType = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<String> currentLambdaClass = new LinkedBlockingDeque<>(1);
 
-    public static LambdaFactoryMethod reifyLambdaClass(Handle lambdaImplMethod, Handle lambdaBridgeMethod,
+    public static LambdaFactoryMethod reifyLambdaClass(Handle lambdaImplMethod, Handle lambdaAccessMethod,
                                                        Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
         try {
             setLambdaImplMethod(lambdaImplMethod);
-            setLambdaBridgeMethod(lambdaBridgeMethod);
+            setLambdaAccessMethod(lambdaAccessMethod);
             setInvoker(invoker);
             setInvokedType(invokedType);
 
@@ -49,8 +49,8 @@ public class LambdaReifier {
         currentLambdaImplMethod.push(lambdaImplMethod);
     }
 
-    private static void setLambdaBridgeMethod(Handle lambdaBridgeMethod) {
-        currentLambdaBridgeMethod.push(lambdaBridgeMethod);
+    private static void setLambdaAccessMethod(Handle lambdaAccessMethod) {
+        currentLambdaAccessMethod.push(lambdaAccessMethod);
     }
 
     private static void setInvoker(Class<?> lambdaInvoker) {
@@ -76,8 +76,8 @@ public class LambdaReifier {
         return currentLambdaImplMethod.getFirst();
     }
 
-    public static Handle getLambdaBridgeMethod() {
-        return currentLambdaBridgeMethod.getFirst();
+    public static Handle getLambdaAccessMethod() {
+        return currentLambdaAccessMethod.getFirst();
     }
 
     public static LambdaFactoryMethod getLambdaFactoryMethod() {
@@ -88,7 +88,7 @@ public class LambdaReifier {
 
     private static void resetGlobals() {
         currentLambdaImplMethod.clear();
-        currentLambdaBridgeMethod.clear();
+        currentLambdaAccessMethod.clear();
         currentInvoker.clear();
         currentInvokedType.clear();
         currentLambdaClass.clear();
