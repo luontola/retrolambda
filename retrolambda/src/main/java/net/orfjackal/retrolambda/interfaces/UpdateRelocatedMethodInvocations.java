@@ -4,7 +4,6 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import com.google.common.base.Preconditions;
 import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -16,12 +15,6 @@ public class UpdateRelocatedMethodInvocations extends ClassVisitor {
     public UpdateRelocatedMethodInvocations(ClassVisitor next, MethodRelocations methodRelocations) {
         super(ASM5, next);
         this.methodRelocations = methodRelocations;
-        Preconditions.checkNotNull(methodRelocations);
-    }
-
-    @Override
-    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override

@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.*;
 
@@ -25,5 +25,11 @@ public class ExtractInterfaceCompanionClass extends ClassVisitor {
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
-    // TODO: remove abstract methods
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        // TODO: remove abstract methods
+
+        access |= ACC_STATIC;
+        return super.visitMethod(access, name, desc, signature, exceptions);
+    }
 }

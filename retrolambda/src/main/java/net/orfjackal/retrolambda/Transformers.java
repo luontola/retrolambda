@@ -38,6 +38,7 @@ public class Transformers {
                 next = new InterfaceModifier(next, targetVersion);
             } else if (FeatureToggles.DEFAULT_METHODS == 2) {
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
+                next = new AddMethodDefaultImplementations(next, methodRelocations);
             }
             next = new BackportLambdaInvocations(next);
             return next;
