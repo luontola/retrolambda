@@ -76,7 +76,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     @Override
-    public MethodRef getMethodLocation(MethodRef original) {
+    public MethodRef getMethodCallTarget(MethodRef original) {
         return relocatedMethods.getOrDefault(original, original);
     }
 

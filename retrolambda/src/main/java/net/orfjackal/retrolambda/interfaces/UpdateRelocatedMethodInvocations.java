@@ -37,7 +37,7 @@ public class UpdateRelocatedMethodInvocations extends ClassVisitor {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            MethodRef ref = methodRelocations.getMethodLocation(new MethodRef(owner, name, desc));
+            MethodRef ref = methodRelocations.getMethodCallTarget(new MethodRef(owner, name, desc));
             super.visitMethodInsn(opcode, ref.owner, ref.name, ref.desc, itf);
         }
     }

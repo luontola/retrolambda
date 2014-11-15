@@ -59,7 +59,7 @@ public class ClassHierarchyAnalyzerTest {
         analyze(InterfaceMethodTypes.class);
 
         MethodRef source = new MethodRef(InterfaceMethodTypes.class, "abstractMethod", "()V");
-        MethodRef target = analyzer.getMethodLocation(source);
+        MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
     }
@@ -69,7 +69,7 @@ public class ClassHierarchyAnalyzerTest {
         analyze(InterfaceMethodTypes.class);
 
         MethodRef source = new MethodRef(InterfaceMethodTypes.class, "defaultMethod", "()V");
-        MethodRef target = analyzer.getMethodLocation(source);
+        MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
     }
@@ -79,7 +79,7 @@ public class ClassHierarchyAnalyzerTest {
         analyze(InterfaceMethodTypes.class);
 
         MethodRef source = new MethodRef(InterfaceMethodTypes.class, "staticMethod", "()V");
-        MethodRef target = analyzer.getMethodLocation(source);
+        MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(new MethodRef(InterfaceMethodTypes$.class, "staticMethod", "()V")));
     }
@@ -89,7 +89,7 @@ public class ClassHierarchyAnalyzerTest {
         analyze(ClassMethodTypes.class);
 
         MethodRef source = new MethodRef(ClassMethodTypes.class, "staticMethod", "()V");
-        MethodRef target = analyzer.getMethodLocation(source);
+        MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
     }
