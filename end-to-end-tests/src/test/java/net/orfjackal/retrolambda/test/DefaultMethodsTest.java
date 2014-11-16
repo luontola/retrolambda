@@ -15,6 +15,7 @@ import java.util.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeThat;
+import static org.mockito.Mockito.mock;
 
 @SuppressWarnings({"Convert2Lambda", "Anonymous2MethodRef", "RedundantCast", "UnusedDeclaration"})
 public class DefaultMethodsTest {
@@ -410,15 +411,21 @@ public class DefaultMethodsTest {
      * e.g. if it's part of the standard library or a third-party library.
      */
     @Test
-    public void default_methods_of_library_interfaces_are_ignored_silently() {
+    public void default_methods_of_library_interfaces_are_ignored_silently() throws Exception {
+        @SuppressWarnings("unchecked") Iterator<String> dummy = mock(Iterator.class);
+
+        // the Iterable interface has default methods in Java 8, but that
+        // should not prevent us from using it in previous Java versions
         Iterable<String> it = new Iterable<String>() {
             @Override
             public Iterator<String> iterator() {
-                return Collections.emptyIterator();
+                return dummy;
             }
         };
 
-        assertThat(it.iterator(), is(Collections.<String>emptyIterator()));
+        assertThat("interface should work as usual", it.iterator(), is(dummy));
+        assertThat("should not copy default methods from library interfaces",
+                it.getClass().getDeclaredMethods(), arrayWithSize(1));
     }
 
     @Test
