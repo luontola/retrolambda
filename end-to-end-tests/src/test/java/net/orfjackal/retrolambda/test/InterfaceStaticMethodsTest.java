@@ -87,7 +87,10 @@ public class InterfaceStaticMethodsTest {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
 
         thrown.expect(IncompatibleClassChangeError.class);
-        thrown.expectMessage("Found interface java.util.Comparator, but class was expected");
+        thrown.expectMessage(SystemUtils.isJavaVersionAtLeast(1.6f)
+                ? equalTo("Found interface java.util.Comparator, but class was expected")
+                : nullValue(String.class)); // on Java 5 there is no message
+
         // We don't want this call to prevent loading this whole test class,
         // it should only fail when this line is executed
         Comparator.naturalOrder();
