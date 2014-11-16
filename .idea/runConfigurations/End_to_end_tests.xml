@@ -12,7 +12,7 @@
             <list>
               <option value="clean" />
               <option value="verify" />
-              <option value="-e" />
+              <option value="-Dmaven.test.redirectTestOutputToFile=false" />
             </list>
           </option>
           <option name="profilesMap">

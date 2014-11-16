@@ -154,6 +154,9 @@ Version History
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
   - *Experimental! Can be enabled with the enviroment variable
     DEFAULT_METHODS=2*
+- Backports try-with-resources statements to Java 6 and older by removing
+  calls to `Throwable.addSuppressed`
+  ([Issue #38](https://github.com/orfjackal/retrolambda/issues/38))
 
 ### Retrolambda 1.7.0 (2014-10-21)
 

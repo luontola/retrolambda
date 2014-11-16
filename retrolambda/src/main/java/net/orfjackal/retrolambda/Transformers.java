@@ -7,6 +7,7 @@ package net.orfjackal.retrolambda;
 import net.orfjackal.retrolambda.defaultmethods.*;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
+import net.orfjackal.retrolambda.trywithresources.SwallowSuppressedExceptions;
 import org.objectweb.asm.*;
 
 public class Transformers {
@@ -80,7 +81,10 @@ public class Transformers {
         ClassVisitor next = writer;
 
         next = new LowerBytecodeVersion(next, targetVersion);
-        next = new FixInvokeStaticOnInterfaceMethod(next);
+        if (targetVersion < Opcodes.V1_7) {
+            next = new SwallowSuppressedExceptions(next);
+        }
+        next = new FixInvokeStaticOnInterfaceMethod(next); // TODO: remove me?
         next = chain.wrap(next);
 
         reader.accept(next, 0);
