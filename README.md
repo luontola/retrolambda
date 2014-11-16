@@ -9,7 +9,7 @@ for running Java 5 code with generics on Java 1.4, **Retrolambda** lets you
 run Java 8 code with lambda expressions and method references on Java 7 or
 lower. It does this by transforming your Java 8 compiled bytecode so that
 it can run on a Java 7 runtime. After the transformation they are just a
-bunch of normal .class files, without adding any runtime dependencies.
+bunch of normal .class files, without any additional runtime dependencies.
 [Read more details](#backported-language-features).
 
 Adventurous developers may use Retrolambda to backport lambda expressions
@@ -17,8 +17,10 @@ even to Java 6 or Java 5. And if you reach Java 5, there are [other
 backporting tools](http://en.wikipedia.org/wiki/Java_backporting_tools)
 that may let you go down to Java 1.4.
 
-Android developers may also use Retrolambda. Serge Zaitsev has written [an
-article about how to do it](http://zserge.com/blog/android-lambda.html).
+Android developers may also use Retrolambda to take advantage of the Java 8
+features on Android. Serge Zaitsev has written [an article about
+it](http://zserge.com/blog/android-lambda.html) and there is a [Gradle
+plugin](#gradle-plugin) which makes it easy.
 
 
 User Guide
@@ -185,7 +187,7 @@ Version History
 
 ### Retrolambda 1.6.2 (2014-10-03)
 
-- Fixed a crash when trying backport Android classes
+- Fixed a crash when trying to backport Android classes
   ([Issue #34](https://github.com/orfjackal/retrolambda/issues/34))
 
 ### Retrolambda 1.6.1 (2014-08-25)
