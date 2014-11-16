@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.util.Flags;
+import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
 import java.util.*;
@@ -63,6 +63,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
                     saveInterfaceMethod(method);
 
                 } else if (isDefaultMethod(access)) {
+                    desc = Bytecode.prependArgumentType(desc, Type.getObjectType(owner));
                     methodDefaultImpls.put(method, new MethodRef(companion, name, desc));
                     companionClasses.put(owner, companion);
                     saveInterfaceMethod(method);

@@ -11,6 +11,7 @@ import org.objectweb.asm.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -48,8 +49,8 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat(analyzer.getInterfaceMethods(getInternalName(InterfaceMethodTypes.class)),
                 containsInAnyOrder(
-                        new MethodRef(InterfaceMethodTypes.class, "abstractMethod", "()V"),
-                        new MethodRef(InterfaceMethodTypes.class, "defaultMethod", "()V"))); // all but staticMethod
+                        new MethodRef(InterfaceMethodTypes.class, "abstractMethod", voidMethod()),
+                        new MethodRef(InterfaceMethodTypes.class, "defaultMethod", voidMethod()))); // all but staticMethod
     }
 
     @Test
@@ -59,7 +60,7 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat(analyzer.getInterfaceMethods(getInternalName(ChildInterface.class)),
                 containsInAnyOrder(
-                        new MethodRef(ChildInterface.class, "abstractMethod", "()V")));
+                        new MethodRef(ChildInterface.class, "abstractMethod", voidMethod())));
     }
 
     @Test
@@ -87,7 +88,7 @@ public class ClassHierarchyAnalyzerTest {
     public void abstract_methods_on_interfaces_are_not_relocated() {
         analyze(InterfaceMethodTypes.class);
 
-        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "abstractMethod", "()V");
+        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "abstractMethod", voidMethod());
         MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
@@ -97,7 +98,7 @@ public class ClassHierarchyAnalyzerTest {
     public void default_methods_on_interfaces_are_not_relocated() {
         analyze(InterfaceMethodTypes.class);
 
-        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "defaultMethod", "()V");
+        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "defaultMethod", voidMethod());
         MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
@@ -107,17 +108,17 @@ public class ClassHierarchyAnalyzerTest {
     public void static_methods_on_interfaces_are_relocated_to_companion_classes() {
         analyze(InterfaceMethodTypes.class);
 
-        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "staticMethod", "()V");
+        MethodRef source = new MethodRef(InterfaceMethodTypes.class, "staticMethod", voidMethod());
         MethodRef target = analyzer.getMethodCallTarget(source);
 
-        assertThat(target, is(new MethodRef(InterfaceMethodTypes$.class, "staticMethod", "()V")));
+        assertThat(target, is(new MethodRef(InterfaceMethodTypes$.class, "staticMethod", voidMethod())));
     }
 
     @Test
     public void static_methods_on_classes_are_not_relocated() {
         analyze(ClassMethodTypes.class);
 
-        MethodRef source = new MethodRef(ClassMethodTypes.class, "staticMethod", "()V");
+        MethodRef source = new MethodRef(ClassMethodTypes.class, "staticMethod", voidMethod());
         MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
@@ -153,7 +154,7 @@ public class ClassHierarchyAnalyzerTest {
     public void abstract_methods_have_no_implementation() {
         analyze(HasDefaultMethods.class);
 
-        MethodRef method = new MethodRef(HasDefaultMethods.class, "abstractMethod", "()V");
+        MethodRef method = new MethodRef(HasDefaultMethods.class, "abstractMethod", voidMethod());
         MethodRef impl = analyzer.getMethodDefaultImplementation(method);
 
         assertThat(impl, is(nullValue()));
@@ -163,10 +164,10 @@ public class ClassHierarchyAnalyzerTest {
     public void default_method_implementation_is_moved_to_companion_class() {
         analyze(HasDefaultMethods.class);
 
-        MethodRef method = new MethodRef(HasDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef method = new MethodRef(HasDefaultMethods.class, "defaultMethod", voidMethod());
         MethodRef impl = analyzer.getMethodDefaultImplementation(method);
 
-        assertThat(impl, is(new MethodRef(HasDefaultMethods$.class, "defaultMethod", "()V")));
+        assertThat(impl, is(new MethodRef(HasDefaultMethods$.class, "defaultMethod", voidMethod(HasDefaultMethods.class))));
     }
 
     @Test
@@ -174,10 +175,10 @@ public class ClassHierarchyAnalyzerTest {
         analyze(HasDefaultMethods.class,
                 DoesNotOverrideDefaultMethods.class);
 
-        MethodRef method = new MethodRef(DoesNotOverrideDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef method = new MethodRef(DoesNotOverrideDefaultMethods.class, "defaultMethod", voidMethod());
         MethodRef impl = analyzer.getMethodDefaultImplementation(method);
 
-        assertThat(impl, is(new MethodRef(HasDefaultMethods$.class, "defaultMethod", "()V")));
+        assertThat(impl, is(new MethodRef(HasDefaultMethods$.class, "defaultMethod", voidMethod(HasDefaultMethods.class))));
     }
 
     @Test
@@ -185,10 +186,10 @@ public class ClassHierarchyAnalyzerTest {
         analyze(HasDefaultMethods.class,
                 OverridesDefaultMethods.class);
 
-        MethodRef method = new MethodRef(OverridesDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef method = new MethodRef(OverridesDefaultMethods.class, "defaultMethod", voidMethod());
         MethodRef impl = analyzer.getMethodDefaultImplementation(method);
 
-        assertThat(impl, is(new MethodRef(OverridesDefaultMethods$.class, "defaultMethod", "()V")));
+        assertThat(impl, is(new MethodRef(OverridesDefaultMethods$.class, "defaultMethod", voidMethod(OverridesDefaultMethods.class))));
     }
 
     @Test
@@ -196,7 +197,7 @@ public class ClassHierarchyAnalyzerTest {
         analyze(HasDefaultMethods.class,
                 AbstractsDefaultMethods.class);
 
-        MethodRef method = new MethodRef(AbstractsDefaultMethods.class, "defaultMethod", "()V");
+        MethodRef method = new MethodRef(AbstractsDefaultMethods.class, "defaultMethod", voidMethod());
         MethodRef impl = analyzer.getMethodDefaultImplementation(method);
 
         assertThat(impl, is(nullValue()));
@@ -271,6 +272,13 @@ public class ClassHierarchyAnalyzerTest {
 
 
     // other helpers
+
+    private static String voidMethod(Class<?>... argumentTypes) {
+        return Type.getMethodDescriptor(Type.VOID_TYPE,
+                Stream.of(argumentTypes)
+                        .map(Type::getType)
+                        .toArray(Type[]::new));
+    }
 
     private static List<Class<?>> readersToClasses(List<ClassReader> readers) {
         return readers.stream()
