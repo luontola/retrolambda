@@ -37,7 +37,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.7.0</version>
+    <version>1.8.0</version>
     <executions>
         <execution>
             <goals>
@@ -154,6 +154,9 @@ Version History
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
   - *Experimental! Can be enabled with the enviroment variable
     DEFAULT_METHODS=2*
+
+### Retrolambda 1.8.0 (2014-11-16)
+
 - Backports try-with-resources statements to Java 6 and older by removing
   calls to `Throwable.addSuppressed`
   ([Issue #38](https://github.com/orfjackal/retrolambda/issues/38))
