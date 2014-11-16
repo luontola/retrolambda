@@ -84,7 +84,7 @@ public class Transformers {
         if (targetVersion < Opcodes.V1_7) {
             next = new SwallowSuppressedExceptions(next);
         }
-        next = new FixInvokeStaticOnInterfaceMethod(next); // TODO: remove me?
+        next = new FixInvokeStaticOnInterfaceMethod(next);
         next = chain.wrap(next);
 
         reader.accept(next, 0);
