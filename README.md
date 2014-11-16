@@ -10,6 +10,7 @@ run Java 8 code with lambda expressions and method references on Java 7 or
 lower. It does this by transforming your Java 8 compiled bytecode so that
 it can run on a Java 7 runtime. After the transformation they are just a
 bunch of normal .class files, without adding any runtime dependencies.
+[Read more details](#backported-language-features).
 
 Adventurous developers may use Retrolambda to backport lambda expressions
 even to Java 6 or Java 5. And if you reach Java 5, there are [other
@@ -130,6 +131,22 @@ what happens to be the default Java version in JAVA_HOME.
 
 You will need Java 8 for compiling and also for generating Javadocs.
 JDK 7's Javadoc tool will fail for some valid Java 8 code.
+
+
+Backported Language Features
+----------------------------
+
+**Lambda expressions** are backported by converting them to anonymous inner
+classes. This includes the optimization of using a singleton instance for
+stateless lambda expressions to avoid repeated object allocation.
+
+**Method references** are basically just syntax sugar for lambda
+expressions and they are backported in the same way.
+
+**Try-with-resources statements** are backported by removing calls to
+`Throwable.addSuppressed` if the target bytecode version is below Java 7.
+If you would like the suppressed exceptions to be logged instead of
+swallowed, please create a feature request and we'll make it configurable.
 
 
 Known Limitations
