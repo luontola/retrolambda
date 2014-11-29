@@ -27,20 +27,22 @@ public class TryWithResourcesTest {
 
     @Test
     public void suppressed_exceptions() {
+        Exception thrown;
         try {
             try (ThrowSecondaryExceptionOnClose c = new ThrowSecondaryExceptionOnClose()) {
                 throw new PrimaryException();
             }
-
         } catch (Exception e) {
-            assertThat("thrown", e, is(instanceOf(PrimaryException.class)));
-            assertThat("cause", e.getCause(), is(nullValue()));
+            thrown = e;
+        }
 
-            // On Java 6 and lower we will swallow the suppressed exception, because the API does not exist,
-            // but on Java 7 we want to keep the original behavior.
-            if (SystemUtils.isJavaVersionAtLeast(1.7f)) {
-                assertThat("suppressed", e.getSuppressed(), arrayContaining(instanceOf(SecondaryException.class)));
-            }
+        assertThat("thrown", thrown, is(instanceOf(PrimaryException.class)));
+        assertThat("cause", thrown.getCause(), is(nullValue()));
+
+        // On Java 6 and lower we will swallow the suppressed exception, because the API does not exist,
+        // but on Java 7 we want to keep the original behavior.
+        if (SystemUtils.isJavaVersionAtLeast(1.7f)) {
+            assertThat("suppressed", thrown.getSuppressed(), arrayContaining(instanceOf(SecondaryException.class)));
         }
     }
 
