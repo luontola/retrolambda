@@ -7,12 +7,23 @@ package net.orfjackal.retrolambda.test;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
 
-import java.io.Closeable;
+import java.io.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
 
 public class TryWithResourcesTest {
+
+    @Test
+    public void calls_close() throws IOException {
+        Closeable closeable = mock(Closeable.class);
+
+        try (Closeable c = closeable) {
+        }
+
+        verify(closeable).close();
+    }
 
     @Test
     public void suppressed_exceptions() {
