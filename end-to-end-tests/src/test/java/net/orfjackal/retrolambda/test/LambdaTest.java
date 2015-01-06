@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -83,6 +83,15 @@ public class LambdaTest extends SuperClass {
         Callable<Integer> lambda = () -> (int) ((bool ? 1 : 0) + b + s + i + l + f + d + c);
 
         assertThat(lambda.call(), is(36));
+    }
+
+    @Test
+    public void lambda_in_the_constant_initializer_of_an_interface() throws Exception {
+        assertThat(LambdaConstant.LAMBDA.call(), is("foo"));
+    }
+
+    public interface LambdaConstant {
+        Callable<String> LAMBDA = () -> "foo";
     }
 
     @Test
