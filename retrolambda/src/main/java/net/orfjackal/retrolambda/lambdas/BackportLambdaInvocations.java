@@ -47,19 +47,10 @@ public class BackportLambdaInvocations extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        // TODO: move stuff to an interface transformer
-        if (isBridgeMethodOnInterface(access)) {
-            return null; // remove the bridge method; Java 7 didn't use them
-        }
         if (LambdaNaming.isDeserializationHook(access, name, desc)) {
             return null; // remove serialization hooks; we serialize lambda instances as-is
         }
         return new InvokeDynamicInsnConverter(super.visitMethod(access, name, desc, signature, exceptions));
-    }
-
-    private boolean isBridgeMethodOnInterface(int methodAccess) {
-        return Flags.hasFlag(classAccess, ACC_INTERFACE) &&
-                Flags.hasFlag(methodAccess, ACC_BRIDGE);
     }
 
     Handle getLambdaAccessMethod(Handle implMethod) {

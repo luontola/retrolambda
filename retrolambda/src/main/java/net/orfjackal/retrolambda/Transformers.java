@@ -28,8 +28,7 @@ public class Transformers {
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
                 next = new AddMethodDefaultImplementations(next, methodRelocations);
             } else {
-                // needed for lambdas in an interface's constant initializer
-                next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
+                next = new UpdateRelocatedMethodInvocations(next, methodRelocations); // needed for lambdas in an interface's constant initializer
             }
             next = new BackportLambdaClass(next);
             return next;
@@ -60,10 +59,10 @@ public class Transformers {
                 next = new RemoveDefaultMethodBodies(next);
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
             } else {
-                // needed for lambdas in an interface's constant initializer
-                next = new RemoveStaticMethods(next);
+                next = new RemoveStaticMethods(next); // needed for lambdas in an interface's constant initializer
                 next = new WarnAboutDefaultAndStaticMethods(next);
             }
+            next = new RemoveBridgeMethods(next);
             next = new BackportLambdaInvocations(next);
             return next;
         });
