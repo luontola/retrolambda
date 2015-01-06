@@ -81,7 +81,7 @@ Retrolambda is a backporting tool for classes which use lambda expressions
 and have been compiled with Java 8, to run on Java 7 (maybe even Java 5).
 See https://github.com/orfjackal/retrolambda
 
-Copyright (c) 2013-2014  Esko Luontola <www.orfjackal.net>
+Copyright (c) 2013-2015  Esko Luontola <www.orfjackal.net>
 This software is released under the Apache License 2.0.
 The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
