@@ -40,7 +40,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>1.8.0</version>
+    <version>1.8.1</version>
     <executions>
         <execution>
             <goals>
@@ -173,6 +173,9 @@ Version History
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
   - *Experimental! Can be enabled with the environment variable
     DEFAULT_METHODS=2*
+
+### Retrolambda 1.8.1 (2015-01-06)
+
 - Backports lambda expressions in an interface's constant initializer
   ([Issue #42](https://github.com/orfjackal/retrolambda/issues/42))
 
