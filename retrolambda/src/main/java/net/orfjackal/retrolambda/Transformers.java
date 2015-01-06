@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -27,6 +27,9 @@ public class Transformers {
             } else if (FeatureToggles.DEFAULT_METHODS == 2) {
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
                 next = new AddMethodDefaultImplementations(next, methodRelocations);
+            } else {
+                // needed for lambdas in an interface's constant initializer
+                next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
             }
             next = new BackportLambdaClass(next);
             return next;
@@ -56,6 +59,9 @@ public class Transformers {
                 next = new RemoveStaticMethods(next);
                 next = new RemoveDefaultMethodBodies(next);
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
+            } else {
+                // needed for lambdas in an interface's constant initializer
+                next = new RemoveStaticMethods(next);
             }
             next = new BackportLambdaInvocations(next);
             return next;
@@ -63,17 +69,15 @@ public class Transformers {
     }
 
     public byte[] extractInterfaceCompanion(ClassReader reader) {
-        String companion;
-        if (FeatureToggles.DEFAULT_METHODS == 2
-                && (companion = methodRelocations.getCompanionClass(reader.getClassName())) != null) {
-            return transform(reader, (next) -> {
-                next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
-                next = new ExtractInterfaceCompanionClass(next, companion);
-                return next;
-            });
-        } else {
+        String companion = methodRelocations.getCompanionClass(reader.getClassName());
+        if (companion == null) {
             return null;
         }
+        return transform(reader, (next) -> {
+            next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
+            next = new ExtractInterfaceCompanionClass(next, companion);
+            return next;
+        });
     }
 
     private byte[] transform(ClassReader reader, ClassVisitorChain chain) {

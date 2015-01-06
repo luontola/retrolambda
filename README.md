@@ -173,6 +173,8 @@ Version History
   ([Issue #31](https://github.com/orfjackal/retrolambda/issues/31))
   - *Experimental! Can be enabled with the enviroment variable
     DEFAULT_METHODS=2*
+- Backports lambda expressions in an interface's constant initializer
+  ([Issue #42](https://github.com/orfjackal/retrolambda/issues/42))
 
 ### Retrolambda 1.8.0 (2014-11-16)
 

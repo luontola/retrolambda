@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,7 +17,7 @@ public class RemoveStaticMethods extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (isStaticMethod(access)) {
+        if (isStaticMethod(access) && !Flags.isClassInitializer(name, desc, access)) {
             return null;
         } else {
             return super.visitMethod(access, name, desc, signature, exceptions);

@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -57,7 +57,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
         }
         if (FeatureToggles.DEFAULT_METHODS == 0
                 && isNonAbstractMethodOnInterface(access)
-                && !isClassInitializerMethod(name, desc, access)) {
+                && !Flags.isClassInitializer(name, desc, access)) {
             // In case we have missed a case of Java 8 producing non-abstract methods
             // on interfaces, we have this warning here to get a bug report sooner.
             // Not allowed by Java 7:
@@ -85,14 +85,12 @@ public class BackportLambdaInvocations extends ClassVisitor {
                 !Flags.hasFlag(methodAccess, ACC_ABSTRACT);
     }
 
-    private static boolean isClassInitializerMethod(String name, String desc, int methodAccess) {
-        return name.equals("<clinit>") &&
-                desc.equals("()V") &&
-                Flags.hasFlag(methodAccess, ACC_STATIC);
-    }
-
     Handle getLambdaAccessMethod(Handle implMethod) {
         if (!implMethod.getOwner().equals(className)) {
+            return implMethod;
+        }
+        if (Flags.hasFlag(classAccess, ACC_INTERFACE)) {
+            // the method will be relocated to a companion class
             return implMethod;
         }
         // TODO: do not generate an access method if the impl method is not private (probably not implementable with a single pass)
