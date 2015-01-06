@@ -62,6 +62,7 @@ public class Transformers {
             } else {
                 // needed for lambdas in an interface's constant initializer
                 next = new RemoveStaticMethods(next);
+                next = new WarnAboutDefaultAndStaticMethods(next);
             }
             next = new BackportLambdaInvocations(next);
             return next;

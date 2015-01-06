@@ -4,7 +4,6 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
-import net.orfjackal.retrolambda.FeatureToggles;
 import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
@@ -55,34 +54,12 @@ public class BackportLambdaInvocations extends ClassVisitor {
         if (LambdaNaming.isDeserializationHook(access, name, desc)) {
             return null; // remove serialization hooks; we serialize lambda instances as-is
         }
-        if (FeatureToggles.DEFAULT_METHODS == 0
-                && isNonAbstractMethodOnInterface(access)
-                && !Flags.isClassInitializer(name, desc, access)) {
-            // In case we have missed a case of Java 8 producing non-abstract methods
-            // on interfaces, we have this warning here to get a bug report sooner.
-            // Not allowed by Java 7:
-            // - default methods
-            // - static methods
-            // - bridge methods
-            // Allowed by Java 7:
-            // - class initializer methods (for initializing constants)
-            System.out.println("WARNING: Method '" + name + "' of interface '" + className + "' is non-abstract! " +
-                    "This will probably fail to run on Java 7 and below. " +
-                    "If you get this warning _without_ using Java 8's default methods, " +
-                    "please report a bug at https://github.com/orfjackal/retrolambda/issues " +
-                    "together with an SSCCE (http://www.sscce.org/)");
-        }
         return new InvokeDynamicInsnConverter(super.visitMethod(access, name, desc, signature, exceptions));
     }
 
     private boolean isBridgeMethodOnInterface(int methodAccess) {
         return Flags.hasFlag(classAccess, ACC_INTERFACE) &&
                 Flags.hasFlag(methodAccess, ACC_BRIDGE);
-    }
-
-    private boolean isNonAbstractMethodOnInterface(int methodAccess) {
-        return Flags.hasFlag(classAccess, ACC_INTERFACE) &&
-                !Flags.hasFlag(methodAccess, ACC_ABSTRACT);
     }
 
     Handle getLambdaAccessMethod(Handle implMethod) {
