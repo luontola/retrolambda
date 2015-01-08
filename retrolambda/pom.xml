@@ -88,8 +88,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <!-- TODO: default methods; enable minimizing -->
-                    <!-- <minimizeJar>true</minimizeJar>  --> <!-- http://jira.codehaus.org/browse/MSHADE-174 -->
+                    <minimizeJar>true</minimizeJar>
                     <relocations>
                         <relocation>
                             <pattern>org.objectweb.asm</pattern>

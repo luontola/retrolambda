@@ -4,7 +4,6 @@
 
 package net.orfjackal.retrolambda;
 
-import net.orfjackal.retrolambda.defaultmethods.*;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.trywithresources.SwallowSuppressedExceptions;
@@ -22,9 +21,7 @@ public class Transformers {
 
     public byte[] backportLambdaClass(ClassReader reader) {
         return transform(reader, (next) -> {
-            if (FeatureToggles.DEFAULT_METHODS == 1) {
-                next = new ClassModifier(targetVersion, next);
-            } else if (FeatureToggles.DEFAULT_METHODS == 2) {
+            if (FeatureToggles.DEFAULT_METHODS == 2) {
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
                 next = new AddMethodDefaultImplementations(next, methodRelocations);
             } else {
@@ -37,10 +34,7 @@ public class Transformers {
 
     public byte[] backportClass(ClassReader reader) {
         return transform(reader, (next) -> {
-            if (FeatureToggles.DEFAULT_METHODS == 1) {
-                next = new ClassModifier(targetVersion, next);
-                next = new InterfaceModifier(next, targetVersion);
-            } else if (FeatureToggles.DEFAULT_METHODS == 2) {
+            if (FeatureToggles.DEFAULT_METHODS == 2) {
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
                 next = new AddMethodDefaultImplementations(next, methodRelocations);
             }
@@ -51,10 +45,7 @@ public class Transformers {
 
     public byte[] backportInterface(ClassReader reader) {
         return transform(reader, (next) -> {
-            if (FeatureToggles.DEFAULT_METHODS == 1) {
-                next = new ClassModifier(targetVersion, next);
-                next = new InterfaceModifier(next, targetVersion);
-            } else if (FeatureToggles.DEFAULT_METHODS == 2) {
+            if (FeatureToggles.DEFAULT_METHODS == 2) {
                 next = new RemoveStaticMethods(next);
                 next = new RemoveDefaultMethodBodies(next);
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);

@@ -1,10 +1,9 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda;
 
-import net.orfjackal.retrolambda.defaultmethods.Helpers;
 import net.orfjackal.retrolambda.files.*;
 import net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer;
 import net.orfjackal.retrolambda.lambdas.*;
@@ -34,10 +33,6 @@ public class Retrolambda {
         if (!Files.isDirectory(inputDir)) {
             System.out.println("Nothing to do; not a directory: " + inputDir);
             return;
-        }
-
-        if (FeatureToggles.DEFAULT_METHODS == 1) {
-            Helpers.config = config;
         }
 
         Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));
