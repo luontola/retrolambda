@@ -19,8 +19,10 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     private final List<ClassReader> interfaces = new ArrayList<>();
     private final List<ClassReader> classes = new ArrayList<>();
+    private final Map<String, String> superclasses = new HashMap<>();
     private final Map<Type, List<Type>> interfacesByImplementer = new HashMap<>(); // TODO: could use just String instead of Type
     private final Map<String, List<MethodRef>> methodsByInterface = new HashMap<>();
+    private final Map<String, List<MethodRef>> methodsByClass = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
     private final Map<String, String> companionClasses = new HashMap<>();
@@ -37,10 +39,33 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
         List<Type> interfaces = classNamesToTypes(cr.getInterfaces());
         interfacesByImplementer.put(clazz, interfaces);
+        superclasses.put(cr.getClassName(), cr.getSuperName());
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
             analyzeInterface(cr);
+        } else {
+            analyzeClass(cr);
         }
+    }
+
+    private void analyzeClass(ClassReader cr) {
+        cr.accept(new ClassVisitor(ASM5) {
+            private String owner;
+
+            @Override
+            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                this.owner = name;
+            }
+
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+                MethodRef method = new MethodRef(owner, name, desc);
+                methodsByClass.computeIfAbsent(method.owner, key -> new ArrayList<>()).add(method);
+
+                return null;
+            }
+
+        }, ClassReader.SKIP_CODE);
     }
 
     private void analyzeInterface(ClassReader cr) {
@@ -113,21 +138,26 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     @Override
     public MethodRef getMethodDefaultImplementation(MethodRef interfaceMethod) {
-        MethodRef impl = methodDefaultImpls.get(interfaceMethod);
-        if (impl == ABSTRACT_METHOD) {
-            return null;
-        }
-        if (impl != null) {
-            return impl;
-        }
+        MethodRef impl;
+        List<Type> currentInterfaces = new ArrayList<>();
+        List<Type> parentInterfaces = new ArrayList<>();
+        currentInterfaces.add(Type.getObjectType(interfaceMethod.owner));
 
-        // check if a default implementation is inherited from parents
-        for (Type parentInterface : interfacesByImplementer.getOrDefault(Type.getObjectType(interfaceMethod.owner), Collections.emptyList())) {
-            impl = getMethodDefaultImplementation(interfaceMethod.withOwner(parentInterface.getInternalName()));
-            if (impl != null) {
-                return impl;
+        do {
+            for (Type anInterface : currentInterfaces) {
+                impl = methodDefaultImpls.get(interfaceMethod.withOwner(anInterface.getInternalName()));
+                if (impl == ABSTRACT_METHOD) {
+                    return null;
+                }
+                if (impl != null) {
+                    return impl;
+                }
+                parentInterfaces.addAll(interfacesByImplementer.getOrDefault(anInterface, Collections.emptyList()));
             }
-        }
+            currentInterfaces = parentInterfaces;
+            parentInterfaces = new ArrayList<>();
+        } while (!currentInterfaces.isEmpty());
+
         return null;
     }
 
@@ -139,6 +169,15 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             for (MethodRef parentMethod : getInterfaceMethods(parent.getInternalName())) {
                 results.add(parentMethod.withOwner(interfaceName));
             }
+        }
+        return new ArrayList<>(results);
+    }
+
+    public List<MethodRef> getSuperclassMethods(String className) {
+        Set<MethodRef> results = new LinkedHashSet<>();
+        while (superclasses.containsKey(className)) {
+            className = superclasses.get(className);
+            results.addAll(methodsByClass.getOrDefault(className, Collections.emptyList()));
         }
         return new ArrayList<>(results);
     }

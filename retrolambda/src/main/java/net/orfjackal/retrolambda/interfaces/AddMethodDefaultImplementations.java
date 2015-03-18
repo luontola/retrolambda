@@ -40,7 +40,14 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     public void visitEnd() {
         for (String anInterface : interfaces) {
             for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(anInterface)) {
-                if (!methods.contains(interfaceMethod.withOwner(className))) {
+                boolean hasOverride = false;
+                for (MethodRef superMethod : methodRelocations.getSuperclassMethods(className)) {
+                    if (superMethod.equals(interfaceMethod.withOwner(superMethod.owner))) {
+                        hasOverride = true;
+                        break;
+                    }
+                }
+                if (!hasOverride && !methods.contains(interfaceMethod.withOwner(className))) {
                     generateDefaultImplementation(interfaceMethod);
                 }
             }

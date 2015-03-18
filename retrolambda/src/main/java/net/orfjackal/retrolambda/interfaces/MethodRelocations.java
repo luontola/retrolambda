@@ -14,5 +14,7 @@ public interface MethodRelocations {
 
     List<MethodRef> getInterfaceMethods(String interfaceName);
 
+    List<MethodRef> getSuperclassMethods(String className);
+
     String getCompanionClass(String className);
 }
