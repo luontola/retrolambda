@@ -7,7 +7,7 @@ package net.orfjackal.retrolambda.interfaces;
 import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
-import java.util.List;
+import java.util.*;
 
 import static net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer.*;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
@@ -19,6 +19,15 @@ public class ClassInfo {
     public final Type type;
     public final Type superclass;
     public final List<Type> interfaces;
+    public final List<MethodRef> methods = new ArrayList<>();
+
+    public ClassInfo() {
+        this.reader = null;
+        this.access = 0;
+        this.type = null;
+        this.superclass = null;
+        this.interfaces = new ArrayList<>();
+    }
 
     public ClassInfo(ClassReader cr) {
         this.reader = cr;

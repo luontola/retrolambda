@@ -19,8 +19,6 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     @Deprecated
-    private final Map<Type, List<MethodRef>> methodsByInterface = new HashMap<>();
-    @Deprecated
     private final Map<Type, List<MethodRef>> methodsByClass = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
@@ -33,13 +31,13 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         classes.put(c.type, c);
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
-            analyzeInterface(cr);
+            analyzeInterface(c, cr);
         } else {
-            analyzeClass(cr);
+            analyzeClass(c, cr);
         }
     }
 
-    private void analyzeClass(ClassReader cr) {
+    private void analyzeClass(ClassInfo c, ClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
 
@@ -59,7 +57,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         }, ClassReader.SKIP_CODE);
     }
 
-    private void analyzeInterface(ClassReader cr) {
+    private void analyzeInterface(ClassInfo c, ClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
             private String companion;
@@ -76,23 +74,19 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
                 if (isAbstractMethod(access)) {
                     methodDefaultImpls.put(method, ABSTRACT_METHOD);
-                    saveInterfaceMethod(method);
+                    c.methods.add(method);
 
                 } else if (isDefaultMethod(access)) {
                     desc = Bytecode.prependArgumentType(desc, Type.getObjectType(owner));
                     methodDefaultImpls.put(method, new MethodRef(companion, name, desc));
                     companionClasses.put(owner, companion);
-                    saveInterfaceMethod(method);
+                    c.methods.add(method);
 
                 } else if (isStaticMethod(access)) {
                     relocatedMethods.put(method, new MethodRef(companion, name, desc));
                     companionClasses.put(owner, companion);
                 }
                 return null;
-            }
-
-            private void saveInterfaceMethod(MethodRef method) {
-                methodsByInterface.computeIfAbsent(classNameToType(method.owner), key -> new ArrayList<>()).add(method);
             }
 
             private boolean isAbstractMethod(int access) {
@@ -125,12 +119,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     public List<Type> getInterfacesOf(Type type) {
-        ClassInfo c = classes.get(type);
-        if (c == null) {
-            // non-analyzed class, probably from a class library
-            return Collections.emptyList();
-        }
-        return c.interfaces;
+        return classes.getOrDefault(type, new ClassInfo()).interfaces;
     }
 
     @Override
@@ -166,7 +155,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public List<MethodRef> getInterfaceMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
-        results.addAll(methodsByInterface.getOrDefault(type, Collections.emptyList()));
+        results.addAll(classes.getOrDefault(type, new ClassInfo()).methods);
         for (Type parent : getInterfacesOf(type)) {
             for (MethodRef parentMethod : getInterfaceMethods(parent)) {
                 results.add(parentMethod.withOwner(type.getInternalName()));
