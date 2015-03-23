@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -9,6 +9,7 @@ import org.objectweb.asm.*;
 
 import java.util.*;
 
+import static net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer.classNameToType;
 import static org.objectweb.asm.Opcodes.*;
 
 public class AddMethodDefaultImplementations extends ClassVisitor {
@@ -39,9 +40,9 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     @Override
     public void visitEnd() {
         for (String anInterface : interfaces) {
-            for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(anInterface)) {
+            for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(classNameToType(anInterface))) {
                 boolean hasOverride = false;
-                for (MethodRef superMethod : methodRelocations.getSuperclassMethods(className)) {
+                for (MethodRef superMethod : methodRelocations.getSuperclassMethods(classNameToType(className))) {
                     if (superMethod.equals(interfaceMethod.withOwner(superMethod.owner))) {
                         hasOverride = true;
                         break;

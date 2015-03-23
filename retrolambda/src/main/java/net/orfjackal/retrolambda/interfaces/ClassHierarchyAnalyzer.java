@@ -19,11 +19,11 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     @Deprecated
-    private final Map<String, String> superclasses = new HashMap<>();
+    private final Map<Type, Type> superclasses = new HashMap<>();
     @Deprecated
-    private final Map<String, List<MethodRef>> methodsByInterface = new HashMap<>();
+    private final Map<Type, List<MethodRef>> methodsByInterface = new HashMap<>();
     @Deprecated
-    private final Map<String, List<MethodRef>> methodsByClass = new HashMap<>();
+    private final Map<Type, List<MethodRef>> methodsByClass = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
     private final Map<String, String> companionClasses = new HashMap<>();
@@ -34,7 +34,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
 
-        superclasses.put(cr.getClassName(), cr.getSuperName());
+        superclasses.put(c.type, classNameToType(cr.getSuperName()));
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
             analyzeInterface(cr);
@@ -55,7 +55,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                 MethodRef method = new MethodRef(owner, name, desc);
-                methodsByClass.computeIfAbsent(method.owner, key -> new ArrayList<>()).add(method);
+                methodsByClass.computeIfAbsent(classNameToType(method.owner), key -> new ArrayList<>()).add(method);
 
                 return null;
             }
@@ -96,7 +96,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             }
 
             private void saveInterfaceMethod(MethodRef method) {
-                methodsByInterface.computeIfAbsent(method.owner, key -> new ArrayList<>()).add(method);
+                methodsByInterface.computeIfAbsent(classNameToType(method.owner), key -> new ArrayList<>()).add(method);
             }
 
             private boolean isAbstractMethod(int access) {
@@ -168,18 +168,18 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     @Override
-    public List<MethodRef> getInterfaceMethods(String interfaceName) {
+    public List<MethodRef> getInterfaceMethods(Type interfaceName) {
         Set<MethodRef> results = new LinkedHashSet<>();
         results.addAll(methodsByInterface.getOrDefault(interfaceName, Collections.emptyList()));
-        for (Type parent : getInterfacesOf(Type.getObjectType(interfaceName))) {
-            for (MethodRef parentMethod : getInterfaceMethods(parent.getInternalName())) {
-                results.add(parentMethod.withOwner(interfaceName));
+        for (Type parent : getInterfacesOf(interfaceName)) {
+            for (MethodRef parentMethod : getInterfaceMethods(parent)) {
+                results.add(parentMethod.withOwner(interfaceName.getInternalName()));
             }
         }
         return new ArrayList<>(results);
     }
 
-    public List<MethodRef> getSuperclassMethods(String className) {
+    public List<MethodRef> getSuperclassMethods(Type className) {
         Set<MethodRef> results = new LinkedHashSet<>();
         while (superclasses.containsKey(className)) {
             className = superclasses.get(className);

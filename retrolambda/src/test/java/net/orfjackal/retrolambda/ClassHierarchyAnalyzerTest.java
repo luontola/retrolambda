@@ -47,7 +47,7 @@ public class ClassHierarchyAnalyzerTest {
     public void finds_interface_methods() {
         analyze(InterfaceMethodTypes.class);
 
-        assertThat(analyzer.getInterfaceMethods(getInternalName(InterfaceMethodTypes.class)),
+        assertThat(analyzer.getInterfaceMethods(Type.getType(InterfaceMethodTypes.class)),
                 containsInAnyOrder(
                         new MethodRef(InterfaceMethodTypes.class, "abstractMethod", voidMethod()),
                         new MethodRef(InterfaceMethodTypes.class, "defaultMethod", voidMethod()))); // all but staticMethod
@@ -58,14 +58,14 @@ public class ClassHierarchyAnalyzerTest {
         analyze(ChildInterface.class,
                 Interface.class);
 
-        assertThat(analyzer.getInterfaceMethods(getInternalName(ChildInterface.class)),
+        assertThat(analyzer.getInterfaceMethods(Type.getType(ChildInterface.class)),
                 containsInAnyOrder(
                         new MethodRef(ChildInterface.class, "abstractMethod", voidMethod())));
     }
 
     @Test
     public void does_not_find_interface_methods_of_not_analyzed_interfaces() {
-        assertThat(analyzer.getInterfaceMethods(getInternalName(Interface.class)), is(empty()));
+        assertThat(analyzer.getInterfaceMethods(Type.getType(Interface.class)), is(empty()));
     }
 
     private interface Interface {
@@ -313,14 +313,10 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     private static byte[] readBytecode(Class<?> clazz) {
-        try (InputStream in = clazz.getResourceAsStream("/" + getInternalName(clazz) + ".class")) {
+        try (InputStream in = clazz.getResourceAsStream("/" + Type.getType(clazz).getInternalName() + ".class")) {
             return ByteStreams.toByteArray(in);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    private static String getInternalName(Class<?> clazz) {
-        return Type.getType(clazz).getInternalName();
     }
 }
