@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -135,6 +135,7 @@ public class DefaultMethodsTest {
     @Test
     public void implements_original_and_overridden_default_method() {
         assertThat(new AB().foo(), is("overridden"));
+        assertThat(new BA().foo(), is("overridden"));
     }
 
     private interface A {
@@ -150,6 +151,9 @@ public class DefaultMethodsTest {
     }
 
     private class AB implements A, B {
+    }
+
+    private class BA implements B, A {
     }
 
 
