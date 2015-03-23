@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -25,6 +25,10 @@ public final class MethodRef {
         this.owner = owner;
         this.name = name;
         this.desc = desc;
+    }
+    
+    public MethodSignature getSignature() {
+        return new MethodSignature(name, desc);
     }
 
     public MethodRef withOwner(String newOwner) {

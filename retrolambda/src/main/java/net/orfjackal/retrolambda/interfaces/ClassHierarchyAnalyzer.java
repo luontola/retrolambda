@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,11 +17,12 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     private static final MethodRef ABSTRACT_METHOD = new MethodRef("", "", "");
 
-    private final List<ClassReader> interfaces = new ArrayList<>();
-    private final List<ClassReader> classes = new ArrayList<>();
+    private final Map<Type, ClassInfo> classes = new HashMap<>();
+    @Deprecated
     private final Map<String, String> superclasses = new HashMap<>();
-    private final Map<Type, List<Type>> interfacesByImplementer = new HashMap<>(); // TODO: could use just String instead of Type
+    @Deprecated
     private final Map<String, List<MethodRef>> methodsByInterface = new HashMap<>();
+    @Deprecated
     private final Map<String, List<MethodRef>> methodsByClass = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
@@ -29,16 +30,10 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     public void analyze(byte[] bytecode) {
         ClassReader cr = new ClassReader(bytecode);
-        Type clazz = classNameToType(cr.getClassName());
 
-        if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
-            interfaces.add(cr);
-        } else {
-            classes.add(cr);
-        }
+        ClassInfo c = new ClassInfo(cr);
+        classes.put(c.type, c);
 
-        List<Type> interfaces = classNamesToTypes(cr.getInterfaces());
-        interfacesByImplementer.put(clazz, interfaces);
         superclasses.put(cr.getClassName(), cr.getSuperName());
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
@@ -119,16 +114,27 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         }, ClassReader.SKIP_CODE);
     }
 
-    public List<ClassReader> getInterfaces() {
-        return interfaces;
+    public List<ClassInfo> getInterfaces() {
+        return classes.values()
+                .stream()
+                .filter(ClassInfo::isInterface)
+                .collect(toList());
     }
 
-    public List<ClassReader> getClasses() {
-        return classes;
+    public List<ClassInfo> getClasses() {
+        return classes.values()
+                .stream()
+                .filter(ClassInfo::isClass)
+                .collect(toList());
     }
 
     public List<Type> getInterfacesOf(Type type) {
-        return interfacesByImplementer.getOrDefault(type, Collections.emptyList());
+        ClassInfo c = classes.get(type);
+        if (c == null) {
+            // non-analyzed class, probably from a class library
+            return Collections.emptyList();
+        }
+        return c.interfaces;
     }
 
     @Override
@@ -152,7 +158,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
                 if (impl != null) {
                     return impl;
                 }
-                parentInterfaces.addAll(interfacesByImplementer.getOrDefault(anInterface, Collections.emptyList()));
+                parentInterfaces.addAll(getInterfacesOf(anInterface));
             }
             currentInterfaces = parentInterfaces;
             parentInterfaces = new ArrayList<>();
@@ -187,13 +193,13 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         return companionClasses.get(className);
     }
 
-    private static List<Type> classNamesToTypes(String[] interfaces) {
+    static List<Type> classNamesToTypes(String[] interfaces) {
         return Stream.of(interfaces)
                 .map(ClassHierarchyAnalyzer::classNameToType)
                 .collect(toList());
     }
 
-    private static Type classNameToType(String className) {
+    static Type classNameToType(String className) {
         return Type.getType("L" + className + ";");
     }
 }

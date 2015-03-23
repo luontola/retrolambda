@@ -5,9 +5,8 @@
 package net.orfjackal.retrolambda;
 
 import net.orfjackal.retrolambda.files.*;
-import net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer;
+import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
-import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.net.*;
@@ -57,12 +56,12 @@ public class Retrolambda {
             });
 
             List<byte[]> transformed = new ArrayList<>();
-            for (ClassReader reader : analyzer.getInterfaces()) {
-                transformed.add(transformers.extractInterfaceCompanion(reader));
-                transformed.add(transformers.backportInterface(reader));
+            for (ClassInfo c : analyzer.getInterfaces()) {
+                transformed.add(transformers.extractInterfaceCompanion(c.reader));
+                transformed.add(transformers.backportInterface(c.reader));
             }
-            for (ClassReader reader : analyzer.getClasses()) {
-                transformed.add(transformers.backportClass(reader));
+            for (ClassInfo c : analyzer.getClasses()) {
+                transformed.add(transformers.backportClass(c.reader));
             }
 
             // We need to load some of the classes (for calling the lambda metafactory)

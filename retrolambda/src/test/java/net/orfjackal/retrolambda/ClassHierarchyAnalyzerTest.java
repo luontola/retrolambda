@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@ package net.orfjackal.retrolambda;
 import com.google.common.io.ByteStreams;
 import net.orfjackal.retrolambda.interfaces.*;
 import org.junit.Test;
-import org.objectweb.asm.*;
+import org.objectweb.asm.Type;
 
 import java.io.*;
 import java.util.*;
@@ -259,11 +259,11 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     private List<Class<?>> getInterfaces() {
-        return readersToClasses(analyzer.getInterfaces());
+        return infosToClasses(analyzer.getInterfaces());
     }
 
     private List<Class<?>> getClasses() {
-        return readersToClasses(analyzer.getClasses());
+        return infosToClasses(analyzer.getClasses());
     }
 
     private List<Class<?>> getInterfacesOf(Class<?> clazz) {
@@ -280,8 +280,8 @@ public class ClassHierarchyAnalyzerTest {
                         .toArray(Type[]::new));
     }
 
-    private static List<Class<?>> readersToClasses(List<ClassReader> readers) {
-        return readers.stream()
+    private static List<Class<?>> infosToClasses(List<ClassInfo> classes) {
+        return classes.stream()
                 .map(ClassHierarchyAnalyzerTest::toClass)
                 .collect(toList());
     }
@@ -296,9 +296,9 @@ public class ClassHierarchyAnalyzerTest {
         return asList(aClass);
     }
 
-    private static Class<?> toClass(ClassReader reader) {
+    private static Class<?> toClass(ClassInfo c) {
         try {
-            return Class.forName(reader.getClassName().replace('/', '.'));
+            return Class.forName(c.type.getClassName().replace('/', '.'));
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
