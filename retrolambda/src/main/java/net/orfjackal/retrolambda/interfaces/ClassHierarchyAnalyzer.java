@@ -19,8 +19,6 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     @Deprecated
-    private final Map<Type, Type> superclasses = new HashMap<>();
-    @Deprecated
     private final Map<Type, List<MethodRef>> methodsByInterface = new HashMap<>();
     @Deprecated
     private final Map<Type, List<MethodRef>> methodsByClass = new HashMap<>();
@@ -33,8 +31,6 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
-
-        superclasses.put(c.type, classNameToType(cr.getSuperName()));
 
         if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
             analyzeInterface(cr);
@@ -168,22 +164,23 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     @Override
-    public List<MethodRef> getInterfaceMethods(Type interfaceName) {
+    public List<MethodRef> getInterfaceMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
-        results.addAll(methodsByInterface.getOrDefault(interfaceName, Collections.emptyList()));
-        for (Type parent : getInterfacesOf(interfaceName)) {
+        results.addAll(methodsByInterface.getOrDefault(type, Collections.emptyList()));
+        for (Type parent : getInterfacesOf(type)) {
             for (MethodRef parentMethod : getInterfaceMethods(parent)) {
-                results.add(parentMethod.withOwner(interfaceName.getInternalName()));
+                results.add(parentMethod.withOwner(type.getInternalName()));
             }
         }
         return new ArrayList<>(results);
     }
 
-    public List<MethodRef> getSuperclassMethods(Type className) {
+    public List<MethodRef> getSuperclassMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
-        while (superclasses.containsKey(className)) {
-            className = superclasses.get(className);
-            results.addAll(methodsByClass.getOrDefault(className, Collections.emptyList()));
+        while (classes.containsKey(type)) {
+            ClassInfo c = classes.get(type);
+            type = c.superclass;
+            results.addAll(methodsByClass.getOrDefault(type, Collections.emptyList()));
         }
         return new ArrayList<>(results);
     }
