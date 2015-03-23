@@ -132,6 +132,27 @@ public class DefaultMethodsTest {
     }
 
 
+    @Test
+    public void implements_original_and_overridden_default_method() {
+        assertThat(new AB().foo(), is("overridden"));
+    }
+
+    private interface A {
+        default String foo() {
+            return "original";
+        }
+    }
+
+    private interface B extends A {
+        default String foo() {
+            return "overridden";
+        }
+    }
+
+    private class AB implements A, B {
+    }
+
+
     // Bridge Methods
 
     @Test
