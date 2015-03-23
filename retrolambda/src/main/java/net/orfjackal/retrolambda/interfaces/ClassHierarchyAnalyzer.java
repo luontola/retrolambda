@@ -171,14 +171,16 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     @Override
-    public List<MethodRef> getSuperclassMethods(Type type) {
+    public List<MethodSignature> getSuperclassMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
         while (classes.containsKey(type)) {
             ClassInfo c = classes.get(type);
             type = c.superclass;
             results.addAll(getClass(type).methods);
         }
-        return new ArrayList<>(results);
+        return results.stream()
+                .map(MethodRef::getSignature)
+                .collect(toList());
     }
 
     @Override

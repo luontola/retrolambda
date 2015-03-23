@@ -17,7 +17,7 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     private final MethodRelocations methodRelocations;
     private String className;
     private String[] interfaces;
-    private final Set<MethodRef> methods = new HashSet<>();
+    private final Set<MethodSignature> methods = new HashSet<>();
 
     public AddMethodDefaultImplementations(ClassVisitor next, MethodRelocations methodRelocations) {
         super(ASM5, next);
@@ -33,7 +33,7 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        methods.add(new MethodRef(className, name, desc));
+        methods.add(new MethodSignature(name, desc));
         return super.visitMethod(access, name, desc, signature, exceptions);
     }
 
@@ -41,19 +41,29 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     public void visitEnd() {
         for (String anInterface : interfaces) {
             for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(classNameToType(anInterface))) {
-                boolean hasOverride = false;
-                for (MethodRef superMethod : methodRelocations.getSuperclassMethods(classNameToType(className))) {
-                    if (superMethod.equals(interfaceMethod.withOwner(superMethod.owner))) {
-                        hasOverride = true;
-                        break;
-                    }
-                }
-                if (!hasOverride && !methods.contains(interfaceMethod.withOwner(className))) {
+                if (!overrides(interfaceMethod.getSignature())) {
                     generateDefaultImplementation(interfaceMethod);
                 }
             }
         }
         super.visitEnd();
+    }
+
+    private boolean overrides(MethodSignature method) {
+        return thisOverrides(method) || superclassOverrides(method);
+    }
+
+    private boolean thisOverrides(MethodSignature method) {
+        return methods.contains(method);
+    }
+
+    private boolean superclassOverrides(MethodSignature method) {
+        for (MethodSignature superMethod : methodRelocations.getSuperclassMethods(classNameToType(className))) {
+            if (superMethod.equals(method)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void generateDefaultImplementation(MethodRef interfaceMethod) {
