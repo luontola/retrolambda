@@ -145,6 +145,7 @@ public class DefaultMethodsTest {
     }
 
     private interface B extends A {
+        @Override
         default String foo() {
             return "overridden";
         }

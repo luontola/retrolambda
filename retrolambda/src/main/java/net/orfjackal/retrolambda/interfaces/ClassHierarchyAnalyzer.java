@@ -170,6 +170,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         return new ArrayList<>(results);
     }
 
+    @Override
     public List<MethodRef> getSuperclassMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
         while (classes.containsKey(type)) {

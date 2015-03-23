@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -19,14 +19,17 @@ public class FilteringFileVisitor implements FileVisitor<Path> {
         this.target = target;
     }
 
+    @Override
     public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
         return target.postVisitDirectory(dir, exc);
     }
 
+    @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
         return target.preVisitDirectory(dir, attrs);
     }
 
+    @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
         if (fileFilter.contains(file)) {
             return target.visitFile(file, attrs);
@@ -35,6 +38,7 @@ public class FilteringFileVisitor implements FileVisitor<Path> {
         }
     }
 
+    @Override
     public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
         return target.visitFileFailed(file, exc);
     }
