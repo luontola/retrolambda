@@ -18,8 +18,6 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     private static final MethodRef ABSTRACT_METHOD = new MethodRef("", "", "");
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
-    @Deprecated
-    private final Map<Type, List<MethodRef>> methodsByClass = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
     private final Map<String, String> companionClasses = new HashMap<>();
@@ -49,8 +47,12 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                 MethodRef method = new MethodRef(owner, name, desc);
-                methodsByClass.computeIfAbsent(classNameToType(method.owner), key -> new ArrayList<>()).add(method);
+                // FIXME: skip static methods
+                c.methods.add(method);
 
+                // XXX: backporting Retrolambda fails if we remove this; it tries backporting a lambda while backporting a lambda
+                Runnable r = () -> {
+                };
                 return null;
             }
 
@@ -118,8 +120,12 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
                 .collect(toList());
     }
 
+    private ClassInfo getClass(Type type) {
+        return classes.getOrDefault(type, new ClassInfo());
+    }
+
     public List<Type> getInterfacesOf(Type type) {
-        return classes.getOrDefault(type, new ClassInfo()).interfaces;
+        return getClass(type).interfaces;
     }
 
     @Override
@@ -155,7 +161,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public List<MethodRef> getInterfaceMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
-        results.addAll(classes.getOrDefault(type, new ClassInfo()).methods);
+        results.addAll(getClass(type).methods);
         for (Type parent : getInterfacesOf(type)) {
             for (MethodRef parentMethod : getInterfaceMethods(parent)) {
                 results.add(parentMethod.withOwner(type.getInternalName()));
@@ -169,7 +175,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         while (classes.containsKey(type)) {
             ClassInfo c = classes.get(type);
             type = c.superclass;
-            results.addAll(methodsByClass.getOrDefault(type, Collections.emptyList()));
+            results.addAll(getClass(type).methods);
         }
         return new ArrayList<>(results);
     }
