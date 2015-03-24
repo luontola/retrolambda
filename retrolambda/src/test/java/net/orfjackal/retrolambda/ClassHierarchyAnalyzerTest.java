@@ -155,7 +155,83 @@ public class ClassHierarchyAnalyzerTest {
                         new MethodInfo("defaultMethod", "()V", new MethodKind.Abstract())));
     }
 
-    // TODO: superclasses
+    @Test
+    public void superclass_inheritance() {
+        analyze(BaseClass.class,
+                ChildClass.class);
+
+        assertThat("original", analyzer.getMethods(Type.getType(BaseClass.class)),
+                containsInAnyOrder(
+                        new MethodInfo("baseMethod", "()V", new MethodKind.Concrete())));
+
+        assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildClass.class)),
+                containsInAnyOrder(
+                        new MethodInfo("baseMethod", "()V", new MethodKind.Concrete())));
+    }
+
+    private class BaseClass {
+        void baseMethod() {
+        }
+    }
+
+    private class ChildClass extends BaseClass {
+    }
+
+    @Test
+    public void overriding_default_methods() {
+        analyze(DefaultMethods.class,
+                InheritsDefault.class,
+                OverridesDefault.class,
+                InheritsOverridesDefault.class,
+                InheritsOverridesDefaultAndDirectlyImplements.class);
+
+        assertThat("original", analyzer.getMethods(Type.getType(DefaultMethods.class)),
+                containsInAnyOrder(
+                        new MethodInfo("foo", "()V", new MethodKind.Default(
+                                new MethodRef(DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$DefaultMethods;)V")))));
+
+        assertThat("inherits unchanged", analyzer.getMethods(Type.getType(InheritsDefault.class)),
+                containsInAnyOrder(
+                        new MethodInfo("foo", "()V", new MethodKind.Default(
+                                new MethodRef(DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$DefaultMethods;)V")))));
+
+        assertThat("overrides", analyzer.getMethods(Type.getType(OverridesDefault.class)),
+                containsInAnyOrder(
+                        new MethodInfo("foo", "()V", new MethodKind.Concrete())));
+
+        assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefault.class)),
+                containsInAnyOrder(
+                        new MethodInfo("foo", "()V", new MethodKind.Concrete())));
+
+        assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefaultAndDirectlyImplements.class)),
+                containsInAnyOrder(
+                        new MethodInfo("foo", "()V", new MethodKind.Concrete())));
+    }
+
+    private interface DefaultMethods {
+        default void foo() {
+        }
+    }
+
+    private interface DefaultMethods$ {
+    }
+
+    private class InheritsDefault implements DefaultMethods {
+    }
+
+    private class OverridesDefault implements DefaultMethods {
+        @Override
+        public void foo() {
+        }
+    }
+
+    class InheritsOverridesDefault extends OverridesDefault {
+    }
+
+    class InheritsOverridesDefaultAndDirectlyImplements extends OverridesDefault implements DefaultMethods {
+    }
+
+
     // TODO: edge cases from e2e tests
 
 

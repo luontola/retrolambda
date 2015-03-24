@@ -192,13 +192,20 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         ClassInfo c = getClass(type);
         Map<MethodSignature, MethodInfo> methods = new HashMap<>();
 
+        // in reverse priority order:
+        // - default methods
         for (Type iface : c.interfaces) {
             for (MethodInfo m : getMethods(iface)) {
                 methods.put(m.signature, m);
             }
         }
-
-        // the current class' methods override methods from interfaces
+        // - superclass methods
+        if (c.superclass != null) {
+            for (MethodInfo m : getMethods(c.superclass)) {
+                methods.put(m.signature, m);
+            }
+        }
+        // - own methods
         for (MethodInfo m : c.getMethods()) {
             methods.put(m.signature, m);
         }
