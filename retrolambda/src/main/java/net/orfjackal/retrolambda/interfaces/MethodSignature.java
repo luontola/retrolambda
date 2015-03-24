@@ -13,7 +13,7 @@ public class MethodSignature {
     public final String name;
     public final String desc;
 
-    public MethodSignature(String desc, String name) {
+    public MethodSignature(String name, String desc) {
         this.name = name;
         this.desc = desc;
     }

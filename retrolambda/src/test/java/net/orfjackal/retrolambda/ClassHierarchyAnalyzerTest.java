@@ -82,6 +82,83 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
+    // Method inheritance
+
+    @Test
+    public void abstract_interface_method_inherited_and_implemented() {
+        analyze(Interface.class,
+                ChildInterface.class,
+                InterfaceImplementer.class);
+
+        assertThat("original", analyzer.getMethods(Type.getType(Interface.class)),
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract())));
+
+        assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildInterface.class)),
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract())));
+
+        assertThat("implements", analyzer.getMethods(Type.getType(InterfaceImplementer.class)),
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Concrete())));
+    }
+
+    @Test
+    public void interface_method_types() {
+        analyze(InterfaceMethodTypes.class);
+
+        assertThat(analyzer.getMethods(Type.getType(InterfaceMethodTypes.class)),
+                containsInAnyOrder(
+                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                                new MethodRef(InterfaceMethodTypes$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$InterfaceMethodTypes;)V")))));
+    }
+
+    @Test
+    public void class_method_types() {
+        analyze(ClassMethodTypes.class);
+
+        // TODO: make a difference between abstract and concrete instance methods?
+        // An abstract instance method will probably take precedence over a default method,
+        // so our algorithm might require abstract instance methods to be considered same as concrete.
+        assertThat(analyzer.getMethods(Type.getType(ClassMethodTypes.class)),
+                containsInAnyOrder(
+                        new MethodInfo("abstractMethod", "()V", new MethodKind.Concrete()),
+                        new MethodInfo("instanceMethod", "()V", new MethodKind.Concrete())));
+    }
+
+    @Test
+    public void default_method_overridden_and_abstracted() {
+        analyze(HasDefaultMethods.class,
+                DoesNotOverrideDefaultMethods.class,
+                OverridesDefaultMethods.class,
+                AbstractsDefaultMethods.class);
+
+        assertThat("original", analyzer.getMethods(Type.getType(HasDefaultMethods.class)),
+                containsInAnyOrder(
+                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                                new MethodRef(HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$HasDefaultMethods;)V")))));
+
+        assertThat("inherits unchanged", analyzer.getMethods(Type.getType(DoesNotOverrideDefaultMethods.class)),
+                containsInAnyOrder(
+                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                                new MethodRef(HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$HasDefaultMethods;)V")))));
+
+        assertThat("changes default impl", analyzer.getMethods(Type.getType(OverridesDefaultMethods.class)),
+                containsInAnyOrder(
+                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                                new MethodRef(OverridesDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OverridesDefaultMethods;)V")))));
+
+        assertThat("makes abstract", analyzer.getMethods(Type.getType(AbstractsDefaultMethods.class)),
+                containsInAnyOrder(
+                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", new MethodKind.Abstract())));
+    }
+
+    // TODO: superclasses
+    // TODO: edge cases from e2e tests
+
+
     // Method relocations
 
     @Test

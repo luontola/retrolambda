@@ -44,9 +44,10 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                MethodRef method = new MethodRef(owner, name, desc);
-                // FIXME: skip static methods
-                c.addMethod(method);
+                if (name.equals("<init>") || Flags.hasFlag(access, ACC_STATIC)) {
+                    return null;
+                }
+                c.addMethod(new MethodRef(owner, name, desc), new MethodKind.Concrete());
 
                 // XXX: backporting Retrolambda fails if we remove this; it tries backporting a lambda while backporting a lambda
                 Runnable r = () -> {
@@ -74,13 +75,14 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
                 if (isAbstractMethod(access)) {
                     methodDefaultImpls.put(method, ABSTRACT_METHOD);
-                    c.addMethod(method);
+                    c.addMethod(method, new MethodKind.Abstract());
 
                 } else if (isDefaultMethod(access)) {
                     desc = Bytecode.prependArgumentType(desc, Type.getObjectType(owner));
-                    methodDefaultImpls.put(method, new MethodRef(companion, name, desc));
+                    MethodRef defaultImpl = new MethodRef(companion, name, desc);
+                    methodDefaultImpls.put(method, defaultImpl);
                     c.enableCompanionClass();
-                    c.addMethod(method);
+                    c.addMethod(method, new MethodKind.Default(defaultImpl));
 
                 } else if (isStaticMethod(access)) {
                     relocatedMethods.put(method, new MethodRef(companion, name, desc));
@@ -159,7 +161,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public List<MethodRef> getInterfaceMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
-        results.addAll(getClass(type).getMethods());
+        results.addAll(getClass(type).getMethodRefs());
         for (Type parent : getInterfacesOf(type)) {
             for (MethodRef parentMethod : getInterfaceMethods(parent)) {
                 results.add(parentMethod.withOwner(type.getInternalName()));
@@ -174,7 +176,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         while (classes.containsKey(type)) {
             ClassInfo c = classes.get(type);
             type = c.superclass;
-            results.addAll(getClass(type).getMethods());
+            results.addAll(getClass(type).getMethodRefs());
         }
         return results.stream()
                 .map(MethodRef::getSignature)
@@ -184,5 +186,22 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public Optional<Type> getCompanionClass(Type type) {
         return getClass(type).getCompanionClass();
+    }
+
+    public Collection<MethodInfo> getMethods(Type type) {
+        ClassInfo c = getClass(type);
+        Map<MethodSignature, MethodInfo> methods = new HashMap<>();
+
+        for (Type iface : c.interfaces) {
+            for (MethodInfo m : getMethods(iface)) {
+                methods.put(m.signature, m);
+            }
+        }
+
+        // the current class' methods override methods from interfaces
+        for (MethodInfo m : c.getMethods()) {
+            methods.put(m.signature, m);
+        }
+        return methods.values();
     }
 }

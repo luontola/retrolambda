@@ -20,7 +20,8 @@ public class ClassInfo {
     public final Type type;
     public final Type superclass;
     public final List<Type> interfaces;
-    private final List<MethodRef> methods = new ArrayList<>();
+    private final List<MethodInfo> methods = new ArrayList<>();
+    private final List<MethodRef> methodRefs = new ArrayList<>();
     private Optional<Type> companionClass = Optional.empty();
 
     public ClassInfo() {
@@ -39,12 +40,17 @@ public class ClassInfo {
         this.interfaces = Stream.of(cr.getInterfaces()).map(Type::getObjectType).collect(toList());
     }
 
-    public List<MethodRef> getMethods() {
-        return methods;
+    public List<MethodInfo> getMethods() {
+        return Collections.unmodifiableList(methods);
     }
 
-    public void addMethod(MethodRef method) {
-        methods.add(method);
+    public List<MethodRef> getMethodRefs() {
+        return Collections.unmodifiableList(methodRefs);
+    }
+
+    public void addMethod(MethodRef method, MethodKind kind) {
+        methods.add(new MethodInfo(method.getSignature(), kind));
+        methodRefs.add(method);
     }
 
     public Optional<Type> getCompanionClass() {
