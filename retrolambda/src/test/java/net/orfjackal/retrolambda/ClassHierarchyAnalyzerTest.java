@@ -39,7 +39,7 @@ public class ClassHierarchyAnalyzerTest {
                 InterfaceImplementer.class);
 
         assertThat("Interface", getInterfacesOf(Interface.class), is(empty()));
-        assertThat("ChildInterface", getInterfacesOf(ChildInterface.class), is(Arrays.asList(Interface.class)));
+        assertThat("ChildInterface", getInterfacesOf(ChildInterface.class), is(classList(Interface.class)));
         assertThat("InterfaceImplementer", getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
     }
 

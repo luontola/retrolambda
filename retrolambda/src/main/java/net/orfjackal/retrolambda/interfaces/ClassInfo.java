@@ -8,8 +8,9 @@ import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
 import java.util.*;
+import java.util.stream.Stream;
 
-import static net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer.*;
+import static java.util.stream.Collectors.toList;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 
 public class ClassInfo {
@@ -19,35 +20,39 @@ public class ClassInfo {
     public final Type type;
     public final Type superclass;
     public final List<Type> interfaces;
-    public final List<MethodRef> methods = new ArrayList<>();
-    private Type companion;
+    private final List<MethodRef> methods = new ArrayList<>();
+    private Optional<Type> companionClass = Optional.empty();
 
     public ClassInfo() {
         this.reader = null;
         this.access = 0;
         this.type = null;
         this.superclass = null;
-        this.interfaces = new ArrayList<>();
+        this.interfaces = Collections.emptyList();
     }
 
     public ClassInfo(ClassReader cr) {
         this.reader = cr;
         this.access = cr.getAccess();
-        this.type = classNameToType(cr.getClassName());
-        this.superclass = classNameToType(cr.getSuperName());
-        this.interfaces = classNamesToTypes(cr.getInterfaces());
+        this.type = Type.getObjectType(cr.getClassName());
+        this.superclass = Type.getObjectType(cr.getSuperName());
+        this.interfaces = Stream.of(cr.getInterfaces()).map(Type::getObjectType).collect(toList());
+    }
+
+    public List<MethodRef> getMethods() {
+        return methods;
     }
 
     public void addMethod(MethodRef method) {
         methods.add(method);
     }
 
-    public void enableCompanionClass() {
-        this.companion = Type.getObjectType(type.getInternalName() + "$");
+    public Optional<Type> getCompanionClass() {
+        return companionClass;
     }
 
-    public Optional<Type> getCompanionClass() {
-        return Optional.ofNullable(companion);
+    public void enableCompanionClass() {
+        this.companionClass = Optional.of(Type.getObjectType(type.getInternalName() + "$"));
     }
 
     public boolean isClass() {

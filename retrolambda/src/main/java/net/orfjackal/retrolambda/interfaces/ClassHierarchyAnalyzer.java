@@ -8,7 +8,6 @@ import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static org.objectweb.asm.Opcodes.*;
@@ -160,7 +159,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public List<MethodRef> getInterfaceMethods(Type type) {
         Set<MethodRef> results = new LinkedHashSet<>();
-        results.addAll(getClass(type).methods);
+        results.addAll(getClass(type).getMethods());
         for (Type parent : getInterfacesOf(type)) {
             for (MethodRef parentMethod : getInterfaceMethods(parent)) {
                 results.add(parentMethod.withOwner(type.getInternalName()));
@@ -175,7 +174,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         while (classes.containsKey(type)) {
             ClassInfo c = classes.get(type);
             type = c.superclass;
-            results.addAll(getClass(type).methods);
+            results.addAll(getClass(type).getMethods());
         }
         return results.stream()
                 .map(MethodRef::getSignature)
@@ -185,15 +184,5 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public Optional<Type> getCompanionClass(Type type) {
         return getClass(type).getCompanionClass();
-    }
-
-    static List<Type> classNamesToTypes(String[] interfaces) {
-        return Stream.of(interfaces)
-                .map(ClassHierarchyAnalyzer::classNameToType)
-                .collect(toList());
-    }
-
-    static Type classNameToType(String className) {
-        return Type.getType("L" + className + ";");
     }
 }

@@ -9,7 +9,6 @@ import org.objectweb.asm.*;
 
 import java.util.*;
 
-import static net.orfjackal.retrolambda.interfaces.ClassHierarchyAnalyzer.classNameToType;
 import static org.objectweb.asm.Opcodes.*;
 
 public class AddMethodDefaultImplementations extends ClassVisitor {
@@ -40,7 +39,7 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     @Override
     public void visitEnd() {
         for (String anInterface : interfaces) {
-            for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(classNameToType(anInterface))) {
+            for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(Type.getObjectType(anInterface))) {
                 if (!overrides(interfaceMethod.getSignature())) {
                     generateDefaultImplementation(interfaceMethod);
                 }
@@ -58,7 +57,7 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     }
 
     private boolean superclassOverrides(MethodSignature method) {
-        for (MethodSignature superMethod : methodRelocations.getSuperclassMethods(classNameToType(className))) {
+        for (MethodSignature superMethod : methodRelocations.getSuperclassMethods(Type.getObjectType(className))) {
             if (superMethod.equals(method)) {
                 return true;
             }
