@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda.interfaces;
 
 import org.objectweb.asm.Type;
 
-import java.util.List;
+import java.util.*;
 
 public interface MethodRelocations {
 
@@ -18,5 +18,5 @@ public interface MethodRelocations {
 
     List<MethodSignature> getSuperclassMethods(Type className);
 
-    String getCompanionClass(String className);
+    Optional<Type> getCompanionClass(Type type);
 }

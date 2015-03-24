@@ -9,6 +9,8 @@ import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.trywithresources.SwallowSuppressedExceptions;
 import org.objectweb.asm.*;
 
+import java.util.Optional;
+
 public class Transformers {
 
     private final int targetVersion;
@@ -60,13 +62,13 @@ public class Transformers {
     }
 
     public byte[] extractInterfaceCompanion(ClassReader reader) {
-        String companion = methodRelocations.getCompanionClass(reader.getClassName());
-        if (companion == null) {
+        Optional<Type> companion = methodRelocations.getCompanionClass(Type.getObjectType(reader.getClassName()));
+        if (!companion.isPresent()) {
             return null;
         }
         return transform(reader, (next) -> {
             next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
-            next = new ExtractInterfaceCompanionClass(next, companion);
+            next = new ExtractInterfaceCompanionClass(next, companion.get());
             return next;
         });
     }

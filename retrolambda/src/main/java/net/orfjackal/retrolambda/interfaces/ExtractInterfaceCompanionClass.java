@@ -11,10 +11,10 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class ExtractInterfaceCompanionClass extends ClassVisitor {
 
-    private final String companion;
+    private final Type companion;
     private String interfaceName;
 
-    public ExtractInterfaceCompanionClass(ClassVisitor next, String companion) {
+    public ExtractInterfaceCompanionClass(ClassVisitor next, Type companion) {
         super(ASM5, next);
         this.companion = companion;
     }
@@ -22,7 +22,7 @@ public class ExtractInterfaceCompanionClass extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         interfaceName = name;
-        name = companion;
+        name = companion.getInternalName();
         access &= ~ACC_INTERFACE;
         access &= ~ACC_ABSTRACT;
         super.visit(version, access, name, signature, superName, interfaces);

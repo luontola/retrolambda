@@ -20,6 +20,7 @@ public class ClassInfo {
     public final Type superclass;
     public final List<Type> interfaces;
     public final List<MethodRef> methods = new ArrayList<>();
+    private Type companion;
 
     public ClassInfo() {
         this.reader = null;
@@ -35,6 +36,18 @@ public class ClassInfo {
         this.type = classNameToType(cr.getClassName());
         this.superclass = classNameToType(cr.getSuperName());
         this.interfaces = classNamesToTypes(cr.getInterfaces());
+    }
+
+    public void addMethod(MethodRef method) {
+        methods.add(method);
+    }
+
+    public void enableCompanionClass() {
+        this.companion = Type.getObjectType(type.getInternalName() + "$");
+    }
+
+    public Optional<Type> getCompanionClass() {
+        return Optional.ofNullable(companion);
     }
 
     public boolean isClass() {

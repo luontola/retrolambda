@@ -20,7 +20,6 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
-    private final Map<String, String> companionClasses = new HashMap<>();
 
     public void analyze(byte[] bytecode) {
         ClassReader cr = new ClassReader(bytecode);
@@ -48,7 +47,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
                 MethodRef method = new MethodRef(owner, name, desc);
                 // FIXME: skip static methods
-                c.methods.add(method);
+                c.addMethod(method);
 
                 // XXX: backporting Retrolambda fails if we remove this; it tries backporting a lambda while backporting a lambda
                 Runnable r = () -> {
@@ -76,17 +75,17 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
                 if (isAbstractMethod(access)) {
                     methodDefaultImpls.put(method, ABSTRACT_METHOD);
-                    c.methods.add(method);
+                    c.addMethod(method);
 
                 } else if (isDefaultMethod(access)) {
                     desc = Bytecode.prependArgumentType(desc, Type.getObjectType(owner));
                     methodDefaultImpls.put(method, new MethodRef(companion, name, desc));
-                    companionClasses.put(owner, companion);
-                    c.methods.add(method);
+                    c.enableCompanionClass();
+                    c.addMethod(method);
 
                 } else if (isStaticMethod(access)) {
                     relocatedMethods.put(method, new MethodRef(companion, name, desc));
-                    companionClasses.put(owner, companion);
+                    c.enableCompanionClass();
                 }
                 return null;
             }
@@ -184,8 +183,8 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     }
 
     @Override
-    public String getCompanionClass(String className) {
-        return companionClasses.get(className);
+    public Optional<Type> getCompanionClass(Type type) {
+        return getClass(type).getCompanionClass();
     }
 
     static List<Type> classNamesToTypes(String[] interfaces) {

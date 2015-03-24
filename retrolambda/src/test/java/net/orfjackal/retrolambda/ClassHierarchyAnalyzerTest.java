@@ -240,10 +240,10 @@ public class ClassHierarchyAnalyzerTest {
                 HasDefaultMethods.class,
                 ClassMethodTypes.class);
 
-        assertThat("Interface", analyzer.getCompanionClass(Type.getInternalName(Interface.class)), is(nullValue()));
-        assertThat("InterfaceMethodTypes", analyzer.getCompanionClass(Type.getInternalName(InterfaceMethodTypes.class)), is(Type.getInternalName(InterfaceMethodTypes$.class)));
-        assertThat("HasDefaultMethods", analyzer.getCompanionClass(Type.getInternalName(HasDefaultMethods.class)), is(Type.getInternalName(HasDefaultMethods$.class)));
-        assertThat("ClassMethodTypes", analyzer.getCompanionClass(Type.getInternalName(ClassMethodTypes.class)), is(nullValue()));
+        assertThat("Interface", analyzer.getCompanionClass(Type.getType(Interface.class)), is(Optional.empty()));
+        assertThat("InterfaceMethodTypes", analyzer.getCompanionClass(Type.getType(InterfaceMethodTypes.class)), is(Optional.of(Type.getType(InterfaceMethodTypes$.class))));
+        assertThat("HasDefaultMethods", analyzer.getCompanionClass(Type.getType(HasDefaultMethods.class)), is(Optional.of(Type.getType(HasDefaultMethods$.class))));
+        assertThat("ClassMethodTypes", analyzer.getCompanionClass(Type.getType(ClassMethodTypes.class)), is(Optional.empty()));
     }
 
 
@@ -298,7 +298,7 @@ public class ClassHierarchyAnalyzerTest {
 
     private static Class<?> toClass(ClassInfo c) {
         try {
-            return Class.forName(c.type.getClassName().replace('/', '.'));
+            return Class.forName(c.type.getClassName());
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
