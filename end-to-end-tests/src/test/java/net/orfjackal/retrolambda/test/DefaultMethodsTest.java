@@ -134,8 +134,10 @@ public class DefaultMethodsTest {
 
     @Test
     public void implements_original_and_overridden_default_method() {
+        assertThat(new ImplementsOriginal().foo(), is("original"));
         assertThat(new ImplementsOriginalAndOverriddenDefault().foo(), is("overridden"));
         assertThat(new ImplementsOverriddenAndOriginalDefault().foo(), is("overridden"));
+        assertThat(new ExtendsImplementsOriginalAndImplementsOverriddenDefault().foo(), is("overridden"));
     }
 
     private interface OriginalDefault {
@@ -151,10 +153,16 @@ public class DefaultMethodsTest {
         }
     }
 
+    private class ImplementsOriginal implements OriginalDefault {
+    }
+
     private class ImplementsOriginalAndOverriddenDefault implements OriginalDefault, OverriddenDefault {
     }
 
     private class ImplementsOverriddenAndOriginalDefault implements OverriddenDefault, OriginalDefault {
+    }
+
+    private class ExtendsImplementsOriginalAndImplementsOverriddenDefault extends ImplementsOriginal implements OverriddenDefault {
     }
 
 

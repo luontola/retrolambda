@@ -307,15 +307,23 @@ public class ClassHierarchyAnalyzerTest {
     public void implements_original_and_overridden_default_method() {
         analyze(OriginalDefault.class,
                 OverriddenDefault.class,
+                ImplementsOriginal.class,
                 ImplementsOriginalAndOverriddenDefault.class,
-                ImplementsOverriddenAndOriginalDefault.class);
+                ImplementsOverriddenAndOriginalDefault.class,
+                ExtendsImplementsOriginalAndImplementsOverriddenDefault.class);
 
+        MethodInfo original = new MethodInfo("foo", "()V", OriginalDefault.class, new MethodKind.Default(
+                new MethodRef(OriginalDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OriginalDefault;)V")));
         MethodInfo overridden = new MethodInfo("foo", "()V", OverriddenDefault.class, new MethodKind.Default(
                 new MethodRef(OverriddenDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OverriddenDefault;)V")));
 
+        assertThat("implements original", analyzer.getMethods(Type.getType(ImplementsOriginal.class)),
+                containsInAnyOrder(original));
         assertThat("implements original and overridden", analyzer.getMethods(Type.getType(ImplementsOriginalAndOverriddenDefault.class)),
                 containsInAnyOrder(overridden));
         assertThat("implements overridden and original", analyzer.getMethods(Type.getType(ImplementsOverriddenAndOriginalDefault.class)),
+                containsInAnyOrder(overridden));
+        assertThat("extends implementor of original and implements overridden", analyzer.getMethods(Type.getType(ExtendsImplementsOriginalAndImplementsOverriddenDefault.class)),
                 containsInAnyOrder(overridden));
     }
 
@@ -336,10 +344,16 @@ public class ClassHierarchyAnalyzerTest {
     private interface OverriddenDefault$ {
     }
 
+    private class ImplementsOriginal implements OriginalDefault {
+    }
+
     private class ImplementsOriginalAndOverriddenDefault implements OriginalDefault, OverriddenDefault {
     }
 
     private class ImplementsOverriddenAndOriginalDefault implements OverriddenDefault, OriginalDefault {
+    }
+
+    private class ExtendsImplementsOriginalAndImplementsOverriddenDefault extends ImplementsOriginal implements OverriddenDefault {
     }
 
 

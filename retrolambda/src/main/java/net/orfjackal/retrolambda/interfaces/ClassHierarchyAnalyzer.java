@@ -164,7 +164,9 @@ public class ClassHierarchyAnalyzer {
         // - superclass methods
         if (c.superclass != null) {
             for (MethodInfo m : getMethods(c.superclass)) {
-                methods.put(m.signature, m);
+                if (!isAlreadyInherited(m, methods)) {
+                    methods.put(m.signature, m);
+                }
             }
         }
         // - own methods
