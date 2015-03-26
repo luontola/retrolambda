@@ -7,16 +7,12 @@ package net.orfjackal.retrolambda.interfaces;
 import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
 
-import java.util.*;
-
 import static org.objectweb.asm.Opcodes.*;
 
 public class AddMethodDefaultImplementations extends ClassVisitor {
 
     private final MethodRelocations methodRelocations;
     private String className;
-    private String[] interfaces;
-    private final Set<MethodSignature> methods = new HashSet<>();
 
     public AddMethodDefaultImplementations(ClassVisitor next, MethodRelocations methodRelocations) {
         super(ASM5, next);
@@ -26,47 +22,16 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         this.className = name;
-        this.interfaces = interfaces;
         super.visit(version, access, name, signature, superName, interfaces);
     }
 
     @Override
-    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        methods.add(new MethodSignature(name, desc));
-        return super.visitMethod(access, name, desc, signature, exceptions);
-    }
-
-    @Override
     public void visitEnd() {
-        for (String anInterface : interfaces) {
-            for (MethodRef interfaceMethod : methodRelocations.getInterfaceMethods(Type.getObjectType(anInterface))) {
-                if (!overrides(interfaceMethod.getSignature())) {
-                    generateDefaultImplementation(interfaceMethod);
-                }
-            }
+        for (MethodInfo method : methodRelocations.getDefaultMethods(Type.getObjectType(className))) {
+            MethodRef interfaceMethod = method.toMethodRef();
+            MethodRef defaultImpl = ((MethodKind.Default) method.kind).defaultImpl;
+            Bytecode.generateDelegateMethod(cv, ACC_PUBLIC | ACC_SYNTHETIC, interfaceMethod.toHandle(H_INVOKEVIRTUAL), defaultImpl.toHandle(H_INVOKESTATIC));
         }
         super.visitEnd();
-    }
-
-    private boolean overrides(MethodSignature method) {
-        return thisOverrides(method) || superclassOverrides(method);
-    }
-
-    private boolean thisOverrides(MethodSignature method) {
-        return methods.contains(method);
-    }
-
-    private boolean superclassOverrides(MethodSignature method) {
-        for (MethodSignature superMethod : methodRelocations.getSuperclassMethods(Type.getObjectType(className))) {
-            if (superMethod.equals(method)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void generateDefaultImplementation(MethodRef interfaceMethod) {
-        MethodRef impl = methodRelocations.getMethodDefaultImplementation(interfaceMethod);
-        Bytecode.generateDelegateMethod(cv, ACC_PUBLIC | ACC_SYNTHETIC, interfaceMethod.toHandle(H_INVOKEVIRTUAL), impl.toHandle(H_INVOKESTATIC));
     }
 }

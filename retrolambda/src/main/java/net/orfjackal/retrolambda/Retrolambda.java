@@ -55,12 +55,19 @@ public class Retrolambda {
                 }
             });
 
+            // Because Transformers.backportLambdaClass() analyzes the lambda class,
+            // adding it to the analyzer's list of classes, we must take care to
+            // use the list of classes before that happened, or else we might accidentally
+            // overwrite the lambda class.
+            List<ClassInfo> interfaces = analyzer.getInterfaces();
+            List<ClassInfo> classes = analyzer.getClasses();
+
             List<byte[]> transformed = new ArrayList<>();
-            for (ClassInfo c : analyzer.getInterfaces()) {
+            for (ClassInfo c : interfaces) {
                 transformed.add(transformers.extractInterfaceCompanion(c.reader));
                 transformed.add(transformers.backportInterface(c.reader));
             }
-            for (ClassInfo c : analyzer.getClasses()) {
+            for (ClassInfo c : classes) {
                 transformed.add(transformers.backportClass(c.reader));
             }
 

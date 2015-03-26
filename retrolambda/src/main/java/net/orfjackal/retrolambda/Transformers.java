@@ -24,6 +24,10 @@ public class Transformers {
     public byte[] backportLambdaClass(ClassReader reader) {
         return transform(reader, (next) -> {
             if (FeatureToggles.DEFAULT_METHODS == 2) {
+                // Lambda classes are generated dynamically, so they were not
+                // part of the original analytics and must be analyzed now,
+                // in case they implement interfaces with default methods.
+                methodRelocations.analyze(reader);
                 next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
                 next = new AddMethodDefaultImplementations(next, methodRelocations);
             } else {

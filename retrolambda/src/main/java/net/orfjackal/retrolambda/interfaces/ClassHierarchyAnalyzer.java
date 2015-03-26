@@ -20,9 +20,13 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
 
+    @Override
     public void analyze(byte[] bytecode) {
-        ClassReader cr = new ClassReader(bytecode);
+        analyze(new ClassReader(bytecode));
+    }
 
+    @Override
+    public void analyze(ClassReader cr) {
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
 
@@ -186,6 +190,13 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
     @Override
     public Optional<Type> getCompanionClass(Type type) {
         return getClass(type).getCompanionClass();
+    }
+
+    @Override
+    public List<MethodInfo> getDefaultMethods(Type type) {
+        return getMethods(type).stream()
+                .filter(m -> m.kind instanceof MethodKind.Default)
+                .collect(toList());
     }
 
     public Collection<MethodInfo> getMethods(Type type) {

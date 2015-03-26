@@ -25,6 +25,10 @@ public class MethodInfo {
         this.kind = kind;
     }
 
+    public MethodRef toMethodRef() {
+        return new MethodRef(owner.getInternalName(), signature.name, signature.desc);
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof MethodInfo)) {

@@ -4,11 +4,15 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import org.objectweb.asm.Type;
+import org.objectweb.asm.*;
 
 import java.util.*;
 
 public interface MethodRelocations {
+
+    void analyze(byte[] bytecode);
+
+    void analyze(ClassReader reader);
 
     MethodRef getMethodCallTarget(MethodRef original);
 
@@ -19,4 +23,6 @@ public interface MethodRelocations {
     List<MethodSignature> getSuperclassMethods(Type className);
 
     Optional<Type> getCompanionClass(Type type);
+
+    List<MethodInfo> getDefaultMethods(Type className);
 }
