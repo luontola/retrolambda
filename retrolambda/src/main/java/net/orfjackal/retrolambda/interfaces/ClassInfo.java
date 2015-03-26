@@ -8,9 +8,7 @@ import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
 import java.util.*;
-import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
 
 public class ClassInfo {
@@ -19,9 +17,8 @@ public class ClassInfo {
     private final int access;
     public final Type type;
     public final Type superclass;
-    public final List<Type> interfaces;
+    private final List<Type> interfaces = new ArrayList<>();
     private final List<MethodInfo> methods = new ArrayList<>();
-    private final List<MethodRef> methodRefs = new ArrayList<>();
     private Optional<Type> companionClass = Optional.empty();
 
     public ClassInfo() {
@@ -29,7 +26,6 @@ public class ClassInfo {
         this.access = 0;
         this.type = null;
         this.superclass = null;
-        this.interfaces = Collections.emptyList();
     }
 
     public ClassInfo(ClassReader cr) {
@@ -37,20 +33,21 @@ public class ClassInfo {
         this.access = cr.getAccess();
         this.type = Type.getObjectType(cr.getClassName());
         this.superclass = Type.getObjectType(cr.getSuperName());
-        this.interfaces = Stream.of(cr.getInterfaces()).map(Type::getObjectType).collect(toList());
+        for (String iface : cr.getInterfaces()) {
+            this.interfaces.add(Type.getObjectType(iface));
+        }
+    }
+
+    public List<Type> getInterfaces() {
+        return Collections.unmodifiableList(interfaces);
     }
 
     public List<MethodInfo> getMethods() {
         return Collections.unmodifiableList(methods);
     }
 
-    public List<MethodRef> getMethodRefs() {
-        return Collections.unmodifiableList(methodRefs);
-    }
-
     public void addMethod(MethodRef method, MethodKind kind) {
         methods.add(new MethodInfo(method.getSignature(), Type.getObjectType(method.owner), kind));
-        methodRefs.add(method);
     }
 
     public Optional<Type> getCompanionClass() {

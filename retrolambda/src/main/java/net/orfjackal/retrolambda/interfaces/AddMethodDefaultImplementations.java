@@ -11,12 +11,12 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class AddMethodDefaultImplementations extends ClassVisitor {
 
-    private final MethodRelocations methodRelocations;
+    private final ClassHierarchyAnalyzer analyzer;
     private String className;
 
-    public AddMethodDefaultImplementations(ClassVisitor next, MethodRelocations methodRelocations) {
+    public AddMethodDefaultImplementations(ClassVisitor next, ClassHierarchyAnalyzer analyzer) {
         super(ASM5, next);
-        this.methodRelocations = methodRelocations;
+        this.analyzer = analyzer;
     }
 
     @Override
@@ -27,10 +27,11 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
 
     @Override
     public void visitEnd() {
-        for (MethodInfo method : methodRelocations.getDefaultMethods(Type.getObjectType(className))) {
-            MethodRef interfaceMethod = method.toMethodRef();
-            MethodRef defaultImpl = ((MethodKind.Default) method.kind).defaultImpl;
-            Bytecode.generateDelegateMethod(cv, ACC_PUBLIC | ACC_SYNTHETIC, interfaceMethod.toHandle(H_INVOKEVIRTUAL), defaultImpl.toHandle(H_INVOKESTATIC));
+        for (MethodInfo method : analyzer.getDefaultMethods(Type.getObjectType(className))) {
+            Bytecode.generateDelegateMethod(cv,
+                    ACC_PUBLIC | ACC_SYNTHETIC,
+                    method.toMethodRef().toHandle(H_INVOKEVIRTUAL),
+                    method.getDefaultMethodImpl().toHandle(H_INVOKESTATIC));
         }
         super.visitEnd();
     }

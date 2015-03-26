@@ -11,7 +11,7 @@ import java.util.Objects;
 
 public final class MethodRef {
 
-    // TODO: replace MethodRef with ASM's Handle
+    // TODO: replace MethodRef with ASM's Handle, or merge with MethodInfo?
 
     public final String owner;
     public final String name;
@@ -26,13 +26,9 @@ public final class MethodRef {
         this.name = name;
         this.desc = desc;
     }
-    
+
     public MethodSignature getSignature() {
         return new MethodSignature(name, desc);
-    }
-
-    public MethodRef withOwner(String newOwner) {
-        return new MethodRef(newOwner, name, desc);
     }
 
     public Handle toHandle(int tag) {

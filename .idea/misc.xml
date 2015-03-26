@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+    <entry_points version="2.0">
+      <entry_point TYPE="method" FQNAME="net.orfjackal.retrolambda.PreMain void premain(java.lang.String agentArgs, java.lang.instrument.Instrumentation inst)" />
+    </entry_points>
     <list size="3">
       <item index="0" class="java.lang.String" itemvalue="org.apache.maven.plugins.annotations.Component" />
       <item index="1" class="java.lang.String" itemvalue="org.apache.maven.plugins.annotations.Mojo" />
@@ -74,4 +76,3 @@
     </GetOptions>
   </component>
 </project>
-

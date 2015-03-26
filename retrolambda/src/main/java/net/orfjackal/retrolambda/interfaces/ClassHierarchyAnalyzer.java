@@ -12,20 +12,15 @@ import java.util.*;
 import static java.util.stream.Collectors.toList;
 import static org.objectweb.asm.Opcodes.*;
 
-public class ClassHierarchyAnalyzer implements MethodRelocations {
-
-    private static final MethodRef ABSTRACT_METHOD = new MethodRef("", "", "");
+public class ClassHierarchyAnalyzer {
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
-    private final Map<MethodRef, MethodRef> methodDefaultImpls = new HashMap<>();
 
-    @Override
     public void analyze(byte[] bytecode) {
         analyze(new ClassReader(bytecode));
     }
 
-    @Override
     public void analyze(ClassReader cr) {
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
@@ -78,13 +73,10 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
                 MethodRef method = new MethodRef(owner, name, desc);
 
                 if (isAbstractMethod(access)) {
-                    methodDefaultImpls.put(method, ABSTRACT_METHOD);
                     c.addMethod(method, new MethodKind.Abstract());
 
                 } else if (isDefaultMethod(access)) {
-                    desc = Bytecode.prependArgumentType(desc, Type.getObjectType(owner));
-                    MethodRef defaultImpl = new MethodRef(companion, name, desc);
-                    methodDefaultImpls.put(method, defaultImpl);
+                    MethodRef defaultImpl = new MethodRef(companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner)));
                     c.enableCompanionClass();
                     c.addMethod(method, new MethodKind.Default(defaultImpl));
 
@@ -128,71 +120,24 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         return classes.getOrDefault(type, new ClassInfo());
     }
 
-    public List<Type> getInterfacesOf(Type type) {
-        return getClass(type).interfaces;
-    }
-
-    @Override
     public MethodRef getMethodCallTarget(MethodRef original) {
         return relocatedMethods.getOrDefault(original, original);
     }
 
-    @Override
     public MethodRef getMethodDefaultImplementation(MethodRef interfaceMethod) {
-        MethodRef impl;
-        List<Type> currentInterfaces = new ArrayList<>();
-        List<Type> parentInterfaces = new ArrayList<>();
-        currentInterfaces.add(Type.getObjectType(interfaceMethod.owner));
-
-        do {
-            for (Type anInterface : currentInterfaces) {
-                impl = methodDefaultImpls.get(interfaceMethod.withOwner(anInterface.getInternalName()));
-                if (impl == ABSTRACT_METHOD) {
-                    return null;
-                }
-                if (impl != null) {
-                    return impl;
-                }
-                parentInterfaces.addAll(getInterfacesOf(anInterface));
+        MethodSignature signature = interfaceMethod.getSignature();
+        for (MethodInfo method : getDefaultMethods(Type.getObjectType(interfaceMethod.owner))) {
+            if (method.signature.equals(signature)) {
+                return method.getDefaultMethodImpl();
             }
-            currentInterfaces = parentInterfaces;
-            parentInterfaces = new ArrayList<>();
-        } while (!currentInterfaces.isEmpty());
-
+        }
         return null;
     }
 
-    @Override
-    public List<MethodRef> getInterfaceMethods(Type type) {
-        Set<MethodRef> results = new LinkedHashSet<>();
-        results.addAll(getClass(type).getMethodRefs());
-        for (Type parent : getInterfacesOf(type)) {
-            for (MethodRef parentMethod : getInterfaceMethods(parent)) {
-                results.add(parentMethod.withOwner(type.getInternalName()));
-            }
-        }
-        return new ArrayList<>(results);
-    }
-
-    @Override
-    public List<MethodSignature> getSuperclassMethods(Type type) {
-        Set<MethodRef> results = new LinkedHashSet<>();
-        while (classes.containsKey(type)) {
-            ClassInfo c = classes.get(type);
-            type = c.superclass;
-            results.addAll(getClass(type).getMethodRefs());
-        }
-        return results.stream()
-                .map(MethodRef::getSignature)
-                .collect(toList());
-    }
-
-    @Override
     public Optional<Type> getCompanionClass(Type type) {
         return getClass(type).getCompanionClass();
     }
 
-    @Override
     public List<MethodInfo> getDefaultMethods(Type type) {
         return getMethods(type).stream()
                 .filter(m -> m.kind instanceof MethodKind.Default)
@@ -205,7 +150,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
 
         // in reverse priority order:
         // - default methods
-        for (Type iface : c.interfaces) {
+        for (Type iface : c.getInterfaces()) {
             for (MethodInfo m : getMethods(iface)) {
                 if (!isAlreadyInherited(m, methods)) {
                     methods.put(m.signature, m);
@@ -234,7 +179,7 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         assert getClass(interfaceType).isInterface() : "not interface: " + interfaceType;
         HashSet<Type> results = new HashSet<>();
         results.add(interfaceType);
-        for (Type parentInterface : getClass(interfaceType).interfaces) {
+        for (Type parentInterface : getClass(interfaceType).getInterfaces()) {
             results.addAll(getAllInterfaces(parentInterface));
         }
         return results;

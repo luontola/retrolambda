@@ -14,11 +14,11 @@ import java.util.Optional;
 public class Transformers {
 
     private final int targetVersion;
-    private final MethodRelocations methodRelocations;
+    private final ClassHierarchyAnalyzer analyzer;
 
-    public Transformers(int targetVersion, MethodRelocations methodRelocations) {
+    public Transformers(int targetVersion, ClassHierarchyAnalyzer analyzer) {
         this.targetVersion = targetVersion;
-        this.methodRelocations = methodRelocations;
+        this.analyzer = analyzer;
     }
 
     public byte[] backportLambdaClass(ClassReader reader) {
@@ -27,11 +27,11 @@ public class Transformers {
                 // Lambda classes are generated dynamically, so they were not
                 // part of the original analytics and must be analyzed now,
                 // in case they implement interfaces with default methods.
-                methodRelocations.analyze(reader);
-                next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
-                next = new AddMethodDefaultImplementations(next, methodRelocations);
+                analyzer.analyze(reader);
+                next = new UpdateRelocatedMethodInvocations(next, analyzer);
+                next = new AddMethodDefaultImplementations(next, analyzer);
             } else {
-                next = new UpdateRelocatedMethodInvocations(next, methodRelocations); // needed for lambdas in an interface's constant initializer
+                next = new UpdateRelocatedMethodInvocations(next, analyzer); // needed for lambdas in an interface's constant initializer
             }
             next = new BackportLambdaClass(next);
             return next;
@@ -41,8 +41,8 @@ public class Transformers {
     public byte[] backportClass(ClassReader reader) {
         return transform(reader, (next) -> {
             if (FeatureToggles.DEFAULT_METHODS == 2) {
-                next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
-                next = new AddMethodDefaultImplementations(next, methodRelocations);
+                next = new UpdateRelocatedMethodInvocations(next, analyzer);
+                next = new AddMethodDefaultImplementations(next, analyzer);
             }
             next = new BackportLambdaInvocations(next);
             return next;
@@ -54,7 +54,7 @@ public class Transformers {
             if (FeatureToggles.DEFAULT_METHODS == 2) {
                 next = new RemoveStaticMethods(next);
                 next = new RemoveDefaultMethodBodies(next);
-                next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
+                next = new UpdateRelocatedMethodInvocations(next, analyzer);
             } else {
                 next = new RemoveStaticMethods(next); // needed for lambdas in an interface's constant initializer
                 next = new WarnAboutDefaultAndStaticMethods(next);
@@ -66,12 +66,12 @@ public class Transformers {
     }
 
     public byte[] extractInterfaceCompanion(ClassReader reader) {
-        Optional<Type> companion = methodRelocations.getCompanionClass(Type.getObjectType(reader.getClassName()));
+        Optional<Type> companion = analyzer.getCompanionClass(Type.getObjectType(reader.getClassName()));
         if (!companion.isPresent()) {
             return null;
         }
         return transform(reader, (next) -> {
-            next = new UpdateRelocatedMethodInvocations(next, methodRelocations);
+            next = new UpdateRelocatedMethodInvocations(next, analyzer);
             next = new ExtractInterfaceCompanionClass(next, companion.get());
             return next;
         });

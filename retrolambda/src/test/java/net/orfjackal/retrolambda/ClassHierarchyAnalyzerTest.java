@@ -344,45 +344,6 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
-    // Older tests
-
-    @Test
-    public void finds_implemented_interfaces() {
-        analyze(Interface.class,
-                ChildInterface.class,
-                InterfaceImplementer.class);
-
-        assertThat("Interface", getInterfacesOf(Interface.class), is(empty()));
-        assertThat("ChildInterface", getInterfacesOf(ChildInterface.class), is(classList(Interface.class)));
-        assertThat("InterfaceImplementer", getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
-    }
-
-    @Test
-    public void finds_interface_methods() {
-        analyze(InterfaceMethodTypes.class);
-
-        assertThat(analyzer.getInterfaceMethods(Type.getType(InterfaceMethodTypes.class)),
-                containsInAnyOrder(
-                        new MethodRef(InterfaceMethodTypes.class, "abstractMethod", voidMethod()),
-                        new MethodRef(InterfaceMethodTypes.class, "defaultMethod", voidMethod()))); // all but staticMethod
-    }
-
-    @Test
-    public void finds_inherited_interface_methods() {
-        analyze(ChildInterface.class,
-                Interface.class);
-
-        assertThat(analyzer.getInterfaceMethods(Type.getType(ChildInterface.class)),
-                containsInAnyOrder(
-                        new MethodRef(ChildInterface.class, "abstractMethod", voidMethod())));
-    }
-
-    @Test
-    public void does_not_find_interface_methods_of_not_analyzed_interfaces() {
-        assertThat(analyzer.getInterfaceMethods(Type.getType(Interface.class)), is(empty()));
-    }
-
-
     // Method relocations
 
     @Test
@@ -515,10 +476,6 @@ public class ClassHierarchyAnalyzerTest {
 
     private List<Class<?>> getClasses() {
         return infosToClasses(analyzer.getClasses());
-    }
-
-    private List<Class<?>> getInterfacesOf(Class<?> clazz) {
-        return typesToClasses(analyzer.getInterfacesOf(Type.getType(clazz)));
     }
 
 

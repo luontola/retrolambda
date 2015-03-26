@@ -25,6 +25,10 @@ public class MethodInfo {
         this.kind = kind;
     }
 
+    public MethodRef getDefaultMethodImpl() {
+        return ((MethodKind.Default) kind).defaultImpl;
+    }
+
     public MethodRef toMethodRef() {
         return new MethodRef(owner.getInternalName(), signature.name, signature.desc);
     }
