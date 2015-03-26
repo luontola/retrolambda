@@ -304,7 +304,44 @@ public class ClassHierarchyAnalyzerTest {
     }
 
 
-    // TODO: edge cases from e2e tests
+    @Test
+    public void implements_original_and_overridden_default_method() {
+        analyze(OriginalDefault.class,
+                OverriddenDefault.class,
+                ImplementsOriginalAndOverriddenDefault.class,
+                ImplementsOverriddenAndOriginalDefault.class);
+
+        MethodInfo overridden = new MethodInfo("foo", "()V", OverriddenDefault.class, new MethodKind.Default(
+                new MethodRef(OverriddenDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OverriddenDefault;)V")));
+
+        assertThat("implements original and overridden", analyzer.getMethods(Type.getType(ImplementsOriginalAndOverriddenDefault.class)),
+                containsInAnyOrder(overridden));
+        assertThat("implements overridden and original", analyzer.getMethods(Type.getType(ImplementsOverriddenAndOriginalDefault.class)),
+                containsInAnyOrder(overridden));
+    }
+
+    private interface OriginalDefault {
+        default void foo() {
+        }
+    }
+
+    private interface OriginalDefault$ {
+    }
+
+    private interface OverriddenDefault extends OriginalDefault {
+        @Override
+        default void foo() {
+        }
+    }
+
+    private interface OverriddenDefault$ {
+    }
+
+    private class ImplementsOriginalAndOverriddenDefault implements OriginalDefault, OverriddenDefault {
+    }
+
+    private class ImplementsOverriddenAndOriginalDefault implements OverriddenDefault, OriginalDefault {
+    }
 
 
     // Older tests

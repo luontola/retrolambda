@@ -134,27 +134,27 @@ public class DefaultMethodsTest {
 
     @Test
     public void implements_original_and_overridden_default_method() {
-        assertThat(new AB().foo(), is("overridden"));
-        assertThat(new BA().foo(), is("overridden"));
+        assertThat(new ImplementsOriginalAndOverriddenDefault().foo(), is("overridden"));
+        assertThat(new ImplementsOverriddenAndOriginalDefault().foo(), is("overridden"));
     }
 
-    private interface A {
+    private interface OriginalDefault {
         default String foo() {
             return "original";
         }
     }
 
-    private interface B extends A {
+    private interface OverriddenDefault extends OriginalDefault {
         @Override
         default String foo() {
             return "overridden";
         }
     }
 
-    private class AB implements A, B {
+    private class ImplementsOriginalAndOverriddenDefault implements OriginalDefault, OverriddenDefault {
     }
 
-    private class BA implements B, A {
+    private class ImplementsOverriddenAndOriginalDefault implements OverriddenDefault, OriginalDefault {
     }
 
 
