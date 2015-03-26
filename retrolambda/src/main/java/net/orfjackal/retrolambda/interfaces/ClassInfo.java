@@ -49,7 +49,7 @@ public class ClassInfo {
     }
 
     public void addMethod(MethodRef method, MethodKind kind) {
-        methods.add(new MethodInfo(method.getSignature(), kind));
+        methods.add(new MethodInfo(method.getSignature(), Type.getObjectType(method.owner), kind));
         methodRefs.add(method);
     }
 

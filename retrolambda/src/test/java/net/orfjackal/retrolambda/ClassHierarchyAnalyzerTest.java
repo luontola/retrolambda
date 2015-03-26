@@ -42,13 +42,13 @@ public class ClassHierarchyAnalyzerTest {
                 InterfaceImplementer.class);
 
         assertThat("original", analyzer.getMethods(Type.getType(Interface.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract())));
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildInterface.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract())));
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
 
         assertThat("implements", analyzer.getMethods(Type.getType(InterfaceImplementer.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Concrete())));
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", InterfaceImplementer.class, new MethodKind.Concrete())));
     }
 
     private interface Interface {
@@ -71,8 +71,8 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat(analyzer.getMethods(Type.getType(InterfaceMethodTypes.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
-                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                        new MethodInfo("abstractMethod", "()V", InterfaceMethodTypes.class, new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", InterfaceMethodTypes.class, new MethodKind.Default(
                                 new MethodRef(InterfaceMethodTypes$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$InterfaceMethodTypes;)V")))));
     }
 
@@ -85,8 +85,8 @@ public class ClassHierarchyAnalyzerTest {
         // so our algorithm might require abstract instance methods to be considered same as concrete.
         assertThat(analyzer.getMethods(Type.getType(ClassMethodTypes.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", new MethodKind.Concrete()),
-                        new MethodInfo("instanceMethod", "()V", new MethodKind.Concrete())));
+                        new MethodInfo("abstractMethod", "()V", ClassMethodTypes.class, new MethodKind.Concrete()),
+                        new MethodInfo("instanceMethod", "()V", ClassMethodTypes.class, new MethodKind.Concrete())));
     }
 
     private interface InterfaceMethodTypes {
@@ -122,26 +122,26 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat("original", analyzer.getMethods(Type.getType(HasDefaultMethods.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
-                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                        new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", HasDefaultMethods.class, new MethodKind.Default(
                                 new MethodRef(HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$HasDefaultMethods;)V")))));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(DoesNotOverrideDefaultMethods.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
-                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                        new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", HasDefaultMethods.class, new MethodKind.Default(
                                 new MethodRef(HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$HasDefaultMethods;)V")))));
 
         assertThat("changes default impl", analyzer.getMethods(Type.getType(OverridesDefaultMethods.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
-                        new MethodInfo("defaultMethod", "()V", new MethodKind.Default(
+                        new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", OverridesDefaultMethods.class, new MethodKind.Default(
                                 new MethodRef(OverridesDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OverridesDefaultMethods;)V")))));
 
         assertThat("makes abstract", analyzer.getMethods(Type.getType(AbstractsDefaultMethods.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", new MethodKind.Abstract()),
-                        new MethodInfo("defaultMethod", "()V", new MethodKind.Abstract())));
+                        new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
+                        new MethodInfo("defaultMethod", "()V", AbstractsDefaultMethods.class, new MethodKind.Abstract())));
     }
 
     private interface HasDefaultMethods {
@@ -179,11 +179,11 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat("original", analyzer.getMethods(Type.getType(BaseClass.class)),
                 containsInAnyOrder(
-                        new MethodInfo("baseMethod", "()V", new MethodKind.Concrete())));
+                        new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Concrete())));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildClass.class)),
                 containsInAnyOrder(
-                        new MethodInfo("baseMethod", "()V", new MethodKind.Concrete())));
+                        new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Concrete())));
     }
 
     private class BaseClass {
@@ -205,25 +205,25 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat("original", analyzer.getMethods(Type.getType(DefaultMethods.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", new MethodKind.Default(
+                        new MethodInfo("foo", "()V", DefaultMethods.class, new MethodKind.Default(
                                 new MethodRef(DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$DefaultMethods;)V")))));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(InheritsDefault.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", new MethodKind.Default(
+                        new MethodInfo("foo", "()V", DefaultMethods.class, new MethodKind.Default(
                                 new MethodRef(DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$DefaultMethods;)V")))));
 
         assertThat("overrides", analyzer.getMethods(Type.getType(OverridesDefault.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", new MethodKind.Concrete())));
+                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Concrete())));
 
         assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefault.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", new MethodKind.Concrete())));
+                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Concrete())));
 
         assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefaultAndDirectlyImplements.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", new MethodKind.Concrete())));
+                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Concrete())));
     }
 
     private interface DefaultMethods {
@@ -247,6 +247,60 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     class InheritsOverridesDefaultAndDirectlyImplements extends OverridesDefault implements DefaultMethods {
+    }
+
+
+    @Test
+    public void inheriting_same_default_methods_through_many_parent_interfaces() {
+        analyze(SuperOriginal.class,
+                SuperOverridden.class,
+                InheritsOriginal.class,
+                InheritsOverridden.class,
+                InheritsOverriddenAndOriginal.class,
+                InheritsOriginalAndOverridden.class);
+
+        MethodInfo original = new MethodInfo("foo", "()V", SuperOriginal.class, new MethodKind.Default(
+                new MethodRef(SuperOriginal$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$SuperOriginal;)V")));
+        MethodInfo overridden = new MethodInfo("foo", "()V", SuperOverridden.class, new MethodKind.Default(
+                new MethodRef(SuperOverridden$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$SuperOverridden;)V")));
+
+        assertThat("inherits original", analyzer.getMethods(Type.getType(InheritsOriginal.class)),
+                containsInAnyOrder(original));
+        assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridden.class)),
+                containsInAnyOrder(overridden));
+        assertThat("inherits overridden and original", analyzer.getMethods(Type.getType(InheritsOverriddenAndOriginal.class)),
+                containsInAnyOrder(overridden));
+        assertThat("inherits original and overridden", analyzer.getMethods(Type.getType(InheritsOriginalAndOverridden.class)),
+                containsInAnyOrder(overridden));
+    }
+
+    private interface SuperOriginal {
+        default void foo() {
+        }
+    }
+
+    private interface SuperOriginal$ {
+    }
+
+    private interface SuperOverridden extends SuperOriginal {
+        @Override
+        default void foo() {
+        }
+    }
+
+    private interface SuperOverridden$ {
+    }
+
+    private interface InheritsOriginal extends SuperOriginal {
+    }
+
+    private interface InheritsOverridden extends SuperOverridden {
+    }
+
+    private interface InheritsOverriddenAndOriginal extends SuperOverridden, InheritsOriginal {
+    }
+
+    private interface InheritsOriginalAndOverridden extends InheritsOriginal, SuperOverridden {
     }
 
 

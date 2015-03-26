@@ -196,7 +196,9 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
         // - default methods
         for (Type iface : c.interfaces) {
             for (MethodInfo m : getMethods(iface)) {
-                methods.put(m.signature, m);
+                if (!isAlreadyInherited(m, methods)) {
+                    methods.put(m.signature, m);
+                }
             }
         }
         // - superclass methods
@@ -210,5 +212,20 @@ public class ClassHierarchyAnalyzer implements MethodRelocations {
             methods.put(m.signature, m);
         }
         return methods.values();
+    }
+
+    private boolean isAlreadyInherited(MethodInfo subject, Map<MethodSignature, MethodInfo> existingMethods) {
+        MethodInfo existing = existingMethods.get(subject.signature);
+        return existing != null && getAllInterfaces(existing.owner).contains(subject.owner);
+    }
+
+    private Set<Type> getAllInterfaces(Type interfaceType) {
+        assert getClass(interfaceType).isInterface() : "not interface: " + interfaceType;
+        HashSet<Type> results = new HashSet<>();
+        results.add(interfaceType);
+        for (Type parentInterface : getClass(interfaceType).interfaces) {
+            results.addAll(getAllInterfaces(parentInterface));
+        }
+        return results;
     }
 }
