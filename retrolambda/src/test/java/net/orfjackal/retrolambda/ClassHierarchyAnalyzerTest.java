@@ -48,7 +48,7 @@ public class ClassHierarchyAnalyzerTest {
                 containsInAnyOrder(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
 
         assertThat("implements", analyzer.getMethods(Type.getType(InterfaceImplementer.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", InterfaceImplementer.class, new MethodKind.Concrete())));
+                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", InterfaceImplementer.class, new MethodKind.Implemented())));
     }
 
     private interface Interface {
@@ -80,13 +80,12 @@ public class ClassHierarchyAnalyzerTest {
     public void class_method_types() {
         analyze(ClassMethodTypes.class);
 
-        // TODO: make a difference between abstract and concrete instance methods?
-        // An abstract instance method will probably take precedence over a default method,
-        // so our algorithm might require abstract instance methods to be considered same as concrete.
+        // An abstract instance method takes precedence over a default method,
+        // so we handle abstract instance methods the same way as concrete instance methods.
         assertThat(analyzer.getMethods(Type.getType(ClassMethodTypes.class)),
                 containsInAnyOrder(
-                        new MethodInfo("abstractMethod", "()V", ClassMethodTypes.class, new MethodKind.Concrete()),
-                        new MethodInfo("instanceMethod", "()V", ClassMethodTypes.class, new MethodKind.Concrete())));
+                        new MethodInfo("abstractMethod", "()V", ClassMethodTypes.class, new MethodKind.Implemented()),
+                        new MethodInfo("instanceMethod", "()V", ClassMethodTypes.class, new MethodKind.Implemented())));
     }
 
     private interface InterfaceMethodTypes {
@@ -179,11 +178,11 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat("original", analyzer.getMethods(Type.getType(BaseClass.class)),
                 containsInAnyOrder(
-                        new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Concrete())));
+                        new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Implemented())));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildClass.class)),
                 containsInAnyOrder(
-                        new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Concrete())));
+                        new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Implemented())));
     }
 
     private class BaseClass {
@@ -215,15 +214,15 @@ public class ClassHierarchyAnalyzerTest {
 
         assertThat("overrides", analyzer.getMethods(Type.getType(OverridesDefault.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Concrete())));
+                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Implemented())));
 
         assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefault.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Concrete())));
+                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Implemented())));
 
         assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefaultAndDirectlyImplements.class)),
                 containsInAnyOrder(
-                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Concrete())));
+                        new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Implemented())));
     }
 
     private interface DefaultMethods {

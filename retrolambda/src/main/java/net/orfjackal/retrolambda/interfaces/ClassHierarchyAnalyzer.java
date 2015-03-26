@@ -43,10 +43,10 @@ public class ClassHierarchyAnalyzer {
 
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                if (name.equals("<init>") || Flags.hasFlag(access, ACC_STATIC)) {
+                if (isConstructor(name) || isStaticMethod(access)) {
                     return null;
                 }
-                c.addMethod(new MethodRef(owner, name, desc), new MethodKind.Concrete());
+                c.addMethod(new MethodRef(owner, name, desc), new MethodKind.Implemented());
 
                 // XXX: backporting Retrolambda fails if we remove this; it tries backporting a lambda while backporting a lambda
                 Runnable r = () -> {
@@ -86,20 +86,24 @@ public class ClassHierarchyAnalyzer {
                 }
                 return null;
             }
-
-            private boolean isAbstractMethod(int access) {
-                return Flags.hasFlag(access, ACC_ABSTRACT);
-            }
-
-            private boolean isStaticMethod(int access) {
-                return Flags.hasFlag(access, ACC_STATIC);
-            }
-
-            private boolean isDefaultMethod(int access) {
-                return !isAbstractMethod(access)
-                        && !isStaticMethod(access);
-            }
         }, ClassReader.SKIP_CODE);
+    }
+
+    private static boolean isConstructor(String name) {
+        return name.equals("<init>");
+    }
+
+    private static boolean isAbstractMethod(int access) {
+        return Flags.hasFlag(access, ACC_ABSTRACT);
+    }
+
+    private static boolean isStaticMethod(int access) {
+        return Flags.hasFlag(access, ACC_STATIC);
+    }
+
+    private static boolean isDefaultMethod(int access) {
+        return !isAbstractMethod(access)
+                && !isStaticMethod(access);
     }
 
     public List<ClassInfo> getInterfaces() {

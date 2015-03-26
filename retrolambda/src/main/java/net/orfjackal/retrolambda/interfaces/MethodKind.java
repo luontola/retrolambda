@@ -34,12 +34,22 @@ public abstract class MethodKind {
     }
 
 
+    /**
+     * Instance method on a class, regardless of whether it's abstract or non-abstract,
+     * because it will anyways take precedence over inherited interface methods.
+     */
+    public static class Implemented extends MethodKind {
+    }
+
+    /**
+     * Abstract method on an interface.
+     */
     public static class Abstract extends MethodKind {
     }
 
-    public static class Concrete extends MethodKind {
-    }
-
+    /**
+     * Default method on an interface.
+     */
     public static class Default extends MethodKind {
 
         public final MethodRef defaultImpl;
