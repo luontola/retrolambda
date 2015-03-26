@@ -24,61 +24,12 @@ public class ClassHierarchyAnalyzerTest {
     private final ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
 
     @Test
-    public void finds_interfaces_and_classes_separately() {
+    public void lists_interfaces_and_classes_separately() {
         analyze(Interface.class,
                 InterfaceImplementer.class);
 
         assertThat("interfaces", getInterfaces(), is(classList(Interface.class)));
         assertThat("classes", getClasses(), is(classList(InterfaceImplementer.class)));
-    }
-
-    @Test
-    public void finds_implemented_interfaces() {
-        analyze(Interface.class,
-                ChildInterface.class,
-                InterfaceImplementer.class);
-
-        assertThat("Interface", getInterfacesOf(Interface.class), is(empty()));
-        assertThat("ChildInterface", getInterfacesOf(ChildInterface.class), is(classList(Interface.class)));
-        assertThat("InterfaceImplementer", getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
-    }
-
-    @Test
-    public void finds_interface_methods() {
-        analyze(InterfaceMethodTypes.class);
-
-        assertThat(analyzer.getInterfaceMethods(Type.getType(InterfaceMethodTypes.class)),
-                containsInAnyOrder(
-                        new MethodRef(InterfaceMethodTypes.class, "abstractMethod", voidMethod()),
-                        new MethodRef(InterfaceMethodTypes.class, "defaultMethod", voidMethod()))); // all but staticMethod
-    }
-
-    @Test
-    public void finds_inherited_interface_methods() {
-        analyze(ChildInterface.class,
-                Interface.class);
-
-        assertThat(analyzer.getInterfaceMethods(Type.getType(ChildInterface.class)),
-                containsInAnyOrder(
-                        new MethodRef(ChildInterface.class, "abstractMethod", voidMethod())));
-    }
-
-    @Test
-    public void does_not_find_interface_methods_of_not_analyzed_interfaces() {
-        assertThat(analyzer.getInterfaceMethods(Type.getType(Interface.class)), is(empty()));
-    }
-
-    private interface Interface {
-        void abstractMethod();
-    }
-
-    private interface ChildInterface extends Interface {
-    }
-
-    private class InterfaceImplementer implements Interface {
-        @Override
-        public void abstractMethod() {
-        }
     }
 
 
@@ -99,6 +50,20 @@ public class ClassHierarchyAnalyzerTest {
         assertThat("implements", analyzer.getMethods(Type.getType(InterfaceImplementer.class)),
                 containsInAnyOrder(new MethodInfo("abstractMethod", "()V", new MethodKind.Concrete())));
     }
+
+    private interface Interface {
+        void abstractMethod();
+    }
+
+    private interface ChildInterface extends Interface {
+    }
+
+    private class InterfaceImplementer implements Interface {
+        @Override
+        public void abstractMethod() {
+        }
+    }
+
 
     @Test
     public void interface_method_types() {
@@ -123,6 +88,30 @@ public class ClassHierarchyAnalyzerTest {
                         new MethodInfo("abstractMethod", "()V", new MethodKind.Concrete()),
                         new MethodInfo("instanceMethod", "()V", new MethodKind.Concrete())));
     }
+
+    private interface InterfaceMethodTypes {
+        void abstractMethod();
+
+        default void defaultMethod() {
+        }
+
+        static void staticMethod() {
+        }
+    }
+
+    private interface InterfaceMethodTypes$ {
+    }
+
+    private static abstract class ClassMethodTypes {
+        public abstract void abstractMethod();
+
+        public void instanceMethod() {
+        }
+
+        public static void staticMethod() {
+        }
+    }
+
 
     @Test
     public void default_method_overridden_and_abstracted() {
@@ -155,6 +144,34 @@ public class ClassHierarchyAnalyzerTest {
                         new MethodInfo("defaultMethod", "()V", new MethodKind.Abstract())));
     }
 
+    private interface HasDefaultMethods {
+        void abstractMethod();
+
+        default void defaultMethod() {
+        }
+    }
+
+    private interface HasDefaultMethods$ {
+    }
+
+    private interface DoesNotOverrideDefaultMethods extends HasDefaultMethods {
+    }
+
+    private interface OverridesDefaultMethods extends HasDefaultMethods {
+        @Override
+        default void defaultMethod() {
+        }
+    }
+
+    private interface OverridesDefaultMethods$ {
+    }
+
+    private interface AbstractsDefaultMethods extends HasDefaultMethods {
+        @Override
+        void defaultMethod();
+    }
+
+
     @Test
     public void superclass_inheritance() {
         analyze(BaseClass.class,
@@ -176,6 +193,7 @@ public class ClassHierarchyAnalyzerTest {
 
     private class ChildClass extends BaseClass {
     }
+
 
     @Test
     public void overriding_default_methods() {
@@ -235,6 +253,45 @@ public class ClassHierarchyAnalyzerTest {
     // TODO: edge cases from e2e tests
 
 
+    // Older tests
+
+    @Test
+    public void finds_implemented_interfaces() {
+        analyze(Interface.class,
+                ChildInterface.class,
+                InterfaceImplementer.class);
+
+        assertThat("Interface", getInterfacesOf(Interface.class), is(empty()));
+        assertThat("ChildInterface", getInterfacesOf(ChildInterface.class), is(classList(Interface.class)));
+        assertThat("InterfaceImplementer", getInterfacesOf(InterfaceImplementer.class), is(classList(Interface.class)));
+    }
+
+    @Test
+    public void finds_interface_methods() {
+        analyze(InterfaceMethodTypes.class);
+
+        assertThat(analyzer.getInterfaceMethods(Type.getType(InterfaceMethodTypes.class)),
+                containsInAnyOrder(
+                        new MethodRef(InterfaceMethodTypes.class, "abstractMethod", voidMethod()),
+                        new MethodRef(InterfaceMethodTypes.class, "defaultMethod", voidMethod()))); // all but staticMethod
+    }
+
+    @Test
+    public void finds_inherited_interface_methods() {
+        analyze(ChildInterface.class,
+                Interface.class);
+
+        assertThat(analyzer.getInterfaceMethods(Type.getType(ChildInterface.class)),
+                containsInAnyOrder(
+                        new MethodRef(ChildInterface.class, "abstractMethod", voidMethod())));
+    }
+
+    @Test
+    public void does_not_find_interface_methods_of_not_analyzed_interfaces() {
+        assertThat(analyzer.getInterfaceMethods(Type.getType(Interface.class)), is(empty()));
+    }
+
+
     // Method relocations
 
     @Test
@@ -275,29 +332,6 @@ public class ClassHierarchyAnalyzerTest {
         MethodRef target = analyzer.getMethodCallTarget(source);
 
         assertThat(target, is(source));
-    }
-
-    private interface InterfaceMethodTypes {
-        void abstractMethod();
-
-        default void defaultMethod() {
-        }
-
-        static void staticMethod() {
-        }
-    }
-
-    private interface InterfaceMethodTypes$ {
-    }
-
-    private static abstract class ClassMethodTypes {
-        public abstract void abstractMethod();
-
-        public void instanceMethod() {
-        }
-
-        public static void staticMethod() {
-        }
     }
 
 
@@ -354,33 +388,6 @@ public class ClassHierarchyAnalyzerTest {
         MethodRef impl = analyzer.getMethodDefaultImplementation(method);
 
         assertThat(impl, is(nullValue()));
-    }
-
-    private interface HasDefaultMethods {
-        void abstractMethod();
-
-        default void defaultMethod() {
-        }
-    }
-
-    private interface HasDefaultMethods$ {
-    }
-
-    private interface DoesNotOverrideDefaultMethods extends HasDefaultMethods {
-    }
-
-    private interface OverridesDefaultMethods extends HasDefaultMethods {
-        @Override
-        default void defaultMethod() {
-        }
-    }
-
-    private interface OverridesDefaultMethods$ {
-    }
-
-    private interface AbstractsDefaultMethods extends HasDefaultMethods {
-        @Override
-        void defaultMethod();
     }
 
 
