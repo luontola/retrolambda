@@ -49,7 +49,6 @@ public class WarnAboutDefaultAndStaticMethods extends ClassVisitor {
 
     private void printWarning(String methodKind, String methodName) {
         System.out.println("WARNING: The interface " + interfaceName + " has " + methodKind + " \"" + methodName + "\" " +
-                "but the experimental support for them is not enabled " +
-                "(set the environment variable DEFAULT_METHODS=2)");
+                "but backporting default methods is not enabled");
     }
 }

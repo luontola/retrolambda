@@ -46,6 +46,7 @@
         <testJavaHome>${env.JAVA7_HOME}</testJavaHome>
         <testBytecodeTarget>1.7</testBytecodeTarget>
         <testFork>false</testFork>
+        <testDefaultMethods>true</testDefaultMethods>
     </properties>
 
     <prerequisites>

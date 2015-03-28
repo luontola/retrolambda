@@ -17,11 +17,13 @@ public class Retrolambda {
 
     public static void run(Config config) throws Throwable {
         int bytecodeVersion = config.getBytecodeVersion();
+        boolean defaultMethodsEnabled = config.isDefaultMethodsEnabled();
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
         String classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
         System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
+        System.out.println("Default methods:  " + defaultMethodsEnabled);
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
@@ -38,7 +40,7 @@ public class Retrolambda {
 
         ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
         ClassSaver saver = new ClassSaver(outputDir);
-        Transformers transformers = new Transformers(bytecodeVersion, analyzer);
+        Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
         LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(saver, transformers);
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {

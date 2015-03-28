@@ -87,6 +87,7 @@
                 </executions>
                 <configuration>
                     <target>${testBytecodeTarget}</target>
+                    <defaultMethods>${testDefaultMethods}</defaultMethods>
                     <fork>${testFork}</fork>
                 </configuration>
             </plugin>
@@ -96,13 +97,10 @@
 
     <profiles>
         <profile>
-            <!-- TODO: default methods; remove this profile -->
-            <id>no-default-methods</id>
-            <activation>
-                <property>
-                    <name>!env.DEFAULT_METHODS</name>
-                </property>
-            </activation>
+            <id>noDefaultMethods</id>
+            <properties>
+                <testDefaultMethods>false</testDefaultMethods>
+            </properties>
             <build>
                 <plugins>
                     <plugin>

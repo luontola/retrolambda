@@ -14,16 +14,18 @@ import java.util.Optional;
 public class Transformers {
 
     private final int targetVersion;
+    private final boolean defaultMethodsEnabled;
     private final ClassHierarchyAnalyzer analyzer;
 
-    public Transformers(int targetVersion, ClassHierarchyAnalyzer analyzer) {
+    public Transformers(int targetVersion, boolean defaultMethodsEnabled, ClassHierarchyAnalyzer analyzer) {
         this.targetVersion = targetVersion;
+        this.defaultMethodsEnabled = defaultMethodsEnabled;
         this.analyzer = analyzer;
     }
 
     public byte[] backportLambdaClass(ClassReader reader) {
         return transform(reader, (next) -> {
-            if (FeatureToggles.DEFAULT_METHODS == 2) {
+            if (defaultMethodsEnabled) {
                 // Lambda classes are generated dynamically, so they were not
                 // part of the original analytics and must be analyzed now,
                 // in case they implement interfaces with default methods.
@@ -40,7 +42,7 @@ public class Transformers {
 
     public byte[] backportClass(ClassReader reader) {
         return transform(reader, (next) -> {
-            if (FeatureToggles.DEFAULT_METHODS == 2) {
+            if (defaultMethodsEnabled) {
                 next = new UpdateRelocatedMethodInvocations(next, analyzer);
                 next = new AddMethodDefaultImplementations(next, analyzer);
             }
@@ -51,7 +53,7 @@ public class Transformers {
 
     public byte[] backportInterface(ClassReader reader) {
         return transform(reader, (next) -> {
-            if (FeatureToggles.DEFAULT_METHODS == 2) {
+            if (defaultMethodsEnabled) {
                 next = new RemoveStaticMethods(next);
                 next = new RemoveDefaultMethodBodies(next);
                 next = new UpdateRelocatedMethodInvocations(next, analyzer);
