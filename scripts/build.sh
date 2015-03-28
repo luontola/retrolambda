@@ -5,10 +5,10 @@ set -eux
 
 mvn clean verify \
     --errors \
-    -P fork
+    -P fork,noDefaultMethods
 mvn clean verify \
     --errors \
-    -P fork,noDefaultMethods
+    -P fork
 
 # The Maven plugin's minimum requirement is Java 6,
 # but then the plugin must force forking the process
@@ -21,20 +21,20 @@ JAVA_HOME="$JAVA6_HOME" mvn clean verify \
 
 mvn clean verify \
     --errors \
-    -P java6
-mvn clean verify \
-    --errors \
     -P java6,noDefaultMethods
-
 mvn clean verify \
     --errors \
-    -P java5
+    -P java6
+
 mvn clean verify \
     --errors \
     -P java5,noDefaultMethods
+mvn clean verify \
+    --errors \
+    -P java5
 
-mvn clean deploy \
-    --errors
 mvn clean deploy \
     --errors \
     -P noDefaultMethods
+mvn clean deploy \
+    --errors
