@@ -58,6 +58,9 @@ public class Transformers {
                 next = new RemoveDefaultMethodBodies(next);
                 next = new UpdateRelocatedMethodInvocations(next, analyzer);
             } else {
+                // XXX: It would be better to remove only those static methods which are lambda implementation methods,
+                // but that would either require the use of naming patterns (not guaranteed to work with every Java compiler)
+                // or passing around information that which relocated static methods are because of lambdas.
                 next = new RemoveStaticMethods(next); // needed for lambdas in an interface's constant initializer
                 next = new WarnAboutDefaultAndStaticMethods(next);
             }
