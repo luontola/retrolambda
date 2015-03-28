@@ -67,6 +67,16 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     public String target;
 
     /**
+     * Whether to backport default and static methods on interfaces.
+     * LIMITATIONS: All backported interfaces and all classes which implement
+     * them must be backported together with one execution of Retrolambda.
+     *
+     * @since 2.0.0
+     */
+    @Parameter(defaultValue = "false", property = "retrolambdaDefaultMethods", required = true)
+    public boolean defaultMethods;
+
+    /**
      * Forces Retrolambda to run in a separate process. The default is not to fork,
      * in which case Maven has to run under Java 8, or this plugin will fall back
      * to forking. The forked process uses a Java agent hook for capturing the lambda
@@ -115,6 +125,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         try {
             Properties p = new Properties();
             p.setProperty(Config.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
+            p.setProperty(Config.DEFAULT_METHODS, "" + defaultMethods);
             p.setProperty(Config.INPUT_DIR, getInputDir().getAbsolutePath());
             p.setProperty(Config.OUTPUT_DIR, getOutputDir().getAbsolutePath());
             p.setProperty(Config.CLASSPATH, getClasspath());
@@ -143,6 +154,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                         attribute("executable", getJavaCommand()),
                                         attribute("failonerror", "true")),
                                 element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
+                                element("arg", attribute("value", "-Dretrolambda.defaultMethods=" + defaultMethods)),
                                 element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
                                 element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
                                 element("arg", attribute("value", "-Dretrolambda.classpath=" + getClasspath())),
