@@ -62,10 +62,10 @@ git add -u
 git commit -m "Release $RELEASE_VERSION"
 git tag -s -m "$APP_NAME $RELEASE_VERSION" "v$RELEASE_VERSION"
 
-$SCRIPTS/stage.sh "$APP_NAME $RELEASE_VERSION"
+${SCRIPTS}/stage.sh "$APP_NAME $RELEASE_VERSION"
 
 set-project-version "$NEXT_VERSION"
 git add -u
 git commit -m "Prepare for next development iteration"
 
-$SCRIPTS/publish.sh "$APP_NAME $RELEASE_VERSION" "$RELEASE_VERSION"
+${SCRIPTS}/publish.sh "$APP_NAME $RELEASE_VERSION" "$RELEASE_VERSION"
