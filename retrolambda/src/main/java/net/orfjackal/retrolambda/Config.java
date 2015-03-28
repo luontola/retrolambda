@@ -79,9 +79,10 @@ public class Config {
 
     static {
         optionalParameterHelp(DEFAULT_METHODS,
-                "Whether to backport default and static methods on interfaces.",
+                "Whether to backport default methods and static methods on interfaces.",
                 "LIMITATIONS: All backported interfaces and all classes which implement",
-                "them must be backported together with one execution of Retrolambda.",
+                "them or call their static methods must be backported together,",
+                "with one execution of Retrolambda.",
                 "Disabled by default. Enable by setting to \"true\"");
 
     }

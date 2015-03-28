@@ -6,11 +6,15 @@ Retrolambda: Use Lambdas on Java 7
 
 Just as there was [Retroweaver](http://retroweaver.sourceforge.net/) et al.
 for running Java 5 code with generics on Java 1.4, **Retrolambda** lets you
-run Java 8 code with lambda expressions and method references on Java 7 or
-lower. It does this by transforming your Java 8 compiled bytecode so that
-it can run on a Java 7 runtime. After the transformation they are just a
-bunch of normal .class files, without any additional runtime dependencies.
-[Read more details](#backported-language-features).
+run Java 8 code with **lambda expressions** and **method references** on
+Java 7 or lower. It does this by transforming your Java 8 compiled bytecode
+so that it can run on a Java 7 runtime. After the transformation they are
+just a bunch of normal .class files, without any additional runtime
+dependencies. [Read more details](#backported-language-features).
+
+There is also [limited support](#known-limitations) for backporting
+**default methods** and **static methods on interfaces**. This feature is
+disabled by default.
 
 Adventurous developers may use Retrolambda to backport lambda expressions
 even to Java 6 or Java 5. And if you reach Java 5, there are [other
@@ -101,9 +105,10 @@ Optional system properties:
       Default value is 51 (i.e. Java 7)
 
   retrolambda.defaultMethods
-      Whether to backport default and static methods on interfaces.
+      Whether to backport default methods and static methods on interfaces.
       LIMITATIONS: All backported interfaces and all classes which implement
-      them must be backported together with one execution of Retrolambda.
+      them or call their static methods must be backported together,
+      with one execution of Retrolambda.
       Disabled by default. Enable by setting to "true"
 
   retrolambda.outputDir
@@ -156,13 +161,27 @@ expressions and they are backported in the same way.
 If you would like the suppressed exceptions to be logged instead of
 swallowed, please create a feature request and we'll make it configurable.
 
+*Optionally also:*
+
+**Default methods** are backported by moving the default methods to a
+companion class (interface name + "$") as static methods, and by adding the
+necessary method implementations to all classes which implement that
+interface.
+
+**Static methods on interfaces** are backported by moving the static
+methods to a companion class (interface name + "$"), and by changing all
+methods calls to call the new method location.
+
 
 Known Limitations
 -----------------
 
 Does not backport Java 8 APIs.
 
-Does not backport Java 8 language features other than lambda expressions.
+Backporting default methods and static methods on interfaces requires all
+backported interfaces and all classes which implement them or call their
+static methods to be backported together, with one execution of
+Retrolambda.
 
 May break if a future JDK 8 build stops generating a new class for each
 `invokedynamic` call. Retrolambda works so that it captures the bytecode
