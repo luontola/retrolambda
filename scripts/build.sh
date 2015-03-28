@@ -33,8 +33,8 @@ mvn clean verify \
     --errors \
     -P java5
 
-mvn clean deploy \
+mvn clean verify \
     --errors \
     -P noDefaultMethods
-mvn clean deploy \
+mvn clean verify \
     --errors
