@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -33,6 +33,14 @@ public class ConfigTest {
         systemProperties.setProperty(Config.BYTECODE_VERSION, "50");
         assertThat("can override the default", config().getBytecodeVersion(), is(50));
         assertThat("human printable format", config().getJavaVersion(), is("Java 6"));
+    }
+
+    @Test
+    public void default_methods() {
+        assertThat("defaults to disabled", config().isDefaultMethodsEnabled(), is(false));
+
+        systemProperties.setProperty(Config.DEFAULT_METHODS, "true");
+        assertThat("can override the default", config().isDefaultMethodsEnabled(), is(true));
     }
 
     @Test

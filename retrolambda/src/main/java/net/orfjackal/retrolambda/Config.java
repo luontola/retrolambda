@@ -15,6 +15,7 @@ public class Config {
 
     private static final String PREFIX = "retrolambda.";
     public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
+    public static final String DEFAULT_METHODS = PREFIX + "defaultMethods";
     public static final String INPUT_DIR = PREFIX + "inputDir";
     public static final String OUTPUT_DIR = PREFIX + "outputDir";
     public static final String CLASSPATH = PREFIX + "classpath";
@@ -71,6 +72,22 @@ public class Config {
 
     public String getJavaVersion() {
         return bytecodeVersionNames.getOrDefault(getBytecodeVersion(), "unknown version");
+    }
+
+
+    // default methods
+
+    static {
+        optionalParameterHelp(DEFAULT_METHODS,
+                "Whether to backport default and static methods on interfaces.",
+                "LIMITATIONS: All backported interfaces and all classes which implement",
+                "them must be backported together with one execution of Retrolambda.",
+                "Disabled by default. Enable by setting to \"true\"");
+
+    }
+
+    public boolean isDefaultMethodsEnabled() {
+        return Boolean.parseBoolean(p.getProperty(DEFAULT_METHODS, "false"));
     }
 
 

@@ -100,6 +100,12 @@ Optional system properties:
       offset 7 at http://en.wikipedia.org/wiki/Java_class_file#General_layout
       Default value is 51 (i.e. Java 7)
 
+  retrolambda.defaultMethods
+      Whether to backport default and static methods on interfaces.
+      LIMITATIONS: All backported interfaces and all classes which implement
+      them must be backported together with one execution of Retrolambda.
+      Disabled by default. Enable by setting to "true"
+
   retrolambda.outputDir
       Output directory into where the generated class files are written.
       Defaults to same as retrolambda.inputDir
