@@ -47,10 +47,6 @@ public class ClassHierarchyAnalyzer {
                     return null;
                 }
                 c.addMethod(new MethodRef(owner, name, desc), new MethodKind.Implemented());
-
-                // XXX: backporting Retrolambda fails if we remove this; it tries backporting a lambda while backporting a lambda
-                Runnable r = () -> {
-                };
                 return null;
             }
 

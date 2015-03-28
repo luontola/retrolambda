@@ -64,6 +64,7 @@
                                     <arg value="-Dretrolambda.bytecodeVersion=50"/>
                                     <arg value="-Dretrolambda.inputDir=${project.build.outputDirectory}"/>
                                     <arg value="-Dretrolambda.classpath=${compile_classpath}"/>
+                                    <arg value="-Dretrolambda.includedFiles=${project.build.outputDirectory}/net/orfjackal/retrolambda/Main.class${path.separator}${project.build.outputDirectory}/net/orfjackal/retrolambda/Config.class${path.separator}${project.build.outputDirectory}/net/orfjackal/retrolambda/Retrolambda.class"/>
                                     <arg value="-cp"/>
                                     <arg value="${project.build.outputDirectory}"/>
                                     <arg value="-cp"/>
