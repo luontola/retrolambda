@@ -18,4 +18,8 @@ To run the tests using Java 6 and Java 5, use the commands:
     mvn clean verify -P java6
     mvn clean verify -P java5
 
+To run all combinations of test configurations, use the script:
+
+    ./scripts/build.sh
+
 Finally copy the executable JAR from the `retrolambda/target/` directory.
