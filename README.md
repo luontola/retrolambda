@@ -16,12 +16,12 @@ There is also [limited support](#known-limitations) for backporting
 **default methods** and **static methods on interfaces**. This feature is
 disabled by default.
 
-Adventurous developers may use Retrolambda to backport lambda expressions
-even to Java 6 or Java 5. And if you reach Java 5, there are [other
-backporting tools](http://en.wikipedia.org/wiki/Java_backporting_tools)
-that may let you go down to Java 1.4.
+Retrolambda supports backporting to Java 7, Java 6 and Java 5 runtimes. And
+for adventurous developers there are [other backporting
+tools](http://en.wikipedia.org/wiki/Java_backporting_tools) that may let
+you go from Java 5 down to Java 1.4.
 
-Android developers may also use Retrolambda to take advantage of the Java 8
+Android developers may use Retrolambda to take advantage of the Java 8
 features on Android. Serge Zaitsev has written [an article about
 it](http://zserge.com/blog/android-lambda.html) and there is a [Gradle
 plugin](#gradle-plugin) which makes it easy.
