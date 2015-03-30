@@ -89,7 +89,7 @@ public class Retrolambda {
     }
 
     private static URL[] asUrls(String classpath) {
-        String[] paths = classpath.split(System.getProperty("path.separator"));
+        String[] paths = classpath.split("[:;]"); // Do not use System.getProperty("path.separator") for cross-platform compatibility
         return Arrays.asList(paths).stream()
                 .map(s -> Paths.get(s).toUri())
                 .map(Retrolambda::uriToUrl)
