@@ -164,14 +164,21 @@ swallowed, please create a feature request and we'll make it configurable.
 
 *Optionally also:*
 
-**Default methods** are backported by moving the default methods to a
-companion class (interface name + "$") as static methods, and by adding the
+**Default methods** are backported by copying the default methods to a
+companion class (interface name + "$") as static methods, replacing the
+default methods in the interface with abstract methods, and by adding the
 necessary method implementations to all classes which implement that
 interface.
 
 **Static methods on interfaces** are backported by moving the static
 methods to a companion class (interface name + "$"), and by changing all
-methods calls to call the new method location.
+methods calls to call the new method location.<sup>[1]</sup>
+
+<sup>[1]</sup> *The static methods are moved to a companion class even with
+default method support disabled, because some of them may be lambda
+implementation methods, but the method calls to static methods are not
+updated. This may cause weird error messages if static methods on
+interfaces are accidentally used without enabling default method support.*
 
 
 Known Limitations
