@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -18,12 +18,20 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        if (isPrivateInstanceMethod(access)) { // lambda impl methods which capture `this` are private instance methods
+            return null;
+        }
         if (isDefaultMethod(access)) {
             MethodVisitor next = super.visitMethod(access | ACC_ABSTRACT, name, desc, signature, exceptions);
             return new RemoveMethodBody(next, access, name, desc, signature, exceptions);
         } else {
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
+    }
+
+    private static boolean isPrivateInstanceMethod(int access) {
+        return Flags.hasFlag(access, ACC_PRIVATE)
+                && !Flags.hasFlag(access, ACC_STATIC);
     }
 
     private static boolean isDefaultMethod(int access) {

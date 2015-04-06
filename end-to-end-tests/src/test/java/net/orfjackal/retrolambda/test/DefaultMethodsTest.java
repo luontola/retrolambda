@@ -447,9 +447,20 @@ public class DefaultMethodsTest {
         assertThat(obj.foo().call(), is("foo"));
     }
 
+    @Test
+    public void default_methods_with_lambdas_that_capture_this() throws Exception {
+        UsesLambdas obj = new UsesLambdas() {
+        };
+        assertThat(obj.captureThis().call(), is("foo"));
+    }
+
     private interface UsesLambdas {
         default Callable<String> foo() {
             return () -> "foo";
+        }
+
+        default Callable<String> captureThis() {
+            return () -> foo().call();
         }
     }
 

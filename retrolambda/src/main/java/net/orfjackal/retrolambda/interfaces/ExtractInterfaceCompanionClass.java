@@ -38,13 +38,12 @@ public class ExtractInterfaceCompanionClass extends ClassVisitor {
             // we won't copy constant fields from the interface, so a class initializer won't be needed
             return null;
         }
-        if (Flags.hasFlag(access, ACC_STATIC)
-                && Flags.hasFlag(access, ACC_PRIVATE)) {
-            // XXX: Possibly a lambda impl method, which is private. It is the easiest for us to make it visible,
-            // which should be quite safe because static methods are not inherited (and anyways nothing inherits
-            // the companion class). The clean solution would be to generate an access method for it, but due to
-            // the location in code which generates those access methods, it would require complex code changes to
-            // pass around the information from one transformation to another.
+        if (Flags.hasFlag(access, ACC_PRIVATE)) {
+            // XXX: Possibly a lambda impl method, which is private (static or instance). It is the easiest for us
+            // to make it visible, which should be quite safe because nothing inherits the companion class.
+            // The clean solution would be to generate an access method for it, but due to the location in code
+            // which generates those access methods, it would require complex code changes to pass around the
+            // information from one transformation to another.
             access &= ~ACC_PRIVATE;
         }
         if (!Flags.hasFlag(access, ACC_STATIC)) {
