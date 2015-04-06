@@ -11,6 +11,7 @@ import org.junit.rules.ExpectedException;
 
 import java.lang.annotation.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -437,6 +438,19 @@ public class DefaultMethodsTest {
         CallOtherMethods lambda = () -> 2;
         assertThat(lambda.foo(), is(2));
         assertThat(lambda.callsFoo(), is(12));
+    }
+
+    @Test
+    public void default_methods_with_lambdas() throws Exception {
+        UsesLambdas obj = new UsesLambdas() {
+        };
+        assertThat(obj.foo().call(), is("foo"));
+    }
+
+    private interface UsesLambdas {
+        default Callable<String> foo() {
+            return () -> "foo";
+        }
     }
 
 

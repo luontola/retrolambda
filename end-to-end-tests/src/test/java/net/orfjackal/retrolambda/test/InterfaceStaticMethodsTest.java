@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -33,6 +33,11 @@ public class InterfaceStaticMethodsTest {
     }
 
     @Test
+    public void static_methods_on_interfaces_containing_lambdas() throws Exception {
+        assertThat(Interface.staticMethodContainingLambdas(), is(123));
+    }
+
+    @Test
     public void calling_static_methods_on_interfaces_from_default_methods() {
         Interface obj = new Interface() {
         };
@@ -63,6 +68,11 @@ public class InterfaceStaticMethodsTest {
         // arguments of just a couple of different types because we're lazy
         static String staticMethodWithArgs(String s, int a, long b) {
             return s + a + b;
+        }
+
+        static int staticMethodContainingLambdas() throws Exception {
+            Callable<Integer> lambda = () -> 123;
+            return lambda.call();
         }
     }
 

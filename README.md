@@ -202,6 +202,12 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed not backporting lambda expressions in default methods and static
+  methods on interfaces
+  ([Issue #48](https://github.com/orfjackal/retrolambda/issues/48))
+
 ### Retrolambda 2.0.0 (2015-03-28)
 
 - Backports default methods and static methods on interfaces

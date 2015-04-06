@@ -78,6 +78,9 @@ public class Transformers {
         return transform(reader, (next) -> {
             next = new UpdateRelocatedMethodInvocations(next, analyzer);
             next = new ExtractInterfaceCompanionClass(next, companion.get());
+            // XXX: We call BackportLambdaInvocations twice on the same interface (in backportInterface and extractInterfaceCompanion)
+            // - is this a problem, because it tries to load the lambda class twice?
+            next = new BackportLambdaInvocations(next);
             return next;
         });
     }
