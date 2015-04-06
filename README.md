@@ -189,7 +189,9 @@ Does not backport Java 8 APIs.
 Backporting default methods and static methods on interfaces requires all
 backported interfaces and all classes which implement them or call their
 static methods to be backported together, with one execution of
-Retrolambda.
+Retrolambda. In other words, you must *always do a clean build*. Also,
+backporting default methods won't work across module or dependency
+boundaries.
 
 May break if a future JDK 8 build stops generating a new class for each
 `invokedynamic` call. Retrolambda works so that it captures the bytecode
