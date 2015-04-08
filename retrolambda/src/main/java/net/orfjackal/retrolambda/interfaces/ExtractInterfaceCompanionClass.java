@@ -51,6 +51,7 @@ public class ExtractInterfaceCompanionClass extends ClassVisitor {
             access |= ACC_STATIC;
             // TODO: this adding of the first argument is duplicated in ClassHierarchyAnalyzer
             desc = Bytecode.prependArgumentType(desc, Type.getObjectType(interfaceName));
+            signature = null; // XXX: we should prepend the argument type also to the generic signature, but removing generics is easier
         }
         return super.visitMethod(access, name, desc, signature, exceptions);
     }
