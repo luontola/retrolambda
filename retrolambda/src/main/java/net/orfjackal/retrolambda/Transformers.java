@@ -9,7 +9,7 @@ import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.trywithresources.SwallowSuppressedExceptions;
 import org.objectweb.asm.*;
 
-import java.util.Optional;
+import java.util.*;
 
 public class Transformers {
 
@@ -51,7 +51,22 @@ public class Transformers {
         });
     }
 
-    public byte[] backportInterface(ClassReader reader) {
+    public List<byte[]> backportInterface(ClassReader reader) {
+        // The lambdas must be backported only once, because bad things will happen if a lambda
+        // is called by different class name in the interface and its companion class, and then
+        // the wrong one of them is written to disk last.
+        byte[] lambdasBackported = transform(reader, (next) -> {
+            next = new BackportLambdaInvocations(next);
+            return next;
+        });
+
+        List<byte[]> results = new ArrayList<>();
+        results.add(backportInterface2(new ClassReader(lambdasBackported)));
+        results.addAll(extractInterfaceCompanion(new ClassReader(lambdasBackported)));
+        return results;
+    }
+
+    private byte[] backportInterface2(ClassReader reader) {
         return transform(reader, (next) -> {
             if (defaultMethodsEnabled) {
                 next = new RemoveStaticMethods(next);
@@ -65,24 +80,20 @@ public class Transformers {
                 next = new WarnAboutDefaultAndStaticMethods(next);
             }
             next = new RemoveBridgeMethods(next);
-            next = new BackportLambdaInvocations(next);
             return next;
         });
     }
 
-    public byte[] extractInterfaceCompanion(ClassReader reader) {
+    private List<byte[]> extractInterfaceCompanion(ClassReader reader) {
         Optional<Type> companion = analyzer.getCompanionClass(Type.getObjectType(reader.getClassName()));
         if (!companion.isPresent()) {
-            return null;
+            return Collections.emptyList();
         }
-        return transform(reader, (next) -> {
+        return Arrays.asList(transform(reader, (next) -> {
             next = new UpdateRelocatedMethodInvocations(next, analyzer);
             next = new ExtractInterfaceCompanionClass(next, companion.get());
-            // XXX: We call BackportLambdaInvocations twice on the same interface (in backportInterface and extractInterfaceCompanion)
-            // - is this a problem, because it tries to load the lambda class twice?
-            next = new BackportLambdaInvocations(next);
             return next;
-        });
+        }));
     }
 
     private byte[] transform(ClassReader reader, ClassVisitorChain chain) {

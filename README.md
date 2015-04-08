@@ -204,6 +204,9 @@ Version History
 
 ### Upcoming
 
+- Fixed a hack which caused lambdas in interfaces to be backported twice,
+  possibly producing broken method calls in the bytecode
+  ([Issue #48](https://github.com/orfjackal/retrolambda/issues/48))
 - Removes generic method signatures from the default method implementation
   methods which are placed in the interface's companion class, to avoid
   them getting out of sync with their erased method descriptors

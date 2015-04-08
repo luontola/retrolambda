@@ -66,8 +66,7 @@ public class Retrolambda {
 
             List<byte[]> transformed = new ArrayList<>();
             for (ClassInfo c : interfaces) {
-                transformed.add(transformers.extractInterfaceCompanion(c.reader));
-                transformed.add(transformers.backportInterface(c.reader));
+                transformed.addAll(transformers.backportInterface(c.reader));
             }
             for (ClassInfo c : classes) {
                 transformed.add(transformers.backportClass(c.reader));
