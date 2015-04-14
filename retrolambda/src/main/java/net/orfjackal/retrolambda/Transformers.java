@@ -8,8 +8,10 @@ import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.trywithresources.SwallowSuppressedExceptions;
 import org.objectweb.asm.*;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class Transformers {
 
@@ -55,19 +57,19 @@ public class Transformers {
         // The lambdas must be backported only once, because bad things will happen if a lambda
         // is called by different class name in the interface and its companion class, and then
         // the wrong one of them is written to disk last.
-        byte[] lambdasBackported = transform(reader, (next) -> {
-            next = new BackportLambdaInvocations(next);
-            return next;
-        });
+        ClassNode lambdasBackported = new ClassNode();
+        ClassVisitor next = lambdasBackported;
+        next = new BackportLambdaInvocations(next);
+        reader.accept(next, 0);
 
         List<byte[]> results = new ArrayList<>();
-        results.add(backportInterface2(new ClassReader(lambdasBackported)));
-        results.addAll(extractInterfaceCompanion(new ClassReader(lambdasBackported)));
+        results.add(backportInterface2(lambdasBackported));
+        results.addAll(extractInterfaceCompanion(lambdasBackported));
         return results;
     }
 
-    private byte[] backportInterface2(ClassReader reader) {
-        return transform(reader, (next) -> {
+    private byte[] backportInterface2(ClassNode clazz) {
+        return transform(clazz, (next) -> {
             if (defaultMethodsEnabled) {
                 next = new RemoveStaticMethods(next);
                 next = new RemoveDefaultMethodBodies(next);
@@ -84,19 +86,27 @@ public class Transformers {
         });
     }
 
-    private List<byte[]> extractInterfaceCompanion(ClassReader reader) {
-        Optional<Type> companion = analyzer.getCompanionClass(Type.getObjectType(reader.getClassName()));
+    private List<byte[]> extractInterfaceCompanion(ClassNode clazz) {
+        Optional<Type> companion = analyzer.getCompanionClass(Type.getObjectType(clazz.name));
         if (!companion.isPresent()) {
             return Collections.emptyList();
         }
-        return Arrays.asList(transform(reader, (next) -> {
+        return Arrays.asList(transform(clazz, (next) -> {
             next = new UpdateRelocatedMethodInvocations(next, analyzer);
             next = new ExtractInterfaceCompanionClass(next, companion.get());
             return next;
         }));
     }
 
+    private byte[] transform(ClassNode node, ClassVisitorChain chain) {
+        return transform(node::accept, chain);
+    }
+
     private byte[] transform(ClassReader reader, ClassVisitorChain chain) {
+        return transform(cv -> reader.accept(cv, 0), chain);
+    }
+
+    private byte[] transform(Consumer<ClassVisitor> reader, ClassVisitorChain chain) {
         ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         ClassVisitor next = writer;
 
@@ -107,7 +117,7 @@ public class Transformers {
         next = new FixInvokeStaticOnInterfaceMethod(next);
         next = chain.wrap(next);
 
-        reader.accept(next, 0);
+        reader.accept(next);
         return writer.toByteArray();
     }
 
