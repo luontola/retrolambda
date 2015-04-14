@@ -30,8 +30,8 @@ public class AddMethodDefaultImplementations extends ClassVisitor {
         for (MethodInfo method : analyzer.getDefaultMethods(Type.getObjectType(className))) {
             Bytecode.generateDelegateMethod(cv,
                     ACC_PUBLIC | ACC_SYNTHETIC,
-                    method.toMethodRef().toHandle(H_INVOKEVIRTUAL),
-                    method.getDefaultMethodImpl().toHandle(H_INVOKESTATIC));
+                    method.toMethodRef().toHandle(),
+                    method.getDefaultMethodImpl().toHandle());
         }
         super.visitEnd();
     }

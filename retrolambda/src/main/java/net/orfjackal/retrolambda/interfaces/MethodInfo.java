@@ -11,15 +11,17 @@ import java.util.Objects;
 
 public class MethodInfo {
 
+    public final int tag;
     public final MethodSignature signature;
     public final Type owner;
     public final MethodKind kind;
 
-    public MethodInfo(String name, String desc, Class<?> owner, MethodKind kind) {
-        this(new MethodSignature(name, desc), Type.getType(owner), kind);
+    public MethodInfo(String name, String desc, Class<?> owner, MethodKind kind) { // only for tests, so we can ignore the tag
+        this(-1, new MethodSignature(name, desc), Type.getType(owner), kind);
     }
 
-    public MethodInfo(MethodSignature signature, Type owner, MethodKind kind) {
+    public MethodInfo(int tag, MethodSignature signature, Type owner, MethodKind kind) {
+        this.tag = tag;
         this.signature = signature;
         this.owner = owner;
         this.kind = kind;
@@ -30,7 +32,7 @@ public class MethodInfo {
     }
 
     public MethodRef toMethodRef() {
-        return new MethodRef(owner.getInternalName(), signature.name, signature.desc);
+        return new MethodRef(tag, owner.getInternalName(), signature.name, signature.desc);
     }
 
     @Override
@@ -38,6 +40,7 @@ public class MethodInfo {
         if (!(obj instanceof MethodInfo)) {
             return false;
         }
+        // NOTE: the tag does not not affect method equality, because e.g. super calls have different tag but same method
         MethodInfo that = (MethodInfo) obj;
         return this.signature.equals(that.signature)
                 && this.owner.equals(that.owner)
@@ -55,6 +58,7 @@ public class MethodInfo {
                 .addValue(signature)
                 .addValue(owner)
                 .addValue(kind)
+                .addValue("(" + tag + ")")
                 .toString();
     }
 }

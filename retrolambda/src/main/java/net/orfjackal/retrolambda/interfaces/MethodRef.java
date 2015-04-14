@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda.interfaces;
 
 import com.google.common.base.MoreObjects;
+import net.orfjackal.retrolambda.lambdas.Handles;
 import org.objectweb.asm.*;
 
 import java.util.Objects;
@@ -13,15 +14,17 @@ public final class MethodRef {
 
     // TODO: replace MethodRef with ASM's Handle, or merge with MethodInfo?
 
+    public final int tag;
     public final String owner;
     public final String name;
     public final String desc;
 
-    public MethodRef(Class<?> owner, String name, String desc) {
-        this(Type.getInternalName(owner), name, desc);
+    public MethodRef(int tag, Class<?> owner, String name, String desc) {
+        this(tag, Type.getInternalName(owner), name, desc);
     }
 
-    public MethodRef(String owner, String name, String desc) {
+    public MethodRef(int tag, String owner, String name, String desc) {
+        this.tag = tag;
         this.owner = owner;
         this.name = name;
         this.desc = desc;
@@ -31,7 +34,11 @@ public final class MethodRef {
         return new MethodSignature(name, desc);
     }
 
-    public Handle toHandle(int tag) {
+    public int getOpcode() {
+        return Handles.getOpcode(toHandle());
+    }
+
+    public Handle toHandle() {
         return new Handle(tag, owner, name, desc);
     }
 
@@ -40,6 +47,7 @@ public final class MethodRef {
         if (!(obj instanceof MethodRef)) {
             return false;
         }
+        // NOTE: the tag does not not affect method equality, because e.g. super calls have different tag but same method
         MethodRef that = (MethodRef) obj;
         return this.owner.equals(that.owner)
                 && this.name.equals(that.name)
@@ -57,6 +65,7 @@ public final class MethodRef {
                 .addValue(owner)
                 .addValue(name)
                 .addValue(desc)
+                .addValue("(" + tag + ")")
                 .toString();
     }
 }

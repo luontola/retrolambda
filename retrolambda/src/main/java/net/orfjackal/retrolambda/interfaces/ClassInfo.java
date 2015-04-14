@@ -47,7 +47,7 @@ public class ClassInfo {
     }
 
     public void addMethod(MethodRef method, MethodKind kind) {
-        methods.add(new MethodInfo(method.getSignature(), Type.getObjectType(method.owner), kind));
+        methods.add(new MethodInfo(method.tag, method.getSignature(), Type.getObjectType(method.owner), kind));
     }
 
     public Optional<Type> getCompanionClass() {

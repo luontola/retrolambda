@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
+import net.orfjackal.retrolambda.lambdas.Handles;
 import org.objectweb.asm.*;
 
 import static org.objectweb.asm.Opcodes.ASM5;
@@ -30,23 +31,9 @@ public class UpdateRelocatedMethodInvocations extends ClassVisitor {
 
         @Override
         public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
-            MethodRef method = new MethodRef(owner, name, desc);
-
-            // change Interface.super.defaultMethod() calls to static calls on the companion class
-            // TODO: move this inside getMethodCallTarget (also opcode, so must first change MethodRef to Handle)
-            if (opcode == Opcodes.INVOKESPECIAL) {
-                MethodRef impl = analyzer.getMethodDefaultImplementation(method);
-                if (impl != null) {
-                    opcode = Opcodes.INVOKESTATIC;
-                    method = impl;
-                }
-                if (name.startsWith("lambda$captureThis$")) { // FIXME: remove me
-                    opcode = Opcodes.INVOKESTATIC;
-                }
-            }
-
+            MethodRef method = new MethodRef(Handles.opcodeToTag(opcode), owner, name, desc);
             method = analyzer.getMethodCallTarget(method);
-            super.visitMethodInsn(opcode, method.owner, method.name, method.desc, itf);
+            super.visitMethodInsn(method.getOpcode(), method.owner, method.name, method.desc, itf);
         }
     }
 }

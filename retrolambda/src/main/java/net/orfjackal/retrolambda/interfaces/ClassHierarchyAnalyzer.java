@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
+import net.orfjackal.retrolambda.lambdas.Handles;
 import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
@@ -46,7 +47,7 @@ public class ClassHierarchyAnalyzer {
                 if (isConstructor(name) || isStaticMethod(access)) {
                     return null;
                 }
-                c.addMethod(new MethodRef(owner, name, desc), new MethodKind.Implemented());
+                c.addMethod(new MethodRef(H_INVOKEVIRTUAL, owner, name, desc), new MethodKind.Implemented());
                 return null;
             }
 
@@ -66,22 +67,22 @@ public class ClassHierarchyAnalyzer {
 
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                MethodRef method = new MethodRef(owner, name, desc);
+                MethodRef method = new MethodRef(Handles.accessToTag(access, true), owner, name, desc);
 
                 if (isAbstractMethod(access)) {
                     c.addMethod(method, new MethodKind.Abstract());
 
                 } else if (isDefaultMethod(access)) {
-                    MethodRef defaultImpl = new MethodRef(companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner)));
+                    MethodRef defaultImpl = new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner)));
                     c.enableCompanionClass();
                     c.addMethod(method, new MethodKind.Default(defaultImpl));
 
                 } else if (isInstanceLambdaImplMethod(access)) {
-                    relocatedMethods.put(method, new MethodRef(companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
+                    relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
                     c.enableCompanionClass();
 
                 } else if (isStaticMethod(access)) {
-                    relocatedMethods.put(method, new MethodRef(companion, name, desc));
+                    relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, desc));
                     c.enableCompanionClass();
                 }
                 return null;
@@ -140,6 +141,13 @@ public class ClassHierarchyAnalyzer {
     }
 
     public MethodRef getMethodCallTarget(MethodRef original) {
+        if (original.tag == H_INVOKESPECIAL) {
+            // change Interface.super.defaultMethod() calls to static calls on the companion class
+            MethodRef impl = getMethodDefaultImplementation(original);
+            if (impl != null) {
+                return impl;
+            }
+        }
         return relocatedMethods.getOrDefault(original, original);
     }
 
