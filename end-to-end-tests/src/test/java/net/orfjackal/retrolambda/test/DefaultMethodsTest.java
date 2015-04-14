@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.test;
 
+import net.orfjackal.retrolambda.test.anotherpackage.UsesLambdasInAnotherPackage;
 import org.apache.commons.lang.SystemUtils;
 import org.hamcrest.*;
 import org.junit.*;
@@ -444,7 +445,7 @@ public class DefaultMethodsTest {
     public void default_methods_with_lambdas() throws Exception {
         UsesLambdas obj = new UsesLambdas() {
         };
-        assertThat(obj.foo().call(), is("foo"));
+        assertThat(obj.stateless().call(), is("foo"));
     }
 
     @Test
@@ -455,13 +456,29 @@ public class DefaultMethodsTest {
     }
 
     private interface UsesLambdas {
-        default Callable<String> foo() {
+        default Callable<String> stateless() {
             return () -> "foo";
         }
 
         default Callable<String> captureThis() {
-            return () -> foo().call();
+            return () -> stateless().call();
         }
+    }
+
+    /**
+     * Lambdas which capture this in default methods will generate the lambda implementation
+     * method as a private <em>instance</em> method. We must avoid copying those methods to
+     * the interface implementers as if they were default methods.
+     */
+    @Test
+    public void default_methods_with_lambdas_in_another_package() throws Exception {
+        System.out.println("DefaultMethodsTest.default_methods_with_lambdas_in_another_package");
+        UsesLambdasInAnotherPackage obj = new UsesLambdasInAnotherPackage() {
+        };
+        assertThat(obj.stateless().call(), is("foo"));
+        assertThat(obj.captureThis().call(), is("foo"));
+        assertThat("should contain only delegates to the two default methods",
+                obj.getClass().getDeclaredMethods(), arrayWithSize(2));
     }
 
 
