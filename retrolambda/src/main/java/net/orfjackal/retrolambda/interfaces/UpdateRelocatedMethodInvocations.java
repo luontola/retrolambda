@@ -40,6 +40,9 @@ public class UpdateRelocatedMethodInvocations extends ClassVisitor {
                     opcode = Opcodes.INVOKESTATIC;
                     method = impl;
                 }
+                if (name.startsWith("lambda$captureThis$")) { // FIXME: remove me
+                    opcode = Opcodes.INVOKESTATIC;
+                }
             }
 
             method = analyzer.getMethodCallTarget(method);

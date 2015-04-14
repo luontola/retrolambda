@@ -11,6 +11,7 @@ import org.objectweb.asm.Type;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -354,6 +355,38 @@ public class ClassHierarchyAnalyzerTest {
     }
 
     private class ExtendsImplementsOriginalAndImplementsOverriddenDefault extends ImplementsOriginal implements OverriddenDefault {
+    }
+
+
+    @Test
+    public void default_methods_with_lambdas() {
+        analyze(UsesLambdas.class,
+                ImplementsUsesLambdas.class);
+
+        MethodInfo stateless = new MethodInfo("stateless", "()Ljava/util/concurrent/Callable;", UsesLambdas.class, new MethodKind.Default(
+                new MethodRef(UsesLambdas$.class, "stateless", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$UsesLambdas;)Ljava/util/concurrent/Callable;")));
+        MethodInfo captureThis = new MethodInfo("captureThis", "()Ljava/util/concurrent/Callable;", UsesLambdas.class, new MethodKind.Default(
+                new MethodRef(UsesLambdas$.class, "captureThis", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$UsesLambdas;)Ljava/util/concurrent/Callable;")));
+
+        assertThat("does not copy instance lambda impl methods to implementers",
+                analyzer.getMethods(Type.getType(ImplementsUsesLambdas.class)),
+                containsInAnyOrder(stateless, captureThis));
+    }
+
+    private interface UsesLambdas {
+        default Callable<String> stateless() {
+            return () -> "foo";
+        }
+
+        default Callable<String> captureThis() {
+            return () -> stateless().call();
+        }
+    }
+
+    private interface UsesLambdas$ {
+    }
+
+    private class ImplementsUsesLambdas implements UsesLambdas {
     }
 
 

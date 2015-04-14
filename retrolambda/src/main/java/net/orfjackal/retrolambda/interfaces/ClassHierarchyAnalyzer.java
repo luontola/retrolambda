@@ -76,6 +76,10 @@ public class ClassHierarchyAnalyzer {
                     c.enableCompanionClass();
                     c.addMethod(method, new MethodKind.Default(defaultImpl));
 
+                } else if (isInstanceLambdaImplMethod(access)) {
+                    relocatedMethods.put(method, new MethodRef(companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
+                    c.enableCompanionClass();
+
                 } else if (isStaticMethod(access)) {
                     relocatedMethods.put(method, new MethodRef(companion, name, desc));
                     c.enableCompanionClass();
@@ -99,7 +103,22 @@ public class ClassHierarchyAnalyzer {
 
     private static boolean isDefaultMethod(int access) {
         return !isAbstractMethod(access)
-                && !isStaticMethod(access);
+                && !isStaticMethod(access)
+                && isPublicMethod(access);
+    }
+
+    private static boolean isInstanceLambdaImplMethod(int access) {
+        return !isAbstractMethod(access)
+                && !isStaticMethod(access)
+                && isPrivateMethod(access);
+    }
+
+    private static boolean isPublicMethod(int access) {
+        return Flags.hasFlag(access, ACC_PUBLIC);
+    }
+
+    private static boolean isPrivateMethod(int access) {
+        return Flags.hasFlag(access, ACC_PRIVATE);
     }
 
     public List<ClassInfo> getInterfaces() {
