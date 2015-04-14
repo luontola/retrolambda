@@ -27,6 +27,12 @@ features on Android. Serge Zaitsev has written [an article about
 it](http://zserge.com/blog/android-lambda.html) and there is a [Gradle
 plugin](#gradle-plugin) which makes it easy.
 
+Retrolambda does not backport the new Java 8 APIs, but there are other
+projects that have backported some of them:
+
+* [streamsupport](http://sourceforge.net/projects/streamsupport/) backports the `java.util.stream` API
+* [ThreeTen](http://www.threeten.org/) backports the `java.time` API
+
 
 User Guide
 ----------
