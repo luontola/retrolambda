@@ -51,7 +51,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
     <executions>
         <execution>
             <goals>
@@ -208,7 +208,7 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.0.3 (2015-06-07)
 
 - Fixed Retrolambda generating stack map frames for Java 5 bytecode,
   causing some bytecode tools to fail
