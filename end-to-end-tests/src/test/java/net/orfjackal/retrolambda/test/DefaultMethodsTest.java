@@ -472,7 +472,6 @@ public class DefaultMethodsTest {
      */
     @Test
     public void default_methods_with_lambdas_in_another_package() throws Exception {
-        System.out.println("DefaultMethodsTest.default_methods_with_lambdas_in_another_package");
         UsesLambdasInAnotherPackage obj = new UsesLambdasInAnotherPackage() {
         };
         assertThat(obj.stateless().call(), is("foo"));
