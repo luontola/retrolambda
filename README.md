@@ -208,6 +208,12 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed Retrolambda generating stack map frames for Java 5 bytecode,
+  causing some bytecode tools to fail
+  ([Issue #55](https://github.com/orfjackal/retrolambda/issues/55))
+
 ### Retrolambda 2.0.2 (2015-04-14)
 
 - Fixed a hack which caused lambdas in interfaces to be backported twice,
