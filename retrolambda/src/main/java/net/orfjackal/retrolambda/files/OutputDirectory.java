@@ -9,24 +9,24 @@ import org.objectweb.asm.ClassReader;
 import java.io.IOException;
 import java.nio.file.*;
 
-public class ClassSaver {
+public class OutputDirectory {
 
     private final Path outputDir;
 
-    public ClassSaver(Path outputDir) {
+    public OutputDirectory(Path outputDir) {
         this.outputDir = outputDir;
     }
 
-    public void saveClass(byte[] bytecode) throws IOException {
+    public void writeClass(byte[] bytecode) throws IOException {
         if (bytecode == null) {
             return;
         }
         ClassReader cr = new ClassReader(bytecode);
         Path relativePath = Paths.get(cr.getClassName() + ".class");
-        saveResource(relativePath, bytecode);
+        writeFile(relativePath, bytecode);
     }
 
-    public void saveResource(Path relativePath, byte[] content) throws IOException {
+    public void writeFile(Path relativePath, byte[] content) throws IOException {
         Path outputFile = outputDir.resolve(relativePath);
         Files.createDirectories(outputFile.getParent());
         Files.write(outputFile, content);

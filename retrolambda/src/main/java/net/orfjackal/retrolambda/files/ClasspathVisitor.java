@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 
-public abstract class BytecodeFileVisitor extends SimpleFileVisitor<Path> {
+public abstract class ClasspathVisitor extends SimpleFileVisitor<Path> {
 
     private Path baseDir;
 

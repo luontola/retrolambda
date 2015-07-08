@@ -5,15 +5,15 @@
 package net.orfjackal.retrolambda.lambdas;
 
 import net.orfjackal.retrolambda.Transformers;
-import net.orfjackal.retrolambda.files.ClassSaver;
+import net.orfjackal.retrolambda.files.OutputDirectory;
 import org.objectweb.asm.ClassReader;
 
 public class LambdaClassSaver {
 
-    private final ClassSaver saver;
+    private final OutputDirectory saver;
     private final Transformers transformers;
 
-    public LambdaClassSaver(ClassSaver saver, Transformers transformers) {
+    public LambdaClassSaver(OutputDirectory saver, Transformers transformers) {
         this.saver = saver;
         this.transformers = transformers;
     }
@@ -27,7 +27,7 @@ public class LambdaClassSaver {
     private void reifyLambdaClass(String className, byte[] bytecode) {
         try {
             System.out.println("Saving lambda class: " + className);
-            saver.saveClass(transformers.backportLambdaClass(new ClassReader(bytecode)));
+            saver.writeClass(transformers.backportLambdaClass(new ClassReader(bytecode)));
 
         } catch (Throwable t) {
             // print to stdout to keep in sync with other log output

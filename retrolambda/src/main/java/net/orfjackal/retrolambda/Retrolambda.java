@@ -39,9 +39,9 @@ public class Retrolambda {
         Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));
 
         ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
-        ClassSaver saver = new ClassSaver(outputDir);
+        OutputDirectory outputDirectory = new OutputDirectory(outputDir);
         Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
-        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(saver, transformers);
+        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers);
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {
             if (PreMain.isAgentLoaded()) {
@@ -50,7 +50,7 @@ public class Retrolambda {
                 dumper.install();
             }
 
-            visitFiles(inputDir, includedFiles, new BytecodeFileVisitor() {
+            visitFiles(inputDir, includedFiles, new ClasspathVisitor() {
                 @Override
                 protected void visitClass(byte[] bytecode) {
                     analyzer.analyze(bytecode);
@@ -58,7 +58,7 @@ public class Retrolambda {
 
                 @Override
                 protected void visitResource(Path relativePath, byte[] content) throws IOException {
-                    saver.saveResource(relativePath, content);
+                    outputDirectory.writeFile(relativePath, content);
                 }
             });
 
@@ -80,7 +80,7 @@ public class Retrolambda {
             // We need to load some of the classes (for calling the lambda metafactory)
             // so we need to take care not to modify any bytecode before loading them.
             for (byte[] bytecode : transformed) {
-                saver.saveClass(bytecode);
+                outputDirectory.writeClass(bytecode);
             }
         }
     }
