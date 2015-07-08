@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -27,7 +27,7 @@ public class LambdaClassSaver {
     private void reifyLambdaClass(String className, byte[] bytecode) {
         try {
             System.out.println("Saving lambda class: " + className);
-            saver.save(transformers.backportLambdaClass(new ClassReader(bytecode)));
+            saver.saveClass(transformers.backportLambdaClass(new ClassReader(bytecode)));
 
         } catch (Throwable t) {
             // print to stdout to keep in sync with other log output

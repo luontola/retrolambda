@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -17,13 +17,18 @@ public class ClassSaver {
         this.outputDir = outputDir;
     }
 
-    public void save(byte[] bytecode) throws IOException {
+    public void saveClass(byte[] bytecode) throws IOException {
         if (bytecode == null) {
             return;
         }
         ClassReader cr = new ClassReader(bytecode);
-        Path outputFile = outputDir.resolve(cr.getClassName() + ".class");
+        Path relativePath = Paths.get(cr.getClassName() + ".class");
+        saveResource(relativePath, bytecode);
+    }
+
+    public void saveResource(Path relativePath, byte[] content) throws IOException {
+        Path outputFile = outputDir.resolve(relativePath);
         Files.createDirectories(outputFile.getParent());
-        Files.write(outputFile, bytecode);
+        Files.write(outputFile, content);
     }
 }

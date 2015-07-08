@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,6 +14,7 @@ import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertTrue;
 
 public class RetrolambdaTest {
 
@@ -21,6 +22,7 @@ public class RetrolambdaTest {
     public final TemporaryFolder tempDir = new TemporaryFolder();
 
     private Path inputDir;
+    private Path outputDir;
 
     private final List<Path> visitedFiles = new ArrayList<>();
     private final FileVisitor<Path> visitor = new SimpleFileVisitor<Path>() {
@@ -38,6 +40,7 @@ public class RetrolambdaTest {
     @Before
     public void setup() throws IOException {
         inputDir = tempDir.newFolder("inputDir").toPath();
+        outputDir = tempDir.newFolder("outputDir").toPath();
         file1 = Files.createFile(inputDir.resolve("file1.txt"));
         file2 = Files.createFile(inputDir.resolve("file2.txt"));
         Path subdir = inputDir.resolve("subdir");
@@ -69,5 +72,22 @@ public class RetrolambdaTest {
         Retrolambda.visitFiles(inputDir, includedFiles, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1));
+    }
+
+    @Test
+    public void copies_resources_to_output_directory() throws Throwable {
+        Properties p = new Properties();
+        p.setProperty(Config.INPUT_DIR, inputDir.toString());
+        p.setProperty(Config.OUTPUT_DIR, outputDir.toString());
+        p.setProperty(Config.CLASSPATH, "");
+
+        Retrolambda.run(new Config(p));
+
+        assertIsFile(outputDir.resolve("file1.txt"));
+        assertIsFile(outputDir.resolve("subdir/file.txt"));
+    }
+
+    private static void assertIsFile(Path path) {
+        assertTrue("Expected " + path + " to be a file", Files.isRegularFile(path));
     }
 }

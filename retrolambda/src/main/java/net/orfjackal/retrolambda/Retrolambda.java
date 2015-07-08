@@ -52,8 +52,13 @@ public class Retrolambda {
 
             visitFiles(inputDir, includedFiles, new BytecodeFileVisitor() {
                 @Override
-                protected void visit(byte[] bytecode) {
+                protected void visitClass(byte[] bytecode) {
                     analyzer.analyze(bytecode);
+                }
+
+                @Override
+                protected void visitResource(Path relativePath, byte[] content) throws IOException {
+                    saver.saveResource(relativePath, content);
                 }
             });
 
@@ -75,7 +80,7 @@ public class Retrolambda {
             // We need to load some of the classes (for calling the lambda metafactory)
             // so we need to take care not to modify any bytecode before loading them.
             for (byte[] bytecode : transformed) {
-                saver.save(bytecode);
+                saver.saveClass(bytecode);
             }
         }
     }

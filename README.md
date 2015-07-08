@@ -217,6 +217,8 @@ Version History
 - Removes bytecode references to `java.lang.invoke.MethodHandles.Lookup` on
   Java 6 and older
   ([Issue #61](https://github.com/orfjackal/retrolambda/issues/61))
+- Copies non-class files from input to output directory
+  ([Issue #54](https://github.com/orfjackal/retrolambda/issues/54))
 
 ### Retrolambda 2.0.3 (2015-06-07)
 
