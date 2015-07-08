@@ -4,8 +4,12 @@
 
 package net.orfjackal.retrolambda.test;
 
+import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.*;
 
+import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -13,6 +17,7 @@ import java.util.concurrent.Callable;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeThat;
 
 public class LambdaTest extends SuperClass {
 
@@ -259,6 +264,19 @@ public class LambdaTest extends SuperClass {
 
         assertThat(((Parent) child).privateMethod(), is("parent version"));
         assertThat(child.parentRef().call(), is("parent version"));
+    }
+
+    @Test
+    public void bytecode_will_not_contain_dangling_references_to_MethodHandles() throws IOException {
+        assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.7f)));
+
+        ClassReader cr = new ClassReader(getClass().getName().replace('.', '/'));
+        ClassNode cn = new ClassNode();
+        cr.accept(cn, ClassReader.SKIP_CODE);
+
+        for (InnerClassNode innerClass : cn.innerClasses) {
+            assertThat(innerClass.name, not(startsWith("java/lang/invoke")));
+        }
     }
 }
 

@@ -113,6 +113,7 @@ public class Transformers {
         next = new LowerBytecodeVersion(next, targetVersion);
         if (targetVersion < Opcodes.V1_7) {
             next = new SwallowSuppressedExceptions(next);
+            next = new RemoveMethodHandlesLookupReferences(next);
         }
         next = new FixInvokeStaticOnInterfaceMethod(next);
         next = chain.wrap(next);

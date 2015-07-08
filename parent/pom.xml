@@ -47,6 +47,8 @@
         <testBytecodeTarget>1.7</testBytecodeTarget>
         <testFork>false</testFork>
         <testDefaultMethods>true</testDefaultMethods>
+        <!-- Override the default value of this property, but allow changing it on the command line -->
+        <maven.test.redirectTestOutputToFile>true</maven.test.redirectTestOutputToFile>
     </properties>
 
     <prerequisites>
@@ -167,7 +169,7 @@
                     <includes>
                         <include>**/*Test.class</include>
                     </includes>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>${maven.test.redirectTestOutputToFile}</redirectTestOutputToFile>
                 </configuration>
             </plugin>
 
@@ -177,7 +179,7 @@
                     <includes>
                         <include>**/*Test.class</include>
                     </includes>
-                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+                    <redirectTestOutputToFile>${maven.test.redirectTestOutputToFile}</redirectTestOutputToFile>
                     <jvm>${testJavaHome}/bin/java</jvm>
                 </configuration>
             </plugin>
