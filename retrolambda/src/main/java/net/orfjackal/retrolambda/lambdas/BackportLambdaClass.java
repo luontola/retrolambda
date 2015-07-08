@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -149,6 +149,23 @@ public class BackportLambdaClass extends ClassVisitor {
                         accessMethod.getName(),
                         accessMethod.getDesc(),
                         accessMethod.getTag() == H_INVOKEINTERFACE);
+
+                if (implMethod.getTag() == H_NEWINVOKESPECIAL
+                        && accessMethod.getTag() == H_INVOKESTATIC) {
+                    // The impl is a private constructor which is called through an access method.
+                    // XXX: The current method already did NEW an instance, but we won't use it because
+                    // the access method will also instantiate it, so we could remove the unused
+                    // instance from stack using the following code, but this is not strictly necessary
+                    // because ARETURN is allowed to leave behind a non-empty stack. We could improve
+                    // this backporter so that it would remove the unnecessary "NEW, DUP" instructions,
+                    // but that would be complicated.
+                    if (false) {
+                        super.visitVarInsn(ASTORE, 1);
+                        super.visitInsn(POP);
+                        super.visitInsn(POP);
+                        super.visitVarInsn(ALOAD, 1);
+                    }
+                }
             } else {
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
             }

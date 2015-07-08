@@ -63,12 +63,25 @@ public class BackportLambdaInvocations extends ClassVisitor {
         }
         // TODO: do not generate an access method if the impl method is not private (probably not implementable with a single pass)
         String name = "access$lambda$" + lambdaAccessToImplMethods.size();
-        String desc = implMethod.getTag() == H_INVOKESTATIC
-                ? implMethod.getDesc()
-                : Types.prependArgumentType(Type.getType("L" + className + ";"), implMethod.getDesc());
+        String desc = getLambdaAccessMethodDesc(implMethod);
         Handle accessMethod = new Handle(H_INVOKESTATIC, className, name, desc);
         lambdaAccessToImplMethods.put(accessMethod, implMethod);
         return accessMethod;
+    }
+
+    private String getLambdaAccessMethodDesc(Handle implMethod) {
+        if (implMethod.getTag() == H_INVOKESTATIC) {
+            // static method call -> keep as-is
+            return implMethod.getDesc();
+
+        } else if (implMethod.getTag() == H_NEWINVOKESPECIAL) {
+            // constructor call -> change to a a factory method
+            return Types.changeReturnType(Type.getObjectType(implMethod.getOwner()), implMethod.getDesc());
+
+        } else {
+            // instance method call -> change to a static method
+            return Types.prependArgumentType(Type.getObjectType(className), implMethod.getDesc());
+        }
     }
 
     @Override

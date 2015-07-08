@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -14,6 +14,12 @@ public class Bytecode {
     public static void generateDelegateMethod(ClassVisitor cv, int access, Handle method, Handle target) {
         MethodVisitor mv = cv.visitMethod(access, method.getName(), method.getDesc(), null, null);
         mv.visitCode();
+
+        // if the target method is constructor, then we must NEW up the instance inside the delegate method
+        if (target.getTag() == H_NEWINVOKESPECIAL) {
+            mv.visitTypeInsn(NEW, target.getOwner());
+            mv.visitInsn(DUP);
+        }
 
         // we assume one of the methods to be static and the other virtual, i.e. it has an implicit 'this' argument
         Type[] args = longest(

@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -47,6 +47,11 @@ public class Types {
             default:
                 throw new AssertionError("Unexpected handle type: " + handle);
         }
+    }
+
+    public static String changeReturnType(Type returnType, String methodDescriptor) {
+        Type[] argumentTypes = Type.getArgumentTypes(methodDescriptor);
+        return Type.getMethodDescriptor(returnType, argumentTypes);
     }
 
     public static String prependArgumentType(Type argumentType, String methodDescriptor) {

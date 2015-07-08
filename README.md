@@ -212,6 +212,8 @@ Version History
 
 - Fixed a compile error when calling default methods from another module
   ([Issue #56](https://github.com/orfjackal/retrolambda/issues/56))
+- Fixed method references to constructors of the current class
+  ([Issue #60](https://github.com/orfjackal/retrolambda/issues/60))
 
 ### Retrolambda 2.0.3 (2015-06-07)
 

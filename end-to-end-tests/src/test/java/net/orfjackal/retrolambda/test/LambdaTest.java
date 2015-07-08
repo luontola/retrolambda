@@ -125,6 +125,47 @@ public class LambdaTest extends SuperClass {
         assertThat(ref.call(), is(instanceOf(ArrayList.class)));
     }
 
+    /**
+     * Because the constructor is private, an access method must be generated for it
+     * and also the NEW instruction must be done inside the access method.
+     */
+    @Test
+    public void method_references_to_private_constructors() throws Exception {
+        Callable<HasPrivateConstructor> factory = HasPrivateConstructor.factory();
+        assertThat(factory.call(), is(instanceOf(HasPrivateConstructor.class)));
+
+        HasPrivateConstructorWithArgs.Factory factoryArgs = HasPrivateConstructorWithArgs.factory();
+        assertThat(factoryArgs.create("args"), is(instanceOf(HasPrivateConstructorWithArgs.class)));
+        assertThat(factoryArgs.create("args").args, is("args"));
+    }
+
+    public static class HasPrivateConstructor {
+
+        private HasPrivateConstructor() {
+        }
+
+        public static Callable<HasPrivateConstructor> factory() {
+            return HasPrivateConstructor::new;
+        }
+    }
+
+    public static class HasPrivateConstructorWithArgs {
+        public final String args;
+
+        private HasPrivateConstructorWithArgs(String args) {
+            this.args = args;
+        }
+
+        public static Factory factory() {
+            return HasPrivateConstructorWithArgs::new;
+        }
+
+        public interface Factory {
+            HasPrivateConstructorWithArgs create(String args);
+        }
+    }
+
+
     @Test
     public void method_references_to_overridden_inherited_methods_with_super() throws Exception {
         Callable<String> ref = super::inheritedMethod;
