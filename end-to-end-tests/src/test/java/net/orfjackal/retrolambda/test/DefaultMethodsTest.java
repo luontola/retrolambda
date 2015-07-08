@@ -472,12 +472,42 @@ public class DefaultMethodsTest {
      */
     @Test
     public void default_methods_with_lambdas_in_another_package() throws Exception {
+        assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.8f)));
+
         UsesLambdasInAnotherPackage obj = new UsesLambdasInAnotherPackage() {
         };
         assertThat(obj.stateless().call(), is("foo"));
         assertThat(obj.captureThis().call(), is("foo"));
         assertThat("should contain only delegates to the two default methods",
                 obj.getClass().getDeclaredMethods(), arrayWithSize(2));
+    }
+
+    /**
+     * Though we use {@link InMainSources}, because the Retrolambda Maven plugin
+     * processes the main sources separately from the test sources, the effect is
+     * the same as if they were in another module.
+     */
+    @Test
+    public void calling_default_methods_from_another_module_through_interface() {
+        InMainSources.Interface implementer = new InMainSources.Implementer();
+        assertThat(implementer.defaultMethod(), is("default"));
+
+        InMainSources.Interface overrider = new InMainSources.Overrider();
+        assertThat(overrider.defaultMethod(), is("overridden"));
+    }
+
+    /**
+     * Fixes issue of the generated delegate methods being marked as synthetic,
+     * in which case the Java compiler causes "error: cannot find symbol"
+     * for direct calls to those methods.
+     */
+    @Test
+    public void calling_default_methods_from_another_module_through_class() {
+        InMainSources.Implementer implementer = new InMainSources.Implementer();
+        assertThat(implementer.defaultMethod(), is("default"));
+
+        InMainSources.Overrider overrider = new InMainSources.Overrider();
+        assertThat(overrider.defaultMethod(), is("overridden"));
     }
 
 
@@ -553,7 +583,7 @@ public class DefaultMethodsTest {
         }
 
         @SomeAnnotation(4)
-        public static void annotatedStaticMethod() {
+        static void annotatedStaticMethod() {
         }
     }
 

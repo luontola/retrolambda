@@ -208,6 +208,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed a compile error when calling default methods from another module
+  ([Issue #56](https://github.com/orfjackal/retrolambda/issues/56))
+
 ### Retrolambda 2.0.3 (2015-06-07)
 
 - Fixed Retrolambda generating stack map frames for Java 5 bytecode,
