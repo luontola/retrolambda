@@ -208,6 +208,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Support for lambdas with marker interfaces
+  ([Issue #62](https://github.com/orfjackal/retrolambda/issues/62))
+
 ### Retrolambda 2.0.4 (2015-07-08)
 
 - Fixed a compile error when calling default methods from another module

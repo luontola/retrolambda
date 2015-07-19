@@ -100,6 +100,16 @@ public class LambdaTest extends SuperClass {
     }
 
     @Test
+    public void lambdas_with_marker_interfaces_due_to_intersection_types() throws Exception {
+        // We must use something other than java.io.Serializable as the marker interface,
+        // because serializable lambdas are signified by a flag to LambdaMetafactory.altMetafactory
+        Callable<String> lambda = (Callable<String> & Cloneable) () -> "foo";
+
+        assertThat(lambda, is(instanceOf(Cloneable.class)));
+        assertThat(lambda.call(), is("foo"));
+    }
+
+    @Test
     public void method_references_to_virtual_methods() throws Exception {
         String foo = "foo";
         Callable<String> ref = foo::toUpperCase;

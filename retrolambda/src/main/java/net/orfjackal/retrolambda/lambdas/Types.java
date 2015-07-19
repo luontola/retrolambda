@@ -14,7 +14,14 @@ public class Types {
 
     public static Object asmToJdkType(Object arg, ClassLoader classLoader, MethodHandles.Lookup caller) throws Exception {
         if (arg instanceof Type) {
-            return toMethodType((Type) arg, classLoader);
+            Type type = (Type) arg;
+            if (type.getSort() == Type.METHOD) {
+                return toMethodType(type, classLoader);
+            } else if (type.getSort() == Type.OBJECT) {
+                return toClass(type, classLoader);
+            } else {
+                throw new IllegalArgumentException("Unsupported type: " + type);
+            }
         } else if (arg instanceof Handle) {
             return toMethodHandle((Handle) arg, classLoader, caller);
         } else {
@@ -24,6 +31,10 @@ public class Types {
 
     public static MethodType toMethodType(Type type, ClassLoader classLoader) {
         return MethodType.fromMethodDescriptorString(type.getInternalName(), classLoader);
+    }
+
+    private static Class<?> toClass(Type type, ClassLoader classLoader) throws ClassNotFoundException {
+        return classLoader.loadClass(type.getInternalName().replace('/', '.'));
     }
 
     public static MethodHandle toMethodHandle(Handle handle, ClassLoader classLoader, MethodHandles.Lookup lookup) throws Exception {
