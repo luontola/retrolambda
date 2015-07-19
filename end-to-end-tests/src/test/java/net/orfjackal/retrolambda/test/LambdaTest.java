@@ -6,8 +6,8 @@ package net.orfjackal.retrolambda.test;
 
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.*;
+import org.objectweb.asm.Type;
 
 import java.io.IOException;
 import java.lang.reflect.*;
@@ -277,15 +277,27 @@ public class LambdaTest extends SuperClass {
     }
 
     @Test
-    public void bytecode_will_not_contain_dangling_references_to_MethodHandles() throws IOException {
+    public void bytecode_constant_pool_will_not_contain_dangling_references_to_MethodHandles() throws IOException {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.7f)));
 
         ClassReader cr = new ClassReader(getClass().getName().replace('.', '/'));
-        ClassNode cn = new ClassNode();
-        cr.accept(cn, ClassReader.SKIP_CODE);
+        char[] buf = new char[cr.getMaxStringLength()];
 
-        for (InnerClassNode innerClass : cn.innerClasses) {
-            assertThat(innerClass.name, not(startsWith("java/lang/invoke")));
+        for (int item = 0; item < cr.getItemCount(); item++) {
+            Object constant = readConstant(item, buf, cr);
+            if (constant instanceof Type) {
+                Type type = (Type) constant;
+                assertThat("constant #" + item, type.getDescriptor(), not(containsString("java/lang/invoke")));
+            }
+        }
+    }
+
+    private static Object readConstant(int item, char[] buf, ClassReader cr) {
+        try {
+            return cr.readConst(item, buf);
+        } catch (Exception e) {
+            // XXX: constant pool entry which is a Methodref, InvokeDynamic or similar non-plain constant
+            return null;
         }
     }
 }
