@@ -208,6 +208,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed method references to constructors causing VerifyError on Android 
+  ([Issue #67](https://github.com/orfjackal/retrolambda/issues/67))
+
 ### Retrolambda 2.0.5 (2015-07-19)
 
 - Support for lambdas with marker interfaces

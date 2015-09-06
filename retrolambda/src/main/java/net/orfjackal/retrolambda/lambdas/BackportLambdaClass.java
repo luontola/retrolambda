@@ -154,17 +154,15 @@ public class BackportLambdaClass extends ClassVisitor {
                         && accessMethod.getTag() == H_INVOKESTATIC) {
                     // The impl is a private constructor which is called through an access method.
                     // XXX: The current method already did NEW an instance, but we won't use it because
-                    // the access method will also instantiate it, so we could remove the unused
-                    // instance from stack using the following code, but this is not strictly necessary
-                    // because ARETURN is allowed to leave behind a non-empty stack. We could improve
-                    // this backporter so that it would remove the unnecessary "NEW, DUP" instructions,
-                    // but that would be complicated.
-                    if (false) {
-                        super.visitVarInsn(ASTORE, 1);
-                        super.visitInsn(POP);
-                        super.visitInsn(POP);
-                        super.visitVarInsn(ALOAD, 1);
-                    }
+                    // the access method will also instantiate it.
+                    // - The JVM would be OK with a non-empty stack on ARETURN, but it causes a VerifyError
+                    //   on Android, so here we remove the unused instance from the stack.
+                    // - We could improve this backporter so that it would remove the unnecessary
+                    //   "NEW, DUP" instructions, but that would be complicated.
+                    super.visitVarInsn(ASTORE, 1);
+                    super.visitInsn(POP);
+                    super.visitInsn(POP);
+                    super.visitVarInsn(ALOAD, 1);
                 }
             } else {
                 super.visitMethodInsn(opcode, owner, name, desc, itf);
