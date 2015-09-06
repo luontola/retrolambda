@@ -51,7 +51,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.0.5</version>
+    <version>2.0.6</version>
     <executions>
         <execution>
             <goals>
@@ -208,7 +208,7 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.0.6 (2015-09-06)
 
 - Fixed method references to constructors causing VerifyError on Android 
   ([Issue #67](https://github.com/orfjackal/retrolambda/issues/67))
