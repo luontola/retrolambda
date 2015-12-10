@@ -21,13 +21,15 @@ public class Retrolambda {
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
         String classpath = config.getClasspath();
-        List<Path> includedFiles = config.getIncludedFiles();
+        List<Path> includedFiles = new ArrayList<>();
+        includedFiles.addAll(config.getIncludedFileList());
+        includedFiles.addAll(config.getIncludedFiles());
         System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
         System.out.println("Default methods:  " + defaultMethodsEnabled);
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
-        if (includedFiles != null) {
+        if (!includedFiles.isEmpty()) {
             System.out.println("Included files:   " + includedFiles.size());
         }
 

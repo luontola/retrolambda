@@ -4,9 +4,13 @@
 
 package net.orfjackal.retrolambda;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.*;
+import com.google.common.io.Files;
 import org.objectweb.asm.Opcodes;
 
-import java.io.File;
+import java.io.*;
+import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -20,6 +24,7 @@ public class Config {
     public static final String OUTPUT_DIR = PREFIX + "outputDir";
     public static final String CLASSPATH = PREFIX + "classpath";
     public static final String INCLUDED_FILES = PREFIX + "includedFiles";
+    public static final String INCLUDED_FILE = PREFIX + "includedFile";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final List<String> requiredPropertiesHelp = new ArrayList<>();
@@ -157,6 +162,29 @@ public class Config {
                 .filter(s -> !s.isEmpty())
                 .map(Paths::get)
                 .collect(Collectors.toList());
+    }
+
+    static {
+        optionalParameterHelp(INCLUDED_FILE,
+                "A file listing the files to process (one file per line), instead of processing all files.",
+                "This is useful for a build tool to support incremental compilation.");
+    }
+
+    public List<Path> getIncludedFileList() {
+        String filePath = p.getProperty(INCLUDED_FILE);
+        if (filePath == null) {
+            return null;
+        }
+        File file = Paths.get(filePath).toFile();
+
+        try {
+            return Files.readLines(file, Charsets.UTF_8).stream()
+                    .filter(s -> !s.isEmpty())
+                    .map(Paths::get)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            return Collections.emptyList();
+        }
     }
 
     // help
