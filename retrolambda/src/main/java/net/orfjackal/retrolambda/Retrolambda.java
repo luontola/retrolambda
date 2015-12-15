@@ -28,9 +28,8 @@ public class Retrolambda {
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
-        if (includedFiles != null) {
-            System.out.println("Included files:   " + includedFiles.size());
-        }
+        System.out.println("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
+        System.out.println("Agent enabled:    " + PreMain.isAgentLoaded());
 
         if (!Files.isDirectory(inputDir)) {
             System.out.println("Nothing to do; not a directory: " + inputDir);
