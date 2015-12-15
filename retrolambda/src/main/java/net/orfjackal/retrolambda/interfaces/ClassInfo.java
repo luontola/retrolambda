@@ -9,8 +9,6 @@ import org.objectweb.asm.*;
 
 import java.util.*;
 
-import static org.objectweb.asm.Opcodes.ACC_INTERFACE;
-
 public class ClassInfo {
 
     public final ClassReader reader;
@@ -63,6 +61,6 @@ public class ClassInfo {
     }
 
     public boolean isInterface() {
-        return Flags.hasFlag(access, ACC_INTERFACE);
+        return Flags.isInterface(access);
     }
 }

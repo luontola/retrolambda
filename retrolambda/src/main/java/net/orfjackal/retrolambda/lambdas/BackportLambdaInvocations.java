@@ -4,13 +4,14 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
-import net.orfjackal.retrolambda.util.*;
+import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static net.orfjackal.retrolambda.util.Flags.isInterface;
 import static org.objectweb.asm.Opcodes.*;
 
 public class BackportLambdaInvocations extends ClassVisitor {
@@ -57,7 +58,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
         if (!implMethod.getOwner().equals(className)) {
             return implMethod;
         }
-        if (Flags.hasFlag(classAccess, ACC_INTERFACE)) {
+        if (isInterface(classAccess)) {
             // the method will be relocated to a companion class
             return implMethod;
         }

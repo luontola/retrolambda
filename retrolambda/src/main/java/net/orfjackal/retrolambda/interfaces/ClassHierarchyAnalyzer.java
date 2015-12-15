@@ -5,12 +5,13 @@
 package net.orfjackal.retrolambda.interfaces;
 
 import net.orfjackal.retrolambda.lambdas.Handles;
-import net.orfjackal.retrolambda.util.*;
+import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
 
 import java.util.*;
 
 import static java.util.stream.Collectors.toList;
+import static net.orfjackal.retrolambda.util.Flags.*;
 import static org.objectweb.asm.Opcodes.*;
 
 public class ClassHierarchyAnalyzer {
@@ -26,7 +27,7 @@ public class ClassHierarchyAnalyzer {
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
 
-        if (Flags.hasFlag(cr.getAccess(), ACC_INTERFACE)) {
+        if (isInterface(cr.getAccess())) {
             analyzeInterface(c, cr);
         } else {
             analyzeClass(c, cr);
@@ -81,7 +82,7 @@ public class ClassHierarchyAnalyzer {
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
                     c.enableCompanionClass();
 
-                } else if (isStaticMethod(access) && !isStaticInitializer(name)) {
+                } else if (isStaticMethod(access) && !isStaticInitializer(name, desc, access)) {
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, desc));
                     c.enableCompanionClass();
                 }
@@ -90,23 +91,7 @@ public class ClassHierarchyAnalyzer {
         }, ClassReader.SKIP_CODE);
     }
 
-    private static boolean isConstructor(String name) {
-        return name.equals("<init>");
-    }
-
-    private static boolean isStaticInitializer(String name) {
-        return name.equals("<clinit>");
-    }
-
-    private static boolean isAbstractMethod(int access) {
-        return Flags.hasFlag(access, ACC_ABSTRACT);
-    }
-
-    private static boolean isStaticMethod(int access) {
-        return Flags.hasFlag(access, ACC_STATIC);
-    }
-
-    private static boolean isDefaultMethod(int access) {
+    public static boolean isDefaultMethod(int access) {
         return !isAbstractMethod(access)
                 && !isStaticMethod(access)
                 && isPublicMethod(access);
@@ -116,14 +101,6 @@ public class ClassHierarchyAnalyzer {
         return !isAbstractMethod(access)
                 && !isStaticMethod(access)
                 && isPrivateMethod(access);
-    }
-
-    private static boolean isPublicMethod(int access) {
-        return Flags.hasFlag(access, ACC_PUBLIC);
-    }
-
-    private static boolean isPrivateMethod(int access) {
-        return Flags.hasFlag(access, ACC_PRIVATE);
     }
 
     public List<ClassInfo> getInterfaces() {

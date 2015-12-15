@@ -4,10 +4,9 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
-import static org.objectweb.asm.Opcodes.*;
+import static net.orfjackal.retrolambda.util.Flags.*;
 
 public class WarnAboutDefaultAndStaticMethods extends ClassVisitor {
 
@@ -19,7 +18,7 @@ public class WarnAboutDefaultAndStaticMethods extends ClassVisitor {
 
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
-        if (!Flags.hasFlag(access, ACC_INTERFACE)) {
+        if (!isInterface(access)) {
             throw new IllegalArgumentException(name + " is not an interface");
         }
         interfaceName = name;
@@ -33,14 +32,14 @@ public class WarnAboutDefaultAndStaticMethods extends ClassVisitor {
         // - static methods
         // - bridge methods
         // Allowed by Java 7:
-        // - class initializer methods (for initializing constants)
-        if (Flags.hasFlag(access, ACC_STATIC)) {
-            if (!Flags.isClassInitializer(name, desc, access) &&
+        // - static initialization blocks (for initializing constants)
+        if (isStaticMethod(access)) {
+            if (!isStaticInitializer(name, desc, access) &&
                     !name.startsWith("lambda$")) {
                 printWarning("a static method", name);
             }
         } else {
-            if (!Flags.hasFlag(access, ACC_ABSTRACT)) {
+            if (!isAbstractMethod(access)) {
                 printWarning("a default method", name);
             }
         }

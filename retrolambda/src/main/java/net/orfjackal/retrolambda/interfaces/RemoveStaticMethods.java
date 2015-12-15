@@ -4,10 +4,10 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
-import static org.objectweb.asm.Opcodes.*;
+import static net.orfjackal.retrolambda.util.Flags.*;
+import static org.objectweb.asm.Opcodes.ASM5;
 
 public class RemoveStaticMethods extends ClassVisitor {
 
@@ -17,14 +17,10 @@ public class RemoveStaticMethods extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (isStaticMethod(access) && !Flags.isClassInitializer(name, desc, access)) {
+        if (isStaticMethod(access) && !isStaticInitializer(name, desc, access)) {
             return null;
         } else {
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
-    }
-
-    private static boolean isStaticMethod(int access) {
-        return Flags.hasFlag(access, ACC_STATIC);
     }
 }

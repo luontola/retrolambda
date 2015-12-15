@@ -4,10 +4,10 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.MethodNode;
 
+import static net.orfjackal.retrolambda.util.Flags.*;
 import static org.objectweb.asm.Opcodes.*;
 
 public class RemoveDefaultMethodBodies extends ClassVisitor {
@@ -30,13 +30,11 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
     }
 
     private static boolean isPrivateInstanceMethod(int access) {
-        return Flags.hasFlag(access, ACC_PRIVATE)
-                && !Flags.hasFlag(access, ACC_STATIC);
+        return isPrivateMethod(access) && isInstanceMethod(access);
     }
 
     private static boolean isDefaultMethod(int access) {
-        return !Flags.hasFlag(access, ACC_ABSTRACT)
-                && !Flags.hasFlag(access, ACC_STATIC);
+        return isConcreteMethod(access) && isInstanceMethod(access);
     }
 
     private static class RemoveMethodBody extends MethodNode {

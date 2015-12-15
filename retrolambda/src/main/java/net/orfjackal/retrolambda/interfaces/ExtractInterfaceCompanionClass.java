@@ -4,9 +4,10 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.util.*;
+import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
 
+import static net.orfjackal.retrolambda.util.Flags.*;
 import static org.objectweb.asm.Opcodes.*;
 
 public class ExtractInterfaceCompanionClass extends ClassVisitor {
@@ -30,15 +31,15 @@ public class ExtractInterfaceCompanionClass extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (Flags.hasFlag(access, ACC_ABSTRACT)) {
+        if (isAbstractMethod(access)) {
             // do not copy abstract methods to the companion class
             return null;
         }
-        if (Flags.isClassInitializer(name, desc, access)) {
+        if (isStaticInitializer(name, desc, access)) {
             // we won't copy constant fields from the interface, so a class initializer won't be needed
             return null;
         }
-        if (Flags.hasFlag(access, ACC_PRIVATE)) {
+        if (isPrivateMethod(access)) {
             // XXX: Possibly a lambda impl method, which is private (static or instance). It is the easiest for us
             // to make it visible, which should be quite safe because nothing inherits the companion class.
             // The clean solution would be to generate an access method for it, but due to the location in code
@@ -46,7 +47,7 @@ public class ExtractInterfaceCompanionClass extends ClassVisitor {
             // information from one transformation to another.
             access &= ~ACC_PRIVATE;
         }
-        if (!Flags.hasFlag(access, ACC_STATIC)) {
+        if (isInstanceMethod(access)) {
             // default method; make static and take 'this' as the first argument
             access |= ACC_STATIC;
             // TODO: this adding of the first argument is duplicated in ClassHierarchyAnalyzer

@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.util;
 
-import static org.objectweb.asm.Opcodes.ACC_STATIC;
+import static org.objectweb.asm.Opcodes.*;
 
 public class Flags {
 
@@ -12,9 +12,51 @@ public class Flags {
         return (subject & flag) == flag;
     }
 
-    public static boolean isClassInitializer(String name, String desc, int methodAccess) {
+    // classes
+
+    public static boolean isInterface(int access) {
+        return hasFlag(access, ACC_INTERFACE);
+    }
+
+    // initialization
+
+    public static boolean isConstructor(String name) {
+        return name.equals("<init>");
+    }
+
+    public static boolean isStaticInitializer(String name, String desc, int access) {
         return name.equals("<clinit>") &&
                 desc.equals("()V") &&
-                hasFlag(methodAccess, ACC_STATIC);
+                hasFlag(access, ACC_STATIC);
+    }
+
+    // concrete vs abstract
+
+    public static boolean isConcreteMethod(int access) {
+        return !isAbstractMethod(access);
+    }
+
+    public static boolean isAbstractMethod(int access) {
+        return hasFlag(access, ACC_ABSTRACT);
+    }
+
+    // instance vs static
+
+    public static boolean isInstanceMethod(int access) {
+        return !isStaticMethod(access);
+    }
+
+    public static boolean isStaticMethod(int access) {
+        return hasFlag(access, ACC_STATIC);
+    }
+
+    // visibility
+
+    public static boolean isPublicMethod(int access) {
+        return hasFlag(access, ACC_PUBLIC);
+    }
+
+    public static boolean isPrivateMethod(int access) {
+        return hasFlag(access, ACC_PRIVATE);
     }
 }
