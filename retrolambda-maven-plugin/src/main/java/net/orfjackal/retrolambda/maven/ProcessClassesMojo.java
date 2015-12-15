@@ -215,14 +215,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     private String getClasspath() {
         try {
-            StringBuilder sb = new StringBuilder();
-            for (String classpathElement : getClasspathElements()) {
-                if (sb.length() > 0) {
-                    sb.append(File.pathSeparator);
-                }
-                sb.append(classpathElement);
-            }
-            return sb.toString();
+            return Joiner.on(File.pathSeparator).join(getClasspathElements());
         } catch (DependencyResolutionRequiredException e) {
             throw new RuntimeException(e);
         }
@@ -230,14 +223,10 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     private File getClasspathFile() {
         try {
-            StringBuilder sb = new StringBuilder();
-            for (String classpathElement : getClasspathElements()) {
-                sb.append(classpathElement);
-                sb.append("\n");
-            }
+            String classpath = Joiner.on("\n").join(getClasspathElements());
             File file = File.createTempFile("retrolambda", "classpath");
             file.deleteOnExit();
-            Files.write(sb.toString(), file, Charsets.UTF_8);
+            Files.write(classpath, file, Charsets.UTF_8);
             return file;
         } catch (DependencyResolutionRequiredException e) {
             throw new RuntimeException(e);
