@@ -29,6 +29,24 @@ public class ConfigTest {
     }
 
     @Test
+    public void is_fully_configured_when_required_properties_are_set() {
+        assertThat("before", config().isFullyConfigured(), is(false));
+
+        systemProperties.setProperty(Config.INPUT_DIR, "");
+        systemProperties.setProperty(Config.CLASSPATH, "");
+
+        assertThat("after", config().isFullyConfigured(), is(true));
+    }
+
+    @Test
+    public void can_use_alternative_parameter_instead_of_required_parameter() {
+        systemProperties.setProperty(Config.INPUT_DIR, "");
+        systemProperties.setProperty(Config.CLASSPATH_FILE, "");
+
+        assertThat("is fully configured?", config().isFullyConfigured(), is(true));
+    }
+
+    @Test
     public void bytecode_version() {
         assertThat("defaults to Java 7", config().getBytecodeVersion(), is(51));
         assertThat("human printable format", config().getJavaVersion(), is("Java 7"));
