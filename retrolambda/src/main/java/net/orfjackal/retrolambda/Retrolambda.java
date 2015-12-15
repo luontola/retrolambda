@@ -20,7 +20,7 @@ public class Retrolambda {
         boolean defaultMethodsEnabled = config.isDefaultMethodsEnabled();
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
-        String classpath = config.getClasspath();
+        List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
         System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
         System.out.println("Default methods:  " + defaultMethodsEnabled);
@@ -92,10 +92,9 @@ public class Retrolambda {
         Files.walkFileTree(inputDir, visitor);
     }
 
-    private static URL[] asUrls(String classpath) {
-        String[] paths = classpath.split(System.getProperty("path.separator"));
-        return Arrays.asList(paths).stream()
-                .map(s -> Paths.get(s).toUri())
+    private static URL[] asUrls(List<Path> classpath) {
+        return classpath.stream()
+                .map(Path::toUri)
                 .map(Retrolambda::uriToUrl)
                 .toArray(URL[]::new);
     }

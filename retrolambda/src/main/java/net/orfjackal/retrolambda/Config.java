@@ -9,7 +9,7 @@ import org.objectweb.asm.Opcodes;
 import java.io.*;
 import java.nio.file.*;
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
 public class Config {
 
@@ -130,8 +130,12 @@ public class Config {
                 "Uses ; or : as the path separator, see java.io.File#pathSeparatorChar");
     }
 
-    public String getClasspath() {
-        return getRequiredProperty(CLASSPATH);
+    public List<Path> getClasspath() {
+        String classpath = getRequiredProperty(CLASSPATH);
+        return Stream.of(classpath.split(File.pathSeparator))
+                .filter(path -> !path.isEmpty())
+                .map(Paths::get)
+                .collect(Collectors.toList());
     }
 
     private String getRequiredProperty(String key) {

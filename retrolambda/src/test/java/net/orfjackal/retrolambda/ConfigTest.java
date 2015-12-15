@@ -63,6 +63,30 @@ public class ConfigTest {
     }
 
     @Test
+    public void classpath() {
+        systemProperties.setProperty(Config.CLASSPATH, "");
+        assertThat("zero values", config().getClasspath(), is(empty()));
+
+        systemProperties.setProperty(Config.CLASSPATH, "one.jar");
+        assertThat("one value", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"))));
+
+        systemProperties.setProperty(Config.CLASSPATH, "one.jar" + File.pathSeparator + "two.jar");
+        assertThat("multiple values", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"), Paths.get("two.jar"))));
+    }
+
+    @Ignore // TODO
+    @Test
+    public void classpath_file() {
+    }
+
+    @Test
+    public void classpath_is_required() {
+        thrown.expect(IllegalArgumentException.class);
+        thrown.expectMessage("Missing required property: retrolambda.classpath");
+        config().getClasspath();
+    }
+
+    @Test
     public void included_files() {
         assertThat("not set", config().getIncludedFiles(), is(nullValue()));
 
