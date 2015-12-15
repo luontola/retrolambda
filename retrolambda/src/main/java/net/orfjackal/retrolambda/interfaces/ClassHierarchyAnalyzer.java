@@ -81,7 +81,7 @@ public class ClassHierarchyAnalyzer {
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
                     c.enableCompanionClass();
 
-                } else if (isStaticMethod(access)) {
+                } else if (isStaticMethod(access) && !isStaticInitializer(name)) {
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, desc));
                     c.enableCompanionClass();
                 }
@@ -92,6 +92,10 @@ public class ClassHierarchyAnalyzer {
 
     private static boolean isConstructor(String name) {
         return name.equals("<init>");
+    }
+
+    private static boolean isStaticInitializer(String name) {
+        return name.equals("<clinit>");
     }
 
     private static boolean isAbstractMethod(int access) {

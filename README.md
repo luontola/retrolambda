@@ -229,6 +229,9 @@ Version History
 - Made it easier to invoke Retrolambda as a library. Made `Config`
   an interface and fixed an assumption of using the default file system
   ([Pull request #71](https://github.com/orfjackal/retrolambda/pull/71))
+- Don't create a companion class when an interface has just
+  a static initialization block because of constant fields
+  ([Issue #66](https://github.com/orfjackal/retrolambda/issues/66))
 
 ### Retrolambda 2.0.6 (2015-09-06)
 

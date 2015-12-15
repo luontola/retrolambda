@@ -12,6 +12,7 @@ import java.util.Comparator;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
+import static net.orfjackal.retrolambda.test.TestUtil.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeThat;
@@ -104,5 +105,15 @@ public class InterfaceStaticMethodsTest {
         // We don't want this call to prevent loading this whole test class,
         // it should only fail when this line is executed
         Comparator.naturalOrder();
+    }
+
+    @Test
+    public void will_not_generate_a_companion_class_when_the_interface_has_just_constant_fields() {
+        assertThat(InterfaceWithConstants.FOO, is(3));
+        assertClassDoesNotExist(companionNameOf(InterfaceWithConstants.class));
+    }
+
+    private interface InterfaceWithConstants {
+        int FOO = (int) Math.sqrt(9); // a constant which needs to be calculated in a static initialization block
     }
 }

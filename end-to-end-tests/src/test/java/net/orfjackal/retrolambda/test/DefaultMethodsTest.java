@@ -14,6 +14,7 @@ import java.lang.annotation.*;
 import java.util.*;
 import java.util.concurrent.Callable;
 
+import static net.orfjackal.retrolambda.test.TestUtil.companionOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assume.assumeThat;
@@ -604,9 +605,5 @@ public class DefaultMethodsTest {
                 description.appendText("@SomeAnnotation(" + value + ")");
             }
         };
-    }
-
-    private static Class<?> companionOf(Class<?> itf) throws ClassNotFoundException {
-        return Class.forName(itf.getName() + "$");
     }
 }
