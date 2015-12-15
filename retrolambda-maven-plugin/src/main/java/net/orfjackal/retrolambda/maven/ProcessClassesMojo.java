@@ -4,8 +4,9 @@
 
 package net.orfjackal.retrolambda.maven;
 
-import com.google.common.base.Joiner;
+import com.google.common.base.*;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.io.Files;
 import net.orfjackal.retrolambda.*;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.execution.MavenSession;
@@ -143,26 +144,33 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
         getLog().info("Processing classes with Retrolambda");
         String retrolambdaJar = getRetrolambdaJarPath();
-        executeMojo(
-                plugin(groupId("org.apache.maven.plugins"),
-                        artifactId("maven-antrun-plugin"),
-                        version("1.7")),
-                goal("run"),
-                configuration(element(
-                        "target",
-                        element("exec",
-                                attributes(
-                                        attribute("executable", getJavaCommand()),
-                                        attribute("failonerror", "true")),
-                                element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
-                                element("arg", attribute("value", "-Dretrolambda.defaultMethods=" + defaultMethods)),
-                                element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
-                                element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
-                                element("arg", attribute("value", "-Dretrolambda.classpath=" + getClasspath())),
-                                element("arg", attribute("value", "-javaagent:" + retrolambdaJar)),
-                                element("arg", attribute("value", "-jar")),
-                                element("arg", attribute("value", retrolambdaJar))))),
-                executionEnvironment(project, session, pluginManager));
+        File classpathFile = getClasspathFile();
+        try {
+            executeMojo(
+                    plugin(groupId("org.apache.maven.plugins"),
+                            artifactId("maven-antrun-plugin"),
+                            version("1.7")),
+                    goal("run"),
+                    configuration(element(
+                            "target",
+                            element("exec",
+                                    attributes(
+                                            attribute("executable", getJavaCommand()),
+                                            attribute("failonerror", "true")),
+                                    element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
+                                    element("arg", attribute("value", "-Dretrolambda.defaultMethods=" + defaultMethods)),
+                                    element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
+                                    element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
+                                    element("arg", attribute("value", "-Dretrolambda.classpathFile=" + classpathFile)),
+                                    element("arg", attribute("value", "-javaagent:" + retrolambdaJar)),
+                                    element("arg", attribute("value", "-jar")),
+                                    element("arg", attribute("value", retrolambdaJar))))),
+                    executionEnvironment(project, session, pluginManager));
+        } finally {
+            if (!classpathFile.delete()) {
+                getLog().warn("Unable to delete " + classpathFile);
+            }
+        }
     }
 
     private void retrieveRetrolambdaJar(String version) throws MojoExecutionException {
@@ -216,6 +224,24 @@ abstract class ProcessClassesMojo extends AbstractMojo {
             }
             return sb.toString();
         } catch (DependencyResolutionRequiredException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private File getClasspathFile() {
+        try {
+            StringBuilder sb = new StringBuilder();
+            for (String classpathElement : getClasspathElements()) {
+                sb.append(classpathElement);
+                sb.append("\n");
+            }
+            File file = File.createTempFile("retrolambda", "classpath");
+            file.deleteOnExit();
+            Files.write(sb.toString(), file, Charsets.UTF_8);
+            return file;
+        } catch (DependencyResolutionRequiredException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
