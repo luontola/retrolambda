@@ -15,7 +15,7 @@ import java.util.*;
 
 public class Retrolambda {
 
-    public static void run(Config config) throws Throwable {
+    public static void run(SystemPropertiesConfig config) throws Throwable {
         int bytecodeVersion = config.getBytecodeVersion();
         boolean defaultMethodsEnabled = config.isDefaultMethodsEnabled();
         Path inputDir = config.getInputDir();

@@ -14,7 +14,7 @@ import java.util.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 
-public class ConfigTest {
+public class SystemPropertiesConfigTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
@@ -24,24 +24,24 @@ public class ConfigTest {
 
     private final Properties systemProperties = new Properties();
 
-    private Config config() {
-        return new Config(systemProperties);
+    private SystemPropertiesConfig config() {
+        return new SystemPropertiesConfig(systemProperties);
     }
 
     @Test
     public void is_fully_configured_when_required_properties_are_set() {
         assertThat("before", config().isFullyConfigured(), is(false));
 
-        systemProperties.setProperty(Config.INPUT_DIR, "");
-        systemProperties.setProperty(Config.CLASSPATH, "");
+        systemProperties.setProperty(SystemPropertiesConfig.INPUT_DIR, "");
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH, "");
 
         assertThat("after", config().isFullyConfigured(), is(true));
     }
 
     @Test
     public void can_use_alternative_parameter_instead_of_required_parameter() {
-        systemProperties.setProperty(Config.INPUT_DIR, "");
-        systemProperties.setProperty(Config.CLASSPATH_FILE, "");
+        systemProperties.setProperty(SystemPropertiesConfig.INPUT_DIR, "");
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH_FILE, "");
 
         assertThat("is fully configured?", config().isFullyConfigured(), is(true));
     }
@@ -51,7 +51,7 @@ public class ConfigTest {
         assertThat("defaults to Java 7", config().getBytecodeVersion(), is(51));
         assertThat("human printable format", config().getJavaVersion(), is("Java 7"));
 
-        systemProperties.setProperty(Config.BYTECODE_VERSION, "50");
+        systemProperties.setProperty(SystemPropertiesConfig.BYTECODE_VERSION, "50");
         assertThat("can override the default", config().getBytecodeVersion(), is(50));
         assertThat("human printable format", config().getJavaVersion(), is("Java 6"));
     }
@@ -60,7 +60,7 @@ public class ConfigTest {
     public void default_methods() {
         assertThat("defaults to disabled", config().isDefaultMethodsEnabled(), is(false));
 
-        systemProperties.setProperty(Config.DEFAULT_METHODS, "true");
+        systemProperties.setProperty(SystemPropertiesConfig.DEFAULT_METHODS, "true");
         assertThat("can override the default", config().isDefaultMethodsEnabled(), is(true));
     }
 
@@ -73,22 +73,22 @@ public class ConfigTest {
 
     @Test
     public void output_directory() {
-        systemProperties.setProperty(Config.INPUT_DIR, "input dir");
+        systemProperties.setProperty(SystemPropertiesConfig.INPUT_DIR, "input dir");
         assertThat("defaults to input dir", config().getOutputDir(), is(Paths.get("input dir")));
 
-        systemProperties.setProperty(Config.OUTPUT_DIR, "output dir");
+        systemProperties.setProperty(SystemPropertiesConfig.OUTPUT_DIR, "output dir");
         assertThat("can override the default", config().getOutputDir(), is(Paths.get("output dir")));
     }
 
     @Test
     public void classpath() {
-        systemProperties.setProperty(Config.CLASSPATH, "");
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH, "");
         assertThat("zero values", config().getClasspath(), is(empty()));
 
-        systemProperties.setProperty(Config.CLASSPATH, "one.jar");
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH, "one.jar");
         assertThat("one value", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"))));
 
-        systemProperties.setProperty(Config.CLASSPATH, "one.jar" + File.pathSeparator + "two.jar");
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH, "one.jar" + File.pathSeparator + "two.jar");
         assertThat("multiple values", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"), Paths.get("two.jar"))));
     }
 
@@ -97,15 +97,15 @@ public class ConfigTest {
         Path file = tempDir.newFile("classpath.txt").toPath();
 
         Files.write(file, Arrays.asList("", "", "")); // empty lines are ignored
-        systemProperties.setProperty(Config.CLASSPATH_FILE, file.toString());
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH_FILE, file.toString());
         assertThat("zero values", config().getClasspath(), is(empty()));
 
         Files.write(file, Arrays.asList("one.jar"));
-        systemProperties.setProperty(Config.CLASSPATH_FILE, file.toString());
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH_FILE, file.toString());
         assertThat("one value", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"))));
 
         Files.write(file, Arrays.asList("one.jar", "two.jar"));
-        systemProperties.setProperty(Config.CLASSPATH_FILE, file.toString());
+        systemProperties.setProperty(SystemPropertiesConfig.CLASSPATH_FILE, file.toString());
         assertThat("multiple values", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"), Paths.get("two.jar"))));
     }
 
@@ -120,13 +120,13 @@ public class ConfigTest {
     public void included_files() {
         assertThat("not set", config().getIncludedFiles(), is(nullValue()));
 
-        systemProperties.setProperty(Config.INCLUDED_FILES, "");
+        systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES, "");
         assertThat("zero values", config().getIncludedFiles(), is(empty()));
 
-        systemProperties.setProperty(Config.INCLUDED_FILES, "/foo/one.class");
+        systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES, "/foo/one.class");
         assertThat("one value", config().getIncludedFiles(), is(Arrays.asList(Paths.get("/foo/one.class"))));
 
-        systemProperties.setProperty(Config.INCLUDED_FILES, "/foo/one.class" + File.pathSeparator + "/foo/two.class");
+        systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES, "/foo/one.class" + File.pathSeparator + "/foo/two.class");
         assertThat("multiple values", config().getIncludedFiles(), is(Arrays.asList(Paths.get("/foo/one.class"), Paths.get("/foo/two.class"))));
     }
 
@@ -136,15 +136,15 @@ public class ConfigTest {
         assertThat("not set", config().getIncludedFiles(), is(nullValue()));
 
         Files.write(file, Arrays.asList("", "", "")); // empty lines are ignored
-        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, file.toString());
+        systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES_FILE, file.toString());
         assertThat("zero values", config().getIncludedFiles(), is(empty()));
 
         Files.write(file, Arrays.asList("one.class"));
-        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, file.toString());
+        systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES_FILE, file.toString());
         assertThat("one value", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"))));
 
         Files.write(file, Arrays.asList("one.class", "two.class"));
-        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, file.toString());
+        systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES_FILE, file.toString());
         assertThat("multiple values", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"), Paths.get("two.class"))));
     }
 }

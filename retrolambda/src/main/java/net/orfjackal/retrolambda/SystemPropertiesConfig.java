@@ -11,7 +11,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
-public class Config {
+public class SystemPropertiesConfig {
 
     private static final String PREFIX = "retrolambda.";
     public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
@@ -41,7 +41,7 @@ public class Config {
 
     private final Properties p;
 
-    public Config(Properties p) {
+    public SystemPropertiesConfig(Properties p) {
         this.p = p;
     }
 

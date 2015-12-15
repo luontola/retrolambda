@@ -77,11 +77,11 @@ public class RetrolambdaTest {
     @Test
     public void copies_resources_to_output_directory() throws Throwable {
         Properties p = new Properties();
-        p.setProperty(Config.INPUT_DIR, inputDir.toString());
-        p.setProperty(Config.OUTPUT_DIR, outputDir.toString());
-        p.setProperty(Config.CLASSPATH, "");
+        p.setProperty(SystemPropertiesConfig.INPUT_DIR, inputDir.toString());
+        p.setProperty(SystemPropertiesConfig.OUTPUT_DIR, outputDir.toString());
+        p.setProperty(SystemPropertiesConfig.CLASSPATH, "");
 
-        Retrolambda.run(new Config(p));
+        Retrolambda.run(new SystemPropertiesConfig(p));
 
         assertIsFile(outputDir.resolve("file1.txt"));
         assertIsFile(outputDir.resolve("subdir/file.txt"));

@@ -126,12 +126,12 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         getLog().info("Processing classes with Retrolambda");
         try {
             Properties p = new Properties();
-            p.setProperty(Config.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
-            p.setProperty(Config.DEFAULT_METHODS, "" + defaultMethods);
-            p.setProperty(Config.INPUT_DIR, getInputDir().getAbsolutePath());
-            p.setProperty(Config.OUTPUT_DIR, getOutputDir().getAbsolutePath());
-            p.setProperty(Config.CLASSPATH, getClasspath());
-            Retrolambda.run(new Config(p));
+            p.setProperty(SystemPropertiesConfig.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
+            p.setProperty(SystemPropertiesConfig.DEFAULT_METHODS, "" + defaultMethods);
+            p.setProperty(SystemPropertiesConfig.INPUT_DIR, getInputDir().getAbsolutePath());
+            p.setProperty(SystemPropertiesConfig.OUTPUT_DIR, getOutputDir().getAbsolutePath());
+            p.setProperty(SystemPropertiesConfig.CLASSPATH, getClasspath());
+            Retrolambda.run(new SystemPropertiesConfig(p));
         } catch (Throwable t) {
             throw new MojoExecutionException("Failed to run Retrolambda", t);
         }
