@@ -226,6 +226,9 @@ Version History
 - Added the `-Dretrolambda.includedFilesFile` parameter to avoid 
   the command line length limit
   ([Pull request #74](https://github.com/orfjackal/retrolambda/pull/74))
+- Made it easier to invoke Retrolambda as a library. Made `Config`
+  an interface and fixed an assumption of using the default file system
+  ([Pull request #71](https://github.com/orfjackal/retrolambda/pull/71))
 
 ### Retrolambda 2.0.6 (2015-09-06)
 
