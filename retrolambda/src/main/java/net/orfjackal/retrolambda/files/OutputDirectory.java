@@ -22,7 +22,7 @@ public class OutputDirectory {
             return;
         }
         ClassReader cr = new ClassReader(bytecode);
-        Path relativePath = Paths.get(cr.getClassName() + ".class");
+        Path relativePath = outputDir.getFileSystem().getPath(cr.getClassName() + ".class");
         writeFile(relativePath, bytecode);
     }
 
