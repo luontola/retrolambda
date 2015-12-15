@@ -11,7 +11,7 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
-public class SystemPropertiesConfig {
+public class SystemPropertiesConfig implements Config {
 
     private static final String PREFIX = "retrolambda.";
     public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
@@ -81,10 +81,12 @@ public class SystemPropertiesConfig {
                 "Default value is " + Opcodes.V1_7 + " (i.e. Java 7)");
     }
 
+    @Override
     public int getBytecodeVersion() {
         return Integer.parseInt(p.getProperty(BYTECODE_VERSION, "" + Opcodes.V1_7));
     }
 
+    @Override
     public String getJavaVersion() {
         return bytecodeVersionNames.getOrDefault(getBytecodeVersion(), "unknown version");
     }
@@ -102,6 +104,7 @@ public class SystemPropertiesConfig {
 
     }
 
+    @Override
     public boolean isDefaultMethodsEnabled() {
         return Boolean.parseBoolean(p.getProperty(DEFAULT_METHODS, "false"));
     }
@@ -114,6 +117,7 @@ public class SystemPropertiesConfig {
                 "Input directory from where the original class files are read.");
     }
 
+    @Override
     public Path getInputDir() {
         String inputDir = p.getProperty(INPUT_DIR);
         if (inputDir != null) {
@@ -131,6 +135,7 @@ public class SystemPropertiesConfig {
                 "Defaults to same as " + INPUT_DIR);
     }
 
+    @Override
     public Path getOutputDir() {
         String outputDir = p.getProperty(OUTPUT_DIR);
         if (outputDir != null) {
@@ -152,6 +157,7 @@ public class SystemPropertiesConfig {
                 "length limit. The file must list one file per line with UTF-8 encoding.");
     }
 
+    @Override
     public List<Path> getClasspath() {
         String classpath = p.getProperty(CLASSPATH);
         if (classpath != null) {
@@ -196,6 +202,7 @@ public class SystemPropertiesConfig {
                 "length limit. The file must list one file per line with UTF-8 encoding.");
     }
 
+    @Override
     public List<Path> getIncludedFiles() {
         String files = p.getProperty(INCLUDED_FILES);
         if (files != null) {
