@@ -4,13 +4,9 @@
 
 package net.orfjackal.retrolambda;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.*;
-import com.google.common.io.Files;
 import org.objectweb.asm.Opcodes;
 
 import java.io.*;
-import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,7 +20,7 @@ public class Config {
     public static final String OUTPUT_DIR = PREFIX + "outputDir";
     public static final String CLASSPATH = PREFIX + "classpath";
     public static final String INCLUDED_FILES = PREFIX + "includedFiles";
-    public static final String INCLUDED_FILE = PREFIX + "includedFile";
+    public static final String INCLUDED_FILES_FILE = PREFIX + "includedFilesFile";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final List<String> requiredPropertiesHelp = new ArrayList<>();
@@ -130,7 +126,8 @@ public class Config {
 
     static {
         requiredParameterHelp(CLASSPATH,
-                "Classpath containing the original class files and their dependencies.");
+                "Classpath containing the original class files and their dependencies.",
+                "Uses ; or : as the path separator, see java.io.File#pathSeparatorChar");
     }
 
     public String getClasspath() {
@@ -145,47 +142,43 @@ public class Config {
         return value;
     }
 
+
     // incremental files
 
     static {
         optionalParameterHelp(INCLUDED_FILES,
                 "List of files to process, instead of processing all files.",
-                "This is useful for a build tool to support incremental compilation.");
+                "This is useful for a build tool to support incremental compilation.",
+                "Uses ; or : as the path separator, see java.io.File#pathSeparatorChar");
+        optionalParameterHelp(INCLUDED_FILES_FILE,
+                "File listing the files to process, instead of processing all files.",
+                "Alternative to " + INCLUDED_FILES + " for avoiding the command line",
+                "length limit. The file must list one file per line with UTF-8 encoding.");
     }
 
     public List<Path> getIncludedFiles() {
         String files = p.getProperty(INCLUDED_FILES);
-        if (files == null) {
-            return null;
-        }
-        return Arrays.asList(files.split(File.pathSeparator)).stream()
-                .filter(s -> !s.isEmpty())
-                .map(Paths::get)
-                .collect(Collectors.toList());
-    }
-
-    static {
-        optionalParameterHelp(INCLUDED_FILE,
-                "A file listing the files to process (one file per line), instead of processing all files.",
-                "This is useful for a build tool to support incremental compilation.");
-    }
-
-    public List<Path> getIncludedFileList() {
-        String filePath = p.getProperty(INCLUDED_FILE);
-        if (filePath == null) {
-            return null;
-        }
-        File file = Paths.get(filePath).toFile();
-
-        try {
-            return Files.readLines(file, Charsets.UTF_8).stream()
+        if (files != null) {
+            return Arrays.asList(files.split(File.pathSeparator)).stream()
                     .filter(s -> !s.isEmpty())
                     .map(Paths::get)
                     .collect(Collectors.toList());
-        } catch (IOException e) {
-            return Collections.emptyList();
         }
+        String filesFile = p.getProperty(INCLUDED_FILES_FILE);
+        if (filesFile != null) {
+            try {
+                return Files.readAllLines(Paths.get(filesFile))
+                        .stream()
+                        .filter(path -> !path.isEmpty())
+                        .map(Paths::get)
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + INCLUDED_FILES_FILE + " from " + filesFile, e);
+            }
+        }
+        return null;
     }
+
 
     // help
 

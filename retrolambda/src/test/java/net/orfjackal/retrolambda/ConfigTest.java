@@ -4,17 +4,12 @@
 
 package net.orfjackal.retrolambda;
 
-import com.google.common.base.*;
-import com.google.common.collect.Lists;
-import com.google.common.io.Files;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
+import org.junit.rules.*;
 
 import java.io.*;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -23,6 +18,9 @@ public class ConfigTest {
 
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
+
+    @Rule
+    public final TemporaryFolder tempDir = new TemporaryFolder();
 
     private final Properties systemProperties = new Properties();
 
@@ -79,39 +77,20 @@ public class ConfigTest {
     }
 
     @Test
-    public void included_file() throws IOException {
-        assertThat("not set", config().getIncludedFileList(), is(nullValue()));
+    public void included_files_file() throws IOException {
+        Path listFile = tempDir.newFile("list.txt").toPath();
+        assertThat("not set", config().getIncludedFiles(), is(nullValue()));
 
-        systemProperties.setProperty(Config.INCLUDED_FILE, "");
-        assertThat("zero values", config().getIncludedFileList(), is(empty()));
+        Files.write(listFile, Arrays.asList("", "", "")); // empty lines are ignored
+        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, listFile.toString());
+        assertThat("zero values", config().getIncludedFiles(), is(empty()));
 
-        // Single file
-        File singleTmp = File.createTempFile("test",".list");
-        singleTmp.deleteOnExit();
+        Files.write(listFile, Arrays.asList("one.class"));
+        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, listFile.toString());
+        assertThat("one value", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"))));
 
-        List<String> file = Lists.newArrayList("foo.java");
-        String delimiter = System.getProperty("line.separator");
-        Files.write(file.stream()
-                .collect(Collectors.joining(delimiter)), singleTmp, Charsets.UTF_8);
-
-        systemProperties.setProperty(Config.INCLUDED_FILE, singleTmp.getAbsolutePath());
-        assertThat("one value", config().getIncludedFileList(), is(
-                file.stream()
-                        .map(f -> Paths.get(f))
-                        .collect(Collectors.toList())));
-
-        // Multiple files
-        File multiTmp = File.createTempFile("test",".list");
-        multiTmp.deleteOnExit();
-
-        List<String> files = Lists.newArrayList("foo.java", "bar.java");
-        Files.write(files.stream()
-                .collect(Collectors.joining(delimiter)), multiTmp, Charsets.UTF_8);
-
-        systemProperties.setProperty(Config.INCLUDED_FILE, multiTmp.getAbsolutePath());
-        assertThat("two values", config().getIncludedFileList(), is(
-                files.stream()
-                        .map(f -> Paths.get(f))
-                        .collect(Collectors.toList())));
+        Files.write(listFile, Arrays.asList("one.class", "two.class"));
+        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, listFile.toString());
+        assertThat("multiple values", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"), Paths.get("two.class"))));
     }
 }
