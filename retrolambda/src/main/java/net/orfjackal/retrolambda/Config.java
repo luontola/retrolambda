@@ -11,8 +11,6 @@ public interface Config {
 
     int getBytecodeVersion();
 
-    String getJavaVersion();
-
     boolean isDefaultMethodsEnabled();
 
     Path getInputDir();

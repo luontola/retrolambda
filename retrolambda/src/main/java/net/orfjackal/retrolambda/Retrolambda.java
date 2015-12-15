@@ -7,6 +7,7 @@ package net.orfjackal.retrolambda;
 import net.orfjackal.retrolambda.files.*;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
+import net.orfjackal.retrolambda.util.Bytecode;
 
 import java.io.IOException;
 import java.net.*;
@@ -22,7 +23,7 @@ public class Retrolambda {
         Path outputDir = config.getOutputDir();
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
-        System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
+        System.out.println("Bytecode version: " + bytecodeVersion + " (" + Bytecode.getJavaVersion(bytecodeVersion) + ")");
         System.out.println("Default methods:  " + defaultMethodsEnabled);
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);

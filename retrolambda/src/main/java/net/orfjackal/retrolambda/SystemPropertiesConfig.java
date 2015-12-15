@@ -26,18 +26,6 @@ public class SystemPropertiesConfig implements Config {
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final Map<String, String> alternativeProperties = new HashMap<>();
     private static final List<String> propertiesHelp = new ArrayList<>();
-    private static final Map<Integer, String> bytecodeVersionNames = new HashMap<>();
-
-    static {
-        bytecodeVersionNames.put(Opcodes.V1_1, "Java 1.1");
-        bytecodeVersionNames.put(Opcodes.V1_2, "Java 1.2");
-        bytecodeVersionNames.put(Opcodes.V1_3, "Java 1.3");
-        bytecodeVersionNames.put(Opcodes.V1_4, "Java 1.4");
-        bytecodeVersionNames.put(Opcodes.V1_5, "Java 5");
-        bytecodeVersionNames.put(Opcodes.V1_6, "Java 6");
-        bytecodeVersionNames.put(Opcodes.V1_7, "Java 7");
-        bytecodeVersionNames.put(Opcodes.V1_8, "Java 8");
-    }
 
     private final Properties p;
 
@@ -84,11 +72,6 @@ public class SystemPropertiesConfig implements Config {
     @Override
     public int getBytecodeVersion() {
         return Integer.parseInt(p.getProperty(BYTECODE_VERSION, "" + Opcodes.V1_7));
-    }
-
-    @Override
-    public String getJavaVersion() {
-        return bytecodeVersionNames.getOrDefault(getBytecodeVersion(), "unknown version");
     }
 
 

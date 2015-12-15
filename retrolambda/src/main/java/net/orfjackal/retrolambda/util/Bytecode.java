@@ -7,9 +7,28 @@ package net.orfjackal.retrolambda.util;
 import net.orfjackal.retrolambda.lambdas.Handles;
 import org.objectweb.asm.*;
 
+import java.util.*;
+
 import static org.objectweb.asm.Opcodes.*;
 
 public class Bytecode {
+
+    private static final Map<Integer, String> bytecodeVersionNames = new HashMap<>();
+
+    static {
+        bytecodeVersionNames.put(Opcodes.V1_1, "Java 1.1");
+        bytecodeVersionNames.put(Opcodes.V1_2, "Java 1.2");
+        bytecodeVersionNames.put(Opcodes.V1_3, "Java 1.3");
+        bytecodeVersionNames.put(Opcodes.V1_4, "Java 1.4");
+        bytecodeVersionNames.put(Opcodes.V1_5, "Java 5");
+        bytecodeVersionNames.put(Opcodes.V1_6, "Java 6");
+        bytecodeVersionNames.put(Opcodes.V1_7, "Java 7");
+        bytecodeVersionNames.put(Opcodes.V1_8, "Java 8");
+    }
+
+    public static String getJavaVersion(int bytecodeVersion) {
+        return bytecodeVersionNames.getOrDefault(bytecodeVersion, "unknown version");
+    }
 
     public static void generateDelegateMethod(ClassVisitor cv, int access, Handle method, Handle target) {
         MethodVisitor mv = cv.visitMethod(access, method.getName(), method.getDesc(), null, null);

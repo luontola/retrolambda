@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.util.Bytecode;
 import org.junit.*;
 import org.junit.rules.*;
 
@@ -49,11 +50,11 @@ public class SystemPropertiesConfigTest {
     @Test
     public void bytecode_version() {
         assertThat("defaults to Java 7", config().getBytecodeVersion(), is(51));
-        assertThat("human printable format", config().getJavaVersion(), is("Java 7"));
+        assertThat("human printable format", Bytecode.getJavaVersion(config().getBytecodeVersion()), is("Java 7"));
 
         systemProperties.setProperty(SystemPropertiesConfig.BYTECODE_VERSION, "50");
         assertThat("can override the default", config().getBytecodeVersion(), is(50));
-        assertThat("human printable format", config().getJavaVersion(), is("Java 6"));
+        assertThat("human printable format", Bytecode.getJavaVersion(config().getBytecodeVersion()), is("Java 6"));
     }
 
     @Test
