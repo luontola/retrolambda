@@ -123,6 +123,11 @@ Optional system properties:
       Output directory into where the generated class files are written.
       Defaults to same as retrolambda.inputDir
 
+  retrolambda.classpathFile
+      File listing the classpath entries.
+      Alternative to retrolambda.classpath for avoiding the command line
+      length limit. The file must list one file per line with UTF-8 encoding.
+
   retrolambda.includedFiles
       List of files to process, instead of processing all files.
       This is useful for a build tool to support incremental compilation.
@@ -217,6 +222,9 @@ Version History
 
 ### Upcoming
 
+- Added the `-Dretrolambda.classpathFile` parameter to avoid 
+  the command line length limit
+  ([Issue #70](https://github.com/orfjackal/retrolambda/issues/70))
 - Added the `-Dretrolambda.includedFilesFile` parameter to avoid 
   the command line length limit
   ([Pull request #74](https://github.com/orfjackal/retrolambda/pull/74))

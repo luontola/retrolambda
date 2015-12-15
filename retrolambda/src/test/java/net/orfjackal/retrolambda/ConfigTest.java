@@ -74,9 +74,21 @@ public class ConfigTest {
         assertThat("multiple values", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"), Paths.get("two.jar"))));
     }
 
-    @Ignore // TODO
     @Test
-    public void classpath_file() {
+    public void classpath_file() throws IOException {
+        Path file = tempDir.newFile("classpath.txt").toPath();
+
+        Files.write(file, Arrays.asList("", "", "")); // empty lines are ignored
+        systemProperties.setProperty(Config.CLASSPATH_FILE, file.toString());
+        assertThat("zero values", config().getClasspath(), is(empty()));
+
+        Files.write(file, Arrays.asList("one.jar"));
+        systemProperties.setProperty(Config.CLASSPATH_FILE, file.toString());
+        assertThat("one value", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"))));
+
+        Files.write(file, Arrays.asList("one.jar", "two.jar"));
+        systemProperties.setProperty(Config.CLASSPATH_FILE, file.toString());
+        assertThat("multiple values", config().getClasspath(), is(Arrays.asList(Paths.get("one.jar"), Paths.get("two.jar"))));
     }
 
     @Test
@@ -102,19 +114,19 @@ public class ConfigTest {
 
     @Test
     public void included_files_file() throws IOException {
-        Path listFile = tempDir.newFile("list.txt").toPath();
+        Path file = tempDir.newFile("includedFiles.txt").toPath();
         assertThat("not set", config().getIncludedFiles(), is(nullValue()));
 
-        Files.write(listFile, Arrays.asList("", "", "")); // empty lines are ignored
-        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, listFile.toString());
+        Files.write(file, Arrays.asList("", "", "")); // empty lines are ignored
+        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, file.toString());
         assertThat("zero values", config().getIncludedFiles(), is(empty()));
 
-        Files.write(listFile, Arrays.asList("one.class"));
-        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, listFile.toString());
+        Files.write(file, Arrays.asList("one.class"));
+        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, file.toString());
         assertThat("one value", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"))));
 
-        Files.write(listFile, Arrays.asList("one.class", "two.class"));
-        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, listFile.toString());
+        Files.write(file, Arrays.asList("one.class", "two.class"));
+        systemProperties.setProperty(Config.INCLUDED_FILES_FILE, file.toString());
         assertThat("multiple values", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"), Paths.get("two.class"))));
     }
 }

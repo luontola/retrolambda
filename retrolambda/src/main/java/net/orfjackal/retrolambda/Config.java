@@ -19,8 +19,9 @@ public class Config {
     public static final String INPUT_DIR = PREFIX + "inputDir";
     public static final String OUTPUT_DIR = PREFIX + "outputDir";
     public static final String CLASSPATH = PREFIX + "classpath";
+    public static final String CLASSPATH_FILE = CLASSPATH + "File";
     public static final String INCLUDED_FILES = PREFIX + "includedFiles";
-    public static final String INCLUDED_FILES_FILE = PREFIX + "includedFilesFile";
+    public static final String INCLUDED_FILES_FILE = INCLUDED_FILES + "File";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final List<String> requiredPropertiesHelp = new ArrayList<>();
@@ -101,7 +102,11 @@ public class Config {
     }
 
     public Path getInputDir() {
-        return Paths.get(getRequiredProperty(INPUT_DIR));
+        String inputDir = p.getProperty(INPUT_DIR);
+        if (inputDir != null) {
+            return Paths.get(inputDir);
+        }
+        throw new IllegalArgumentException("Missing required property: " + INPUT_DIR);
     }
 
 
@@ -115,10 +120,10 @@ public class Config {
 
     public Path getOutputDir() {
         String outputDir = p.getProperty(OUTPUT_DIR);
-        if (outputDir == null) {
-            return getInputDir();
+        if (outputDir != null) {
+            return Paths.get(outputDir);
         }
-        return Paths.get(outputDir);
+        return getInputDir();
     }
 
 
@@ -128,22 +133,32 @@ public class Config {
         requiredParameterHelp(CLASSPATH,
                 "Classpath containing the original class files and their dependencies.",
                 "Uses ; or : as the path separator, see java.io.File#pathSeparatorChar");
+        optionalParameterHelp(CLASSPATH_FILE,
+                "File listing the classpath entries.",
+                "Alternative to " + CLASSPATH + " for avoiding the command line",
+                "length limit. The file must list one file per line with UTF-8 encoding.");
     }
 
     public List<Path> getClasspath() {
-        String classpath = getRequiredProperty(CLASSPATH);
-        return Stream.of(classpath.split(File.pathSeparator))
-                .filter(path -> !path.isEmpty())
-                .map(Paths::get)
-                .collect(Collectors.toList());
-    }
-
-    private String getRequiredProperty(String key) {
-        String value = p.getProperty(key);
-        if (value == null) {
-            throw new IllegalArgumentException("Missing required property: " + key);
+        String classpath = p.getProperty(CLASSPATH);
+        if (classpath != null) {
+            return Stream.of(classpath.split(File.pathSeparator))
+                    .filter(path -> !path.isEmpty())
+                    .map(Paths::get)
+                    .collect(Collectors.toList());
         }
-        return value;
+        String classpathFile = p.getProperty(CLASSPATH_FILE);
+        if (classpathFile != null) {
+            try {
+                return Files.readAllLines(Paths.get(classpathFile)).stream()
+                        .filter(line -> !line.isEmpty())
+                        .map(Paths::get)
+                        .collect(Collectors.toList());
+            } catch (IOException e) {
+                throw new RuntimeException("Failed to read " + CLASSPATH_FILE + " from " + classpathFile, e);
+            }
+        }
+        throw new IllegalArgumentException("Missing required property: " + CLASSPATH);
     }
 
 
