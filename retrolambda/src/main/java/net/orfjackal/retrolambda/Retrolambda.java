@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import com.google.common.collect.Lists;
 import net.orfjackal.retrolambda.files.*;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
@@ -21,13 +22,23 @@ public class Retrolambda {
         Path inputDir = config.getInputDir();
         Path outputDir = config.getOutputDir();
         String classpath = config.getClasspath();
-        List<Path> includedFiles = config.getIncludedFiles();
+        List<Path> includedFilesByArgument = config.getIncludedFileList();
+        List<Path> includedFilesByFileList = config.getIncludedFiles();
+
         System.out.println("Bytecode version: " + bytecodeVersion + " (" + config.getJavaVersion() + ")");
         System.out.println("Default methods:  " + defaultMethodsEnabled);
         System.out.println("Input directory:  " + inputDir);
         System.out.println("Output directory: " + outputDir);
         System.out.println("Classpath:        " + classpath);
-        if (includedFiles != null) {
+
+        List<Path> includedFiles  = Lists.newArrayList();
+        if (includedFilesByArgument != null) {
+            includedFiles.addAll(includedFilesByArgument);
+        }
+        if (includedFilesByFileList != null) {
+            includedFiles.addAll(includedFilesByFileList);
+        }
+        if (!includedFiles.isEmpty()) {
             System.out.println("Included files:   " + includedFiles.size());
         }
 
