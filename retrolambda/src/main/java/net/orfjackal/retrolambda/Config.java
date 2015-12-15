@@ -142,23 +142,31 @@ public class Config {
     public List<Path> getClasspath() {
         String classpath = p.getProperty(CLASSPATH);
         if (classpath != null) {
-            return Stream.of(classpath.split(File.pathSeparator))
-                    .filter(path -> !path.isEmpty())
-                    .map(Paths::get)
-                    .collect(Collectors.toList());
+            return parsePathList(classpath);
         }
         String classpathFile = p.getProperty(CLASSPATH_FILE);
         if (classpathFile != null) {
-            try {
-                return Files.readAllLines(Paths.get(classpathFile)).stream()
-                        .filter(line -> !line.isEmpty())
-                        .map(Paths::get)
-                        .collect(Collectors.toList());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read " + CLASSPATH_FILE + " from " + classpathFile, e);
-            }
+            return readPathList(Paths.get(classpathFile));
         }
         throw new IllegalArgumentException("Missing required property: " + CLASSPATH);
+    }
+
+    private static List<Path> parsePathList(String paths) {
+        return Stream.of(paths.split(File.pathSeparator))
+                .filter(path -> !path.isEmpty())
+                .map(Paths::get)
+                .collect(Collectors.toList());
+    }
+
+    private static List<Path> readPathList(Path file) {
+        try {
+            return Files.readAllLines(file).stream()
+                    .filter(line -> !line.isEmpty())
+                    .map(Paths::get)
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read " + file, e);
+        }
     }
 
 
@@ -178,22 +186,11 @@ public class Config {
     public List<Path> getIncludedFiles() {
         String files = p.getProperty(INCLUDED_FILES);
         if (files != null) {
-            return Arrays.asList(files.split(File.pathSeparator)).stream()
-                    .filter(s -> !s.isEmpty())
-                    .map(Paths::get)
-                    .collect(Collectors.toList());
+            return parsePathList(files);
         }
         String filesFile = p.getProperty(INCLUDED_FILES_FILE);
         if (filesFile != null) {
-            try {
-                return Files.readAllLines(Paths.get(filesFile))
-                        .stream()
-                        .filter(path -> !path.isEmpty())
-                        .map(Paths::get)
-                        .collect(Collectors.toList());
-            } catch (IOException e) {
-                throw new RuntimeException("Failed to read " + INCLUDED_FILES_FILE + " from " + filesFile, e);
-            }
+            return readPathList(Paths.get(filesFile));
         }
         return null;
     }
