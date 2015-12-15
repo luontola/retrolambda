@@ -218,9 +218,9 @@ public class Config {
                 .get();
         return "Usage: java " + options + " [-javaagent:retrolambda.jar] -jar retrolambda.jar\n" +
                 "\n" +
-                "Retrolambda is a backporting tool for classes which use lambda expressions\n" +
-                "and have been compiled with Java 8, to run on Java 7 (maybe even Java 5).\n" +
-                "See https://github.com/orfjackal/retrolambda\n" +
+                "Retrolambda takes Java 8 classes and backports lambda expressions and\n" +
+                "some other language features to work on Java 7, 6 or 5.\n" +
+                "Web site: https://github.com/orfjackal/retrolambda\n" +
                 "\n" +
                 "Copyright (c) 2013-2015  Esko Luontola <www.orfjackal.net>\n" +
                 "This software is released under the Apache License 2.0.\n" +

@@ -88,9 +88,9 @@ Your class files should now run on Java 7 or older.
 ```
 Usage: java -Dretrolambda.inputDir=? -Dretrolambda.classpath=? [-javaagent:retrolambda.jar] -jar retrolambda.jar
 
-Retrolambda is a backporting tool for classes which use lambda expressions
-and have been compiled with Java 8, to run on Java 7 (maybe even Java 5).
-See https://github.com/orfjackal/retrolambda
+Retrolambda takes Java 8 classes and backports lambda expressions and
+some other language features to work on Java 7, 6 or 5.
+Web site: https://github.com/orfjackal/retrolambda
 
 Copyright (c) 2013-2015  Esko Luontola <www.orfjackal.net>
 This software is released under the Apache License 2.0.
