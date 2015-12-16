@@ -42,7 +42,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <minimumMavenVersion>3.1</minimumMavenVersion>
+        <minimumMavenVersion>3.2</minimumMavenVersion>
         <testJavaHome>${env.JAVA7_HOME}</testJavaHome>
         <testBytecodeTarget>1.7</testBytecodeTarget>
         <testFork>false</testFork>
