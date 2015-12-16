@@ -23,3 +23,18 @@ To run all combinations of test configurations, use the script:
     ./scripts/build.sh
 
 Finally copy the executable JAR from the `retrolambda/target/` directory.
+
+
+Using the Docker-based Development Environment
+----------------------------------------------
+
+To avoid having to install all the Java versions on your computer, there is a
+Docker image for building Retrolambda.
+
+The image is already in Docker Hub, but it can also be built locally with:
+
+    make
+
+To run a shell inside the container:
+
+    make shell
