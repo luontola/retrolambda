@@ -27,5 +27,10 @@ RUN curl http://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-mave
 	&& mkdir /root/.m2
 COPY toolchains.xml /root/.m2/
 
-RUN mkdir /project
-WORKDIR /project
+# Install other development tools
+RUN yum -y install \
+	git \
+	nano
+
+RUN mkdir -p /project/retrolambda
+WORKDIR /project/retrolambda
