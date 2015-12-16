@@ -220,10 +220,10 @@ Version History
 
 ### Upcoming
 
-- Added the `-Dretrolambda.classpathFile` parameter to avoid 
+- Added the `-Dretrolambda.classpathFile` parameter to avoid
   the command line length limit
   ([Issue #70](https://github.com/orfjackal/retrolambda/issues/70))
-- Added the `-Dretrolambda.includedFilesFile` parameter to avoid 
+- Added the `-Dretrolambda.includedFilesFile` parameter to avoid
   the command line length limit
   ([Pull request #74](https://github.com/orfjackal/retrolambda/pull/74))
 - Made it easier to invoke Retrolambda as a library. Made `Config`
@@ -235,7 +235,7 @@ Version History
 
 ### Retrolambda 2.0.6 (2015-09-06)
 
-- Fixed method references to constructors causing VerifyError on Android 
+- Fixed method references to constructors causing VerifyError on Android
   ([Issue #67](https://github.com/orfjackal/retrolambda/issues/67))
 
 ### Retrolambda 2.0.5 (2015-07-19)
