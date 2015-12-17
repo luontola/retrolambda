@@ -5,8 +5,6 @@ SCRIPTS=`dirname "$0"`
 DESCRIPTION="$1"
 set -x
 
-${SCRIPTS}/build.sh
-
 rm -rfv staging
 
 mvn clean deploy \
