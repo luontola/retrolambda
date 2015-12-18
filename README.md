@@ -232,6 +232,9 @@ Version History
 - Don't create a companion class when an interface has just
   a static initialization block because of constant fields
   ([Issue #66](https://github.com/orfjackal/retrolambda/issues/66))
+- Improved error messages: report the name of the class or lambda method which
+  crashed Retrolambda
+  ([Issue #69](https://github.com/orfjackal/retrolambda/issues/69))
 
 ### Retrolambda 2.0.6 (2015-09-06)
 
@@ -273,7 +276,6 @@ Version History
   methods which are placed in the interface's companion class, to avoid
   them getting out of sync with their erased method descriptors
   ([Issue #48](https://github.com/orfjackal/retrolambda/issues/48))
-- Improved error messages: report which class crashed Retrolambda 
 
 ### Retrolambda 2.0.1 (2015-04-06)
 

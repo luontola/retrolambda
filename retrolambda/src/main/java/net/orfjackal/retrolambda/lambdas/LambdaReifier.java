@@ -39,7 +39,7 @@ public class LambdaReifier {
             return getLambdaFactoryMethod();
 
         } catch (Throwable t) {
-            throw new RuntimeException(t);
+            throw new RuntimeException("Failed to backport lambda or method reference: " + lambdaImplMethod, t);
         } finally {
             resetGlobals();
         }
