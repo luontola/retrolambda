@@ -123,9 +123,6 @@ public class Transformers {
             return writer.toByteArray();
 
         } catch (Throwable t) {
-            if (className != null) {
-                className = className.replace('/', '.');
-            }
             throw new RuntimeException("Failed to backport class: " + className, t);
         }
     }
