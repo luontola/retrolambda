@@ -273,6 +273,7 @@ Version History
   methods which are placed in the interface's companion class, to avoid
   them getting out of sync with their erased method descriptors
   ([Issue #48](https://github.com/orfjackal/retrolambda/issues/48))
+- Improved error messages: report which class crashed Retrolambda 
 
 ### Retrolambda 2.0.1 (2015-04-06)
 

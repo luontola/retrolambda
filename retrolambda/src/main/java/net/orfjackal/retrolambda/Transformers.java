@@ -99,27 +99,35 @@ public class Transformers {
     }
 
     private byte[] transform(ClassNode node, ClassVisitorChain chain) {
-        return transform(node::accept, chain);
+        return transform(node.name, node::accept, chain);
     }
 
     private byte[] transform(ClassReader reader, ClassVisitorChain chain) {
-        return transform(cv -> reader.accept(cv, 0), chain);
+        return transform(reader.getClassName(), cv -> reader.accept(cv, 0), chain);
     }
 
-    private byte[] transform(Consumer<ClassVisitor> reader, ClassVisitorChain chain) {
-        ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        ClassVisitor next = writer;
+    private byte[] transform(String className, Consumer<ClassVisitor> reader, ClassVisitorChain chain) {
+        try {
+            ClassWriter writer = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+            ClassVisitor next = writer;
 
-        next = new LowerBytecodeVersion(next, targetVersion);
-        if (targetVersion < Opcodes.V1_7) {
-            next = new SwallowSuppressedExceptions(next);
-            next = new RemoveMethodHandlesLookupReferences(next);
+            next = new LowerBytecodeVersion(next, targetVersion);
+            if (targetVersion < Opcodes.V1_7) {
+                next = new SwallowSuppressedExceptions(next);
+                next = new RemoveMethodHandlesLookupReferences(next);
+            }
+            next = new FixInvokeStaticOnInterfaceMethod(next);
+            next = chain.wrap(next);
+
+            reader.accept(next);
+            return writer.toByteArray();
+
+        } catch (Throwable t) {
+            if (className != null) {
+                className = className.replace('/', '.');
+            }
+            throw new RuntimeException("Failed to transform class " + className, t);
         }
-        next = new FixInvokeStaticOnInterfaceMethod(next);
-        next = chain.wrap(next);
-
-        reader.accept(next);
-        return writer.toByteArray();
     }
 
     private interface ClassVisitorChain {
