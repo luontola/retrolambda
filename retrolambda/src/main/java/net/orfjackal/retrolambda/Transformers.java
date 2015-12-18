@@ -126,7 +126,7 @@ public class Transformers {
             if (className != null) {
                 className = className.replace('/', '.');
             }
-            throw new RuntimeException("Failed to transform class " + className, t);
+            throw new RuntimeException("Failed to backport class: " + className, t);
         }
     }
 

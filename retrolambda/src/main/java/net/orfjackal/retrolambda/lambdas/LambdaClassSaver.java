@@ -8,6 +8,8 @@ import net.orfjackal.retrolambda.Transformers;
 import net.orfjackal.retrolambda.files.OutputDirectory;
 import org.objectweb.asm.ClassReader;
 
+import java.io.IOException;
+
 public class LambdaClassSaver {
 
     private final OutputDirectory saver;
@@ -25,14 +27,12 @@ public class LambdaClassSaver {
     }
 
     private void reifyLambdaClass(String className, byte[] bytecode) {
+        System.out.println("Saving lambda class: " + className);
+        bytecode = transformers.backportLambdaClass(new ClassReader(bytecode));
         try {
-            System.out.println("Saving lambda class: " + className);
-            saver.writeClass(transformers.backportLambdaClass(new ClassReader(bytecode)));
-
-        } catch (Throwable t) {
-            // print to stdout to keep in sync with other log output
-            System.out.println("ERROR: Failed to backport lambda class: " + className);
-            t.printStackTrace(System.out);
+            saver.writeClass(bytecode);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
