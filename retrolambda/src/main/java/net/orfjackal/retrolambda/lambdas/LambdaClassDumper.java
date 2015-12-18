@@ -44,7 +44,7 @@ public class LambdaClassDumper implements AutoCloseable {
         if (dumperField != null) {
             try {
                 dumperField.set(null, null);
-            } catch (Exception e) {
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
         }

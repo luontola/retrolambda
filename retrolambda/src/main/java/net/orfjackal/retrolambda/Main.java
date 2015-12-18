@@ -25,7 +25,7 @@ public class Main {
         try {
             Retrolambda.run(config);
         } catch (Throwable t) {
-            System.out.println("Error! Failed to transform some classes");
+            System.out.println("Error! Failed to run Retrolambda");
             t.printStackTrace(System.out);
             System.exit(1);
         }
