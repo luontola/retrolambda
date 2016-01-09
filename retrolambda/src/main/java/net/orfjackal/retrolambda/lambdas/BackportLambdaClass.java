@@ -45,6 +45,9 @@ public class BackportLambdaClass extends ClassVisitor {
         if (LambdaNaming.isSerializationHook(access, name, desc)) {
             return null; // remove serialization hooks; we serialize lambda instances as-is
         }
+        if (LambdaNaming.isPlatformFactoryMethod(access, name, desc, factoryMethod.getDesc())) {
+            return null; // remove the JVM's factory method which will not be unused
+        }
         MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
         next = new RemoveMagicLambdaConstructorCall(next);
         next = new CallPrivateImplMethodsViaAccessMethods(next);
