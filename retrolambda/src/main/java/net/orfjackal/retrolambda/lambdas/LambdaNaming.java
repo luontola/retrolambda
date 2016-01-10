@@ -37,4 +37,12 @@ public class LambdaNaming {
                 && desc.equals(targetDesc)
                 && Flags.hasFlag(access, ACC_PRIVATE | ACC_STATIC);
     }
+
+    public static boolean isBodyMethodName(String name) {
+        return name.startsWith("lambda$");
+    }
+
+    public static boolean isBodyMethod(int access, String name) {
+        return isBodyMethodName(name) && Flags.hasFlag(access, ACC_SYNTHETIC);
+    }
 }
