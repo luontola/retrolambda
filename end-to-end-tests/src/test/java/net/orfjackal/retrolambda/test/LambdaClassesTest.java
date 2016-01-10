@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.test;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -46,7 +47,7 @@ public class LambdaClassesTest {
 
     @Test
     public void capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Set<String> expected = new HashSet<>(Arrays.asList("lambdaFactory$", "run"));
+        Set<String> expected = ImmutableSet.of("run");
 
         Class<?> lambdaClass = Class.forName(Capturing.class.getName() + "$$Lambda$1");
 
@@ -67,7 +68,7 @@ public class LambdaClassesTest {
 
     @Test
     public void non_capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Set<String> expected = new HashSet<>(Arrays.asList("lambdaFactory$", "run"));
+        Set<String> expected = ImmutableSet.of("run");
 
         Class<?> lambdaClass = Class.forName(NonCapturing.class.getName() + "$$Lambda$1");
 

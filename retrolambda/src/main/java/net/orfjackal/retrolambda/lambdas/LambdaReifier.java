@@ -20,23 +20,21 @@ public class LambdaReifier {
     private static final BlockingDeque<Handle> currentLambdaImplMethod = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Handle> currentLambdaAccessMethod = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Class<?>> currentInvoker = new LinkedBlockingDeque<>(1);
-    private static final BlockingDeque<Type> currentInvokedType = new LinkedBlockingDeque<>(1);
-    private static final BlockingDeque<String> currentLambdaClass = new LinkedBlockingDeque<>(1);
+    private static final BlockingDeque<LambdaClassInfo> currentClassInfo = new LinkedBlockingDeque<>(1);
 
-    public static LambdaFactoryMethod reifyLambdaClass(Handle lambdaImplMethod, Handle lambdaAccessMethod,
-                                                       Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
+    public static LambdaClassInfo reifyLambdaClass(Handle lambdaImplMethod, Handle lambdaAccessMethod,
+                                                   Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
         try {
             setLambdaImplMethod(lambdaImplMethod);
             setLambdaAccessMethod(lambdaAccessMethod);
             setInvoker(invoker);
-            setInvokedType(invokedType);
 
             // Causes the lambda class to be loaded. Retrolambda's Java agent
             // will detect it, save it to a file and tell us (via the globals
             // in this class) that what the name of the lambda class was.
             callBootstrapMethod(invoker, invokedName, invokedType, bsm, bsmArgs);
 
-            return getLambdaFactoryMethod();
+            return currentClassInfo.getFirst();
 
         } catch (Throwable t) {
             throw new RuntimeException("Failed to backport lambda or method reference: " + lambdaImplMethod, t);
@@ -57,12 +55,8 @@ public class LambdaReifier {
         currentInvoker.push(lambdaInvoker);
     }
 
-    private static void setInvokedType(Type invokedType) {
-        currentInvokedType.push(invokedType);
-    }
-
-    public static void setLambdaClass(String lambdaClass) {
-        currentLambdaClass.push(lambdaClass);
+    public static void setClassInfo(LambdaClassInfo info) {
+        currentClassInfo.push(info);
     }
 
     public static boolean isLambdaClassToReify(String className) {
@@ -80,18 +74,11 @@ public class LambdaReifier {
         return currentLambdaAccessMethod.getFirst();
     }
 
-    public static LambdaFactoryMethod getLambdaFactoryMethod() {
-        String lambdaClass = currentLambdaClass.getFirst();
-        Type invokedType = currentInvokedType.getFirst();
-        return new LambdaFactoryMethod(lambdaClass, invokedType);
-    }
-
     private static void resetGlobals() {
         currentLambdaImplMethod.clear();
         currentLambdaAccessMethod.clear();
         currentInvoker.clear();
-        currentInvokedType.clear();
-        currentLambdaClass.clear();
+        currentClassInfo.clear();
     }
 
     private static CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {

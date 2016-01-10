@@ -32,9 +32,8 @@ public class LambdaNaming {
                 && Flags.hasFlag(access, ACC_PRIVATE | ACC_STATIC | ACC_SYNTHETIC);
     }
 
-    public static boolean isPlatformFactoryMethod(int access, String name, String desc, String targetDesc) {
+    public static boolean isPlatformFactoryMethod(int access, String name) {
         return name.equals("get$Lambda")
-                && desc.equals(targetDesc)
                 && Flags.hasFlag(access, ACC_PRIVATE | ACC_STATIC);
     }
 }

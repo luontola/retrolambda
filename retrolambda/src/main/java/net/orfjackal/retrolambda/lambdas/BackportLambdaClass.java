@@ -14,10 +14,8 @@ public class BackportLambdaClass extends ClassVisitor {
     private static final String JAVA_LANG_OBJECT = "java/lang/Object";
 
     private String lambdaClass;
-    private Type constructor;
     private Handle implMethod;
     private Handle accessMethod;
-    private LambdaFactoryMethod factoryMethod;
 
     public BackportLambdaClass(ClassVisitor next) {
         super(ASM5, next);
@@ -26,10 +24,8 @@ public class BackportLambdaClass extends ClassVisitor {
     @Override
     public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
         lambdaClass = name;
-        LambdaReifier.setLambdaClass(lambdaClass);
         implMethod = LambdaReifier.getLambdaImplMethod();
         accessMethod = LambdaReifier.getLambdaAccessMethod();
-        factoryMethod = LambdaReifier.getLambdaFactoryMethod();
 
         if (superName.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)) {
             superName = JAVA_LANG_OBJECT;
@@ -40,12 +36,32 @@ public class BackportLambdaClass extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         if (name.equals("<init>")) {
-            constructor = Type.getMethodType(desc);
+            Type constructor = Type.getMethodType(desc);
+            int argumentCount = constructor.getArgumentTypes().length;
+
+            String referenceName;
+            String referenceDesc;
+            if (argumentCount == 0) {
+                // Add the static field and static initializer block to keep a singleton instance.
+                makeSingleton();
+
+                referenceName = SINGLETON_FIELD_NAME;
+                referenceDesc = singletonFieldDesc();
+            } else {
+                // Make the constructor visible
+                access &= ~ACC_PRIVATE;
+
+                referenceName = "<init>";
+                referenceDesc = desc;
+            }
+
+            LambdaClassInfo info = new LambdaClassInfo(lambdaClass, referenceName, referenceDesc, argumentCount);
+            LambdaReifier.setClassInfo(info);
         }
         if (LambdaNaming.isSerializationHook(access, name, desc)) {
             return null; // remove serialization hooks; we serialize lambda instances as-is
         }
-        if (LambdaNaming.isPlatformFactoryMethod(access, name, desc, factoryMethod.getDesc())) {
+        if (LambdaNaming.isPlatformFactoryMethod(access, name)) {
             return null; // remove the JVM's factory method which will not be unused
         }
         MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
@@ -54,17 +70,8 @@ public class BackportLambdaClass extends ClassVisitor {
         return next;
     }
 
-    @Override
-    public void visitEnd() {
-        if (isStateless()) {
-            makeSingleton();
-        }
-        generateFactoryMethod();
-        super.visitEnd();
-    }
-
     private void makeSingleton() {
-        FieldVisitor fv = super.visitField(ACC_PRIVATE | ACC_STATIC | ACC_FINAL,
+        FieldVisitor fv = super.visitField(ACC_STATIC | ACC_FINAL,
                 SINGLETON_FIELD_NAME, singletonFieldDesc(), null, null);
         fv.visitEnd();
 
@@ -79,37 +86,8 @@ public class BackportLambdaClass extends ClassVisitor {
         mv.visitEnd();
     }
 
-    private void generateFactoryMethod() {
-        MethodVisitor mv = cv.visitMethod(ACC_PUBLIC | ACC_STATIC,
-                factoryMethod.getName(), factoryMethod.getDesc(), null, null);
-        mv.visitCode();
-
-        if (isStateless()) {
-            mv.visitFieldInsn(GETSTATIC, lambdaClass, SINGLETON_FIELD_NAME, singletonFieldDesc());
-            mv.visitInsn(ARETURN);
-
-        } else {
-            mv.visitTypeInsn(NEW, lambdaClass);
-            mv.visitInsn(DUP);
-            int varIndex = 0;
-            for (Type type : constructor.getArgumentTypes()) {
-                mv.visitVarInsn(type.getOpcode(ILOAD), varIndex);
-                varIndex += type.getSize();
-            }
-            mv.visitMethodInsn(INVOKESPECIAL, lambdaClass, "<init>", constructor.getDescriptor(), false);
-            mv.visitInsn(ARETURN);
-        }
-
-        mv.visitMaxs(-1, -1); // rely on ClassWriter.COMPUTE_MAXS
-        mv.visitEnd();
-    }
-
     private String singletonFieldDesc() {
         return "L" + lambdaClass + ";";
-    }
-
-    private boolean isStateless() {
-        return constructor.getArgumentTypes().length == 0;
     }
 
 
