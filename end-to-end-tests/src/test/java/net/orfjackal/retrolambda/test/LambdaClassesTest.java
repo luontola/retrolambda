@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2016 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -10,7 +10,8 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 import static net.orfjackal.retrolambda.test.TestUtil.assertClassExists;
-import static org.junit.Assert.assertTrue;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
 
 public class LambdaClassesTest {
 
@@ -22,31 +23,9 @@ public class LambdaClassesTest {
         assertClassExists(Dummy2.class.getName() + "$$Lambda$2");
     }
 
-    @Test
-    public void capturing_lambda_contain_no_unexpected_methods() throws ClassNotFoundException {
-        List<String> expected = new ArrayList<>(Arrays.asList("lambdaFactory$", "run"));
-        Class<?> cls = Class.forName(Dummy1.class.getName() + "$$Lambda$1");
-        for (Method method : cls.getDeclaredMethods()) {
-            assertTrue(method.getName() + " not expected", expected.remove(method.getName()));
-        }
-        assertTrue("Missing methods: " + expected, expected.isEmpty());
-    }
-
-    @Test
-    public void non_capturing_lambda_contain_no_unexpected_methods() throws ClassNotFoundException {
-        List<String> expected = new ArrayList<>(Arrays.asList("lambdaFactory$", "run"));
-        Class<?> cls = Class.forName(Dummy2.class.getName() + "$$Lambda$1");
-        for (Method method : cls.getDeclaredMethods()) {
-            assertTrue(method.getName() + " not expected", expected.remove(method.getName()));
-        }
-        assertTrue("Missing methods: " + expected, expected.isEmpty());
-    }
-
-
     @SuppressWarnings("UnusedDeclaration")
     private class Dummy1 {
         private Dummy1() {
-            // Non-capturing lambdas
             Runnable lambda1 = () -> {
             };
             Runnable lambda2 = () -> {
@@ -57,9 +36,53 @@ public class LambdaClassesTest {
     @SuppressWarnings("UnusedDeclaration")
     private class Dummy2 {
         private Dummy2() {
-            // Capturing lambdas
-            Runnable lambda1 = () -> System.out.println(hashCode());
-            Runnable lambda2 = () -> System.out.println(hashCode());
+            Runnable lambda1 = () -> {
+            };
+            Runnable lambda2 = () -> {
+            };
+        }
+    }
+
+
+    @Test
+    public void capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
+        Set<String> expected = new HashSet<>(Arrays.asList("lambdaFactory$", "run"));
+
+        Class<?> lambdaClass = Class.forName(Capturing.class.getName() + "$$Lambda$1");
+
+        Set<String> actual = new HashSet<>();
+        for (Method method : lambdaClass.getDeclaredMethods()) {
+            actual.add(method.getName());
+        }
+        assertThat(actual, is(expected));
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    private class Capturing {
+        private Capturing() {
+            Runnable lambda = () -> System.out.println(hashCode());
+        }
+    }
+
+
+    @Test
+    public void non_capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
+        Set<String> expected = new HashSet<>(Arrays.asList("lambdaFactory$", "run"));
+
+        Class<?> lambdaClass = Class.forName(NonCapturing.class.getName() + "$$Lambda$1");
+
+        Set<String> actual = new HashSet<>();
+        for (Method method : lambdaClass.getDeclaredMethods()) {
+            actual.add(method.getName());
+        }
+        assertThat(actual, is(expected));
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    private class NonCapturing {
+        private NonCapturing() {
+            Runnable lambda = () -> {
+            };
         }
     }
 }
