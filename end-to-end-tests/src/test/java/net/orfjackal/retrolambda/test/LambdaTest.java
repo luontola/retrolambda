@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2016 Esko Luontola <www.orfjackal.net>
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -110,12 +110,22 @@ public class LambdaTest extends SuperClass {
     }
 
     @Test
-    public void method_references_to_virtual_methods() throws Exception {
+    public void method_references_to_virtual_methods_on_local_variables() throws Exception {
         String foo = "foo";
         Callable<String> ref = foo::toUpperCase;
 
         assertThat(ref.call(), is("FOO"));
     }
+
+    @Test
+    public void method_references_to_virtual_methods_on_instance_variables() throws Exception {
+        Callable<String> ref = instanceVarFoo::toUpperCase;
+
+        assertThat(ref.call(), is("FOO"));
+    }
+
+    @SuppressWarnings("FieldCanBeLocal")
+    private String instanceVarFoo = "foo";
 
     @Test
     public void method_references_to_interface_methods() throws Exception {
