@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda;
 
 import com.google.common.io.ByteStreams;
 import net.orfjackal.retrolambda.interfaces.*;
-import org.junit.Test;
+import org.junit.*;
 import org.objectweb.asm.Type;
 
 import java.io.*;
@@ -21,9 +21,9 @@ import static org.hamcrest.Matchers.*;
 import static org.objectweb.asm.Opcodes.*;
 
 @SuppressWarnings("UnusedDeclaration")
-public class ClassHierarchyAnalyzerTest {
+public class ClassAnalyzerTest {
 
-    private final ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
+    private final ClassAnalyzer analyzer = new ClassAnalyzer();
 
     @Test
     public void lists_interfaces_and_classes_separately() {
@@ -44,13 +44,13 @@ public class ClassHierarchyAnalyzerTest {
                 InterfaceImplementer.class);
 
         assertThat("original", analyzer.getMethods(Type.getType(Interface.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
+                hasItem(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildInterface.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
+                hasItem(new MethodInfo("abstractMethod", "()V", Interface.class, new MethodKind.Abstract())));
 
         assertThat("implements", analyzer.getMethods(Type.getType(InterfaceImplementer.class)),
-                containsInAnyOrder(new MethodInfo("abstractMethod", "()V", InterfaceImplementer.class, new MethodKind.Implemented())));
+                hasItem(new MethodInfo("abstractMethod", "()V", InterfaceImplementer.class, new MethodKind.Implemented())));
     }
 
     private interface Interface {
@@ -72,10 +72,10 @@ public class ClassHierarchyAnalyzerTest {
         analyze(InterfaceMethodTypes.class);
 
         assertThat(analyzer.getMethods(Type.getType(InterfaceMethodTypes.class)),
-                containsInAnyOrder(
+                hasItems(
                         new MethodInfo("abstractMethod", "()V", InterfaceMethodTypes.class, new MethodKind.Abstract()),
                         new MethodInfo("defaultMethod", "()V", InterfaceMethodTypes.class, new MethodKind.Default(
-                                new MethodRef(H_INVOKESTATIC, InterfaceMethodTypes$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$InterfaceMethodTypes;)V")))));
+                                new MethodRef(H_INVOKESTATIC, InterfaceMethodTypes$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$InterfaceMethodTypes;)V")))));
     }
 
     @Test
@@ -85,7 +85,7 @@ public class ClassHierarchyAnalyzerTest {
         // An abstract instance method takes precedence over a default method,
         // so we handle abstract instance methods the same way as concrete instance methods.
         assertThat(analyzer.getMethods(Type.getType(ClassMethodTypes.class)),
-                containsInAnyOrder(
+                hasItems(
                         new MethodInfo("abstractMethod", "()V", ClassMethodTypes.class, new MethodKind.Implemented()),
                         new MethodInfo("instanceMethod", "()V", ClassMethodTypes.class, new MethodKind.Implemented())));
     }
@@ -125,19 +125,19 @@ public class ClassHierarchyAnalyzerTest {
                 containsInAnyOrder(
                         new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
                         new MethodInfo("defaultMethod", "()V", HasDefaultMethods.class, new MethodKind.Default(
-                                new MethodRef(H_INVOKESTATIC, HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$HasDefaultMethods;)V")))));
+                                new MethodRef(H_INVOKESTATIC, HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$HasDefaultMethods;)V")))));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(DoesNotOverrideDefaultMethods.class)),
                 containsInAnyOrder(
                         new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
                         new MethodInfo("defaultMethod", "()V", HasDefaultMethods.class, new MethodKind.Default(
-                                new MethodRef(H_INVOKESTATIC, HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$HasDefaultMethods;)V")))));
+                                new MethodRef(H_INVOKESTATIC, HasDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$HasDefaultMethods;)V")))));
 
         assertThat("changes default impl", analyzer.getMethods(Type.getType(OverridesDefaultMethods.class)),
                 containsInAnyOrder(
                         new MethodInfo("abstractMethod", "()V", HasDefaultMethods.class, new MethodKind.Abstract()),
                         new MethodInfo("defaultMethod", "()V", OverridesDefaultMethods.class, new MethodKind.Default(
-                                new MethodRef(H_INVOKESTATIC, OverridesDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OverridesDefaultMethods;)V")))));
+                                new MethodRef(H_INVOKESTATIC, OverridesDefaultMethods$.class, "defaultMethod", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$OverridesDefaultMethods;)V")))));
 
         assertThat("makes abstract", analyzer.getMethods(Type.getType(AbstractsDefaultMethods.class)),
                 containsInAnyOrder(
@@ -179,11 +179,11 @@ public class ClassHierarchyAnalyzerTest {
                 ChildClass.class);
 
         assertThat("original", analyzer.getMethods(Type.getType(BaseClass.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Implemented())));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(ChildClass.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("baseMethod", "()V", BaseClass.class, new MethodKind.Implemented())));
     }
 
@@ -205,25 +205,25 @@ public class ClassHierarchyAnalyzerTest {
                 InheritsOverridesDefaultAndDirectlyImplements.class);
 
         assertThat("original", analyzer.getMethods(Type.getType(DefaultMethods.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("foo", "()V", DefaultMethods.class, new MethodKind.Default(
-                                new MethodRef(H_INVOKESTATIC, DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$DefaultMethods;)V")))));
+                                new MethodRef(H_INVOKESTATIC, DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$DefaultMethods;)V")))));
 
         assertThat("inherits unchanged", analyzer.getMethods(Type.getType(InheritsDefault.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("foo", "()V", DefaultMethods.class, new MethodKind.Default(
-                                new MethodRef(H_INVOKESTATIC, DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$DefaultMethods;)V")))));
+                                new MethodRef(H_INVOKESTATIC, DefaultMethods$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$DefaultMethods;)V")))));
 
         assertThat("overrides", analyzer.getMethods(Type.getType(OverridesDefault.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Implemented())));
 
         assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefault.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Implemented())));
 
         assertThat("inherits overridden", analyzer.getMethods(Type.getType(InheritsOverridesDefaultAndDirectlyImplements.class)),
-                containsInAnyOrder(
+                hasItem(
                         new MethodInfo("foo", "()V", OverridesDefault.class, new MethodKind.Implemented())));
     }
 
@@ -261,9 +261,9 @@ public class ClassHierarchyAnalyzerTest {
                 InheritsOriginalAndOverridden.class);
 
         MethodInfo original = new MethodInfo("foo", "()V", SuperOriginal.class, new MethodKind.Default(
-                new MethodRef(H_INVOKESTATIC, SuperOriginal$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$SuperOriginal;)V")));
+                new MethodRef(H_INVOKESTATIC, SuperOriginal$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$SuperOriginal;)V")));
         MethodInfo overridden = new MethodInfo("foo", "()V", SuperOverridden.class, new MethodKind.Default(
-                new MethodRef(H_INVOKESTATIC, SuperOverridden$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$SuperOverridden;)V")));
+                new MethodRef(H_INVOKESTATIC, SuperOverridden$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$SuperOverridden;)V")));
 
         assertThat("inherits original", analyzer.getMethods(Type.getType(InheritsOriginal.class)),
                 containsInAnyOrder(original));
@@ -315,18 +315,18 @@ public class ClassHierarchyAnalyzerTest {
                 ExtendsImplementsOriginalAndImplementsOverriddenDefault.class);
 
         MethodInfo original = new MethodInfo("foo", "()V", OriginalDefault.class, new MethodKind.Default(
-                new MethodRef(H_INVOKESTATIC, OriginalDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OriginalDefault;)V")));
+                new MethodRef(H_INVOKESTATIC, OriginalDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$OriginalDefault;)V")));
         MethodInfo overridden = new MethodInfo("foo", "()V", OverriddenDefault.class, new MethodKind.Default(
-                new MethodRef(H_INVOKESTATIC, OverriddenDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$OverriddenDefault;)V")));
+                new MethodRef(H_INVOKESTATIC, OverriddenDefault$.class, "foo", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$OverriddenDefault;)V")));
 
         assertThat("implements original", analyzer.getMethods(Type.getType(ImplementsOriginal.class)),
-                containsInAnyOrder(original));
+                hasItem(original));
         assertThat("implements original and overridden", analyzer.getMethods(Type.getType(ImplementsOriginalAndOverriddenDefault.class)),
-                containsInAnyOrder(overridden));
+                hasItem(overridden));
         assertThat("implements overridden and original", analyzer.getMethods(Type.getType(ImplementsOverriddenAndOriginalDefault.class)),
-                containsInAnyOrder(overridden));
+                hasItem(overridden));
         assertThat("extends implementor of original and implements overridden", analyzer.getMethods(Type.getType(ExtendsImplementsOriginalAndImplementsOverriddenDefault.class)),
-                containsInAnyOrder(overridden));
+                hasItem(overridden));
     }
 
     private interface OriginalDefault {
@@ -365,13 +365,13 @@ public class ClassHierarchyAnalyzerTest {
                 ImplementsUsesLambdas.class);
 
         MethodInfo stateless = new MethodInfo("stateless", "()Ljava/util/concurrent/Callable;", UsesLambdas.class, new MethodKind.Default(
-                new MethodRef(H_INVOKESTATIC, UsesLambdas$.class, "stateless", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$UsesLambdas;)Ljava/util/concurrent/Callable;")));
+                new MethodRef(H_INVOKESTATIC, UsesLambdas$.class, "stateless", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$UsesLambdas;)Ljava/util/concurrent/Callable;")));
         MethodInfo captureThis = new MethodInfo("captureThis", "()Ljava/util/concurrent/Callable;", UsesLambdas.class, new MethodKind.Default(
-                new MethodRef(H_INVOKESTATIC, UsesLambdas$.class, "captureThis", "(Lnet/orfjackal/retrolambda/ClassHierarchyAnalyzerTest$UsesLambdas;)Ljava/util/concurrent/Callable;")));
+                new MethodRef(H_INVOKESTATIC, UsesLambdas$.class, "captureThis", "(Lnet/orfjackal/retrolambda/ClassAnalyzerTest$UsesLambdas;)Ljava/util/concurrent/Callable;")));
 
         assertThat("does not copy instance lambda impl methods to implementers",
                 analyzer.getMethods(Type.getType(ImplementsUsesLambdas.class)),
-                containsInAnyOrder(stateless, captureThis));
+                hasItems(stateless, captureThis));
     }
 
     private interface UsesLambdas {
@@ -537,13 +537,13 @@ public class ClassHierarchyAnalyzerTest {
 
     private static List<Class<?>> infosToClasses(List<ClassInfo> classes) {
         return classes.stream()
-                .map(ClassHierarchyAnalyzerTest::toClass)
+                .map(ClassAnalyzerTest::toClass)
                 .collect(toList());
     }
 
     private static List<Class<?>> typesToClasses(List<Type> types) {
         return types.stream()
-                .map(ClassHierarchyAnalyzerTest::toClass)
+                .map(ClassAnalyzerTest::toClass)
                 .collect(toList());
     }
 

@@ -11,16 +11,19 @@ import java.util.Objects;
 
 public class MethodInfo {
 
+    public final int access;
     public final int tag;
     public final MethodSignature signature;
     public final Type owner;
     public final MethodKind kind;
 
-    public MethodInfo(String name, String desc, Class<?> owner, MethodKind kind) { // only for tests, so we can ignore the tag
-        this(-1, new MethodSignature(name, desc), Type.getType(owner), kind);
+    public MethodInfo(String name, String desc, Class<?> owner, MethodKind kind) {
+        // only for tests, so we can ignore the tag and access
+        this(0, -1, new MethodSignature(name, desc), Type.getType(owner), kind);
     }
 
-    public MethodInfo(int tag, MethodSignature signature, Type owner, MethodKind kind) {
+    public MethodInfo(int access, int tag, MethodSignature signature, Type owner, MethodKind kind) {
+        this.access = access;
         this.tag = tag;
         this.signature = signature;
         this.owner = owner;
@@ -58,7 +61,7 @@ public class MethodInfo {
                 .addValue(signature)
                 .addValue(owner)
                 .addValue(kind)
-                .addValue("(" + tag + ")")
+                .addValue("(tag=" + tag + ", access=" + access + ")")
                 .toString();
     }
 }

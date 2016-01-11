@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 import static net.orfjackal.retrolambda.util.Flags.*;
 import static org.objectweb.asm.Opcodes.*;
 
-public class ClassHierarchyAnalyzer {
+public class ClassAnalyzer {
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
@@ -45,10 +45,16 @@ public class ClassHierarchyAnalyzer {
 
             @Override
             public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-                if (isConstructor(name) || isStaticMethod(access)) {
-                    return null;
+                int tag;
+                if (isConstructor(name)) {
+                    tag = H_INVOKESPECIAL;
+                } else if (isStaticMethod(access)) {
+                    tag = H_INVOKESTATIC;
+                } else {
+                    tag = H_INVOKEVIRTUAL;
                 }
-                c.addMethod(new MethodRef(H_INVOKEVIRTUAL, owner, name, desc), new MethodKind.Implemented());
+
+                c.addMethod(access, new MethodRef(tag, owner, name, desc), new MethodKind.Implemented());
                 return null;
             }
 
@@ -71,12 +77,12 @@ public class ClassHierarchyAnalyzer {
                 MethodRef method = new MethodRef(Handles.accessToTag(access, true), owner, name, desc);
 
                 if (isAbstractMethod(access)) {
-                    c.addMethod(method, new MethodKind.Abstract());
+                    c.addMethod(access, method, new MethodKind.Abstract());
 
                 } else if (isDefaultMethod(access)) {
                     MethodRef defaultImpl = new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner)));
                     c.enableCompanionClass();
-                    c.addMethod(method, new MethodKind.Default(defaultImpl));
+                    c.addMethod(access, method, new MethodKind.Default(defaultImpl));
 
                 } else if (isInstanceLambdaImplMethod(access)) {
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
