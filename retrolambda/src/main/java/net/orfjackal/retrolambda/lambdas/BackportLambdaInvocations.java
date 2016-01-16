@@ -6,6 +6,7 @@ package net.orfjackal.retrolambda.lambdas;
 
 import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
+import org.objectweb.asm.tree.*;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -51,7 +52,8 @@ public class BackportLambdaInvocations extends ClassVisitor {
         if (LambdaNaming.isDeserializationHook(access, name, desc)) {
             return null; // remove serialization hooks; we serialize lambda instances as-is
         }
-        return new InvokeDynamicInsnConverter(super.visitMethod(access, name, desc, signature, exceptions));
+        MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
+        return new InvokeDynamicInsnConverter(access, name, desc, signature, exceptions, next);
     }
 
     Handle getLambdaAccessMethod(Handle implMethod) {
@@ -96,10 +98,13 @@ public class BackportLambdaInvocations extends ClassVisitor {
     }
 
 
-    private class InvokeDynamicInsnConverter extends MethodVisitor {
+    private class InvokeDynamicInsnConverter extends MethodNode {
+        private final MethodVisitor next;
 
-        public InvokeDynamicInsnConverter(MethodVisitor next) {
-            super(ASM5, next);
+        public InvokeDynamicInsnConverter(int access, String name, String desc, String signature, String[] exceptions,
+                                          MethodVisitor next) {
+            super(ASM5, access, name, desc, signature, exceptions);
+            this.next = next;
         }
 
         @Override
@@ -116,9 +121,46 @@ public class BackportLambdaInvocations extends ClassVisitor {
             Handle implMethod = (Handle) bsmArgs[1];
             Handle accessMethod = getLambdaAccessMethod(implMethod);
 
-            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, accessMethod,
+            LambdaClassInfo info = LambdaReifier.reifyLambdaClass(implMethod, accessMethod,
                     invoker, invokedName, invokedType, bsm, bsmArgs);
-            super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
+
+            if (info.isStateless()) {
+                super.visitFieldInsn(GETSTATIC, info.getLambdaClass(), info.getReferenceName(),
+                        info.getReferenceDesc());
+                return;
+            }
+
+            // At this point we know that the lambda is capturing and will require load bytecodes for its arguments.
+            // Since these must occur after the new/dup bytecodes, find the first load instruction and place the
+            // new/dup bytecode before it.
+            AbstractInsnNode firstLoad = null;
+            for (int i = instructions.size() - 1, seen = 0; i >= 0; i--) {
+                AbstractInsnNode instruction = instructions.get(i);
+                int opcode = instruction.getOpcode();
+                if (opcode == ALOAD || opcode == ILOAD || opcode == LLOAD || opcode == FLOAD || opcode == DLOAD || opcode == GETSTATIC) {
+                    seen++;
+                    if (seen == info.getArgumentCount()) {
+                        firstLoad = instruction;
+                        break;
+                    }
+                }
+            }
+            if (firstLoad == null) {
+                throw new IllegalStateException(
+                        "Unable to find expected load instruction count. Please report this as a bug.");
+            }
+
+            instructions.insertBefore(firstLoad, new TypeInsnNode(NEW, info.getLambdaClass()));
+            instructions.insertBefore(firstLoad, new InsnNode(DUP));
+
+            super.visitMethodInsn(INVOKESPECIAL, info.getLambdaClass(), info.getReferenceName(),
+                    info.getReferenceDesc(), false);
+        }
+
+        @Override
+        public void visitEnd() {
+            // Forward all recorded instructions to the delegate method visitor.
+            accept(next);
         }
     }
 
