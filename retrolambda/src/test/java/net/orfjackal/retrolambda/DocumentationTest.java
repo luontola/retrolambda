@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda;
 
 import org.junit.Test;
+import org.junit.Ignore;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -13,6 +14,7 @@ import java.util.Properties;
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore
 public class DocumentationTest {
 
     @Test

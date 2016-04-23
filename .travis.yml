@@ -1,0 +1,25 @@
+language: java
+
+jdk:
+  - oraclejdk8
+
+after_success:
+  - .buildscript/deploy_snapshot.sh
+
+env:
+  global:
+    - secure: "w6udqBpY2zSPWb3p8LYHIG6bmgQeU4VzVEPrYYPI/a831Z4VA+vlXmchKy+QG6b0BQPEGynEymChIIHdEwuHWHXA18FdJatOyhjVQIA49B9wx6GKjHhnZivWQbyLfGe5MiqEPRoL39nmv9Uvxb0oVTOn+bcACcafgZV0a8NW1Pk6AVsGPDn/v4LkAbQBppsfBWtIsG31gRZCz9/KT2YRyAhULSVShyZn4nz3AnnXWKA6KZQx1Lf/S+ODvCh4M0f0rGji9gJBd+5ZZ69QF4Jsx7LoTnCQNhX7nZlmVW1Kwy9R8JW3ykuFbFp4ewlJ6vL/N5Yy11EkFuxF2+XWUP+VXBffZcYEI2ySiKVE0PAprKNf6yYW9GjObQiXx/VNhohCr91hidQgqd6shMIpMMQaMMrEnABsWQVsDjq4UQHNtATU1ybRJvoB5QAhPXI4q0An9ITcpJxPy8vp/+mgnYEmw+6GFzvzbnk+GNpRHCX+1Ot0cNEtrWdNS0pPqzvUfDiuKKd8MKsB9pY14ALql1IX5tgLfTkUvVzrGKNh9BjybaoRsjH4KYPcxowhoRgNCTibbTiQOWYfX0oQmYQR/p9T7aQm0xx5CT2RiOWnijEcvPXPgKE69qQPExDxzcqr9MrGkaXkyEmZK9vOUE446ZbkssmCSB2KBgoLb57GjC6wksI="
+    - secure: "LJ6hubgEpZIeha+jqTCIldtRPndVJSPONMqkAJSui08e/P29yC/qpYKvZPUt8x6t29cIORxah98DeCoBrIwbK0WXhpyThWK3Bq/qNoBrwO8bVrOxm7TqP2HcPyTN7PlVFXBfSHdEplR1hxDqOA9qmogC343cO9a24LPwlroegYVAuZucUAA+Q7svrZXR9MmTmf0WSVkLUXsZ/c0mr9NzkzdY4uI/QI2YVW96NQDlyR6GeVzawVAT/uVKEZhhihzq9jc/7bgzFbOGa0W7s7+MmHXYofWBsfSykELAkRoTruSvkBfWN2KShn9/KTzlzD390pR8ovjePjdOIHFb1z6OcW2fd/fJH+0ZlaHzJt0aXQemR4l0wA9/GF7fCqrG75YkznKxaYodNKG0A7QzTLDCgYorR3vE0R7PVxK4E0kCJrLe55F0pUdw6RSz8JLbCSr4Fw3Kjv8RR9xLdVDibMVtO60ZEopZnLpgRAg27sYrNDQovs/EZV1nY+fuOZtUDPkAKEthEs/O8Y1K+LIZ3GbuavMfHuPWPKOGlq6GvJ3q0BKuITYonBdY3XsZUvky3wvQgjCgEpzkhEmI4e5g3qSZFLuJs0tqN2kGxY7VoDWYNzO+ZYp9McBqxdI/Rk5JRqmmtDjIKAHUE1kTzHIusUAcaBQtP8CGJUgYRoWHlJUcvKU="
+
+branches:
+  except:
+    - gh-pages
+
+notifications:
+  email: false
+
+sudo: false
+
+cache:
+  directories:
+    - $HOME/.m2

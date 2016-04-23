@@ -10,13 +10,13 @@
         <relativePath/>
     </parent>
 
-    <groupId>net.orfjackal.retrolambda</groupId>
+    <groupId>com.jakewharton.retrolambda</groupId>
     <artifactId>parent</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.0-jake1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Backport of Java 8 lambda expressions to Java 7</description>
-    <url>https://github.com/orfjackal/retrolambda</url>
+    <url>https://github.com/JakeWharton/retrolambda</url>
     <inceptionYear>2013</inceptionYear>
 
     <licenses>
@@ -35,8 +35,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/orfjackal/retrolambda.git</connection>
-        <url>https://github.com/orfjackal/retrolambda</url>
+        <connection>scm:git:git://github.com/JakeWharton/retrolambda.git</connection>
+        <url>https://github.com/JakeWharton/retrolambda</url>
     </scm>
 
     <properties>
