@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.test;
 
+import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
@@ -81,6 +82,26 @@ public class LambdaClassesTest {
     @SuppressWarnings("UnusedDeclaration")
     private class NonCapturing {
         private NonCapturing() {
+            Runnable lambda = () -> {
+            };
+        }
+    }
+
+
+    @Test
+    public void lambda_bodies_contain_no_unnecessary_methods() throws ClassNotFoundException {
+        Set<String> expected = ImmutableSet.of("lambda$main$0", "main");
+
+        Set<String> actual = new HashSet<>();
+        for (Method method : HasLambdaBody.class.getDeclaredMethods()) {
+            actual.add(method.getName());
+        }
+        assertThat(actual, is(expected));
+    }
+
+    @SuppressWarnings("UnusedDeclaration")
+    private class HasLambdaBody {
+        private void main() {
             Runnable lambda = () -> {
             };
         }
