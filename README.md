@@ -46,7 +46,7 @@ These changes have saved approximately 1500-2000 methods from being generated fo
 
 This fork also integrates PRs from other contributors made upstream which are not yet merged:
 
- *  [**Rewrite calls to Objects.requireNonNull**]()
+ *  [**Rewrite calls to Objects.requireNonNull**](https://github.com/orfjackal/retrolambda/pull/93)
 
     When compiling with JDK 9, `javac` uses the Java 7-only `Objects.requireNonNull` method for
     nullability checks. In order to be compatible with pre-Java 7 runtimes, this is rewritten
