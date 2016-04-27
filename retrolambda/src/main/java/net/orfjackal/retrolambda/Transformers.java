@@ -6,6 +6,7 @@ package net.orfjackal.retrolambda;
 
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
+import net.orfjackal.retrolambda.requirenonnull.RequireNonNull;
 import net.orfjackal.retrolambda.trywithresources.SwallowSuppressedExceptions;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.ClassNode;
@@ -115,6 +116,7 @@ public class Transformers {
             if (targetVersion < Opcodes.V1_7) {
                 next = new SwallowSuppressedExceptions(next);
                 next = new RemoveMethodHandlesLookupReferences(next);
+                next = new RequireNonNull(next);
             }
             next = new FixInvokeStaticOnInterfaceMethod(next);
             next = chain.wrap(next);
