@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
+import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
 
@@ -18,10 +19,12 @@ public class BackportLambdaInvocations extends ClassVisitor {
 
     private int classAccess;
     private String className;
+    private final ClassAnalyzer analyzer;
     private final Map<Handle, Handle> lambdaAccessToImplMethods = new LinkedHashMap<>();
 
-    public BackportLambdaInvocations(ClassVisitor next) {
+    public BackportLambdaInvocations(ClassVisitor next, ClassAnalyzer analyzer) {
         super(ASM5, next);
+        this.analyzer = analyzer;
     }
 
     @Override
@@ -56,18 +59,50 @@ public class BackportLambdaInvocations extends ClassVisitor {
 
     Handle getLambdaAccessMethod(Handle implMethod) {
         if (!implMethod.getOwner().equals(className)) {
-            return implMethod;
+            if (isNonOwnedMethodVisible(implMethod)) {
+                return implMethod;
+            }
+        } else {
+            if (isInterface(classAccess)) {
+                // the method will be relocated to a companion class
+                return implMethod;
+            }
+            if (isOwnedMethodVisible(implMethod)) {
+                // The method is visible to the companion class and therefore doesn't need an accessor.
+                return implMethod;
+            }
         }
-        if (isInterface(classAccess)) {
-            // the method will be relocated to a companion class
-            return implMethod;
-        }
-        // TODO: do not generate an access method if the impl method is not private (probably not implementable with a single pass)
         String name = "access$lambda$" + lambdaAccessToImplMethods.size();
         String desc = getLambdaAccessMethodDesc(implMethod);
         Handle accessMethod = new Handle(H_INVOKESTATIC, className, name, desc);
         lambdaAccessToImplMethods.put(accessMethod, implMethod);
         return accessMethod;
+    }
+
+    private boolean isOwnedMethodVisible(Handle implMethod) {
+        MethodSignature implSignature = new MethodSignature(implMethod.getName(), implMethod.getDesc());
+
+        Collection<MethodInfo> methods = analyzer.getMethods(Type.getObjectType(implMethod.getOwner()));
+        for (MethodInfo method : methods) {
+            if (method.signature.equals(implSignature)) {
+                // The method will be visible to the companion class if the private flag is absent.
+                return (method.access & ACC_PRIVATE) == 0;
+            }
+        }
+        throw new IllegalStateException("Non-analyzed method " + implMethod + ". Report this as a bug.");
+    }
+
+    private boolean isNonOwnedMethodVisible(Handle implMethod) {
+        MethodSignature implSignature = new MethodSignature(implMethod.getName(), implMethod.getDesc());
+
+        Collection<MethodInfo> methods = analyzer.getMethods(Type.getObjectType(implMethod.getOwner()));
+        for (MethodInfo method : methods) {
+            if (method.signature.equals(implSignature)) {
+                // The method will be visible to the companion class if the protected flag is absent.
+                return (method.access & ACC_PROTECTED) == 0;
+            }
+        }
+        return true;
     }
 
     private String getLambdaAccessMethodDesc(Handle implMethod) {

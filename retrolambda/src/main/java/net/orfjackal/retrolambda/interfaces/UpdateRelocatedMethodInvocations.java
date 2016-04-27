@@ -11,9 +11,9 @@ import static org.objectweb.asm.Opcodes.ASM5;
 
 public class UpdateRelocatedMethodInvocations extends ClassVisitor {
 
-    private final ClassHierarchyAnalyzer analyzer;
+    private final ClassAnalyzer analyzer;
 
-    public UpdateRelocatedMethodInvocations(ClassVisitor next, ClassHierarchyAnalyzer analyzer) {
+    public UpdateRelocatedMethodInvocations(ClassVisitor next, ClassAnalyzer analyzer) {
         super(ASM5, next);
         this.analyzer = analyzer;
     }

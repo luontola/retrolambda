@@ -38,7 +38,7 @@ public class Retrolambda {
 
         Thread.currentThread().setContextClassLoader(new NonDelegatingClassLoader(asUrls(classpath)));
 
-        ClassHierarchyAnalyzer analyzer = new ClassHierarchyAnalyzer();
+        ClassAnalyzer analyzer = new ClassAnalyzer();
         OutputDirectory outputDirectory = new OutputDirectory(outputDir);
         Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
         LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers);

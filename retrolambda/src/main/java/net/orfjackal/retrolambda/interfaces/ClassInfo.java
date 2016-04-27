@@ -44,8 +44,8 @@ public class ClassInfo {
         return Collections.unmodifiableList(methods);
     }
 
-    public void addMethod(MethodRef method, MethodKind kind) {
-        methods.add(new MethodInfo(method.tag, method.getSignature(), Type.getObjectType(method.owner), kind));
+    public void addMethod(int access, MethodRef method, MethodKind kind) {
+        methods.add(new MethodInfo(access, method.tag, method.getSignature(), Type.getObjectType(method.owner), kind));
     }
 
     public Optional<Type> getCompanionClass() {

@@ -11,10 +11,10 @@ import static org.objectweb.asm.Opcodes.*;
 
 public class AddMethodDefaultImplementations extends ClassVisitor {
 
-    private final ClassHierarchyAnalyzer analyzer;
+    private final ClassAnalyzer analyzer;
     private String className;
 
-    public AddMethodDefaultImplementations(ClassVisitor next, ClassHierarchyAnalyzer analyzer) {
+    public AddMethodDefaultImplementations(ClassVisitor next, ClassAnalyzer analyzer) {
         super(ASM5, next);
         this.analyzer = analyzer;
     }

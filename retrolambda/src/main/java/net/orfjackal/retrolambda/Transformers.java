@@ -18,9 +18,9 @@ public class Transformers {
 
     private final int targetVersion;
     private final boolean defaultMethodsEnabled;
-    private final ClassHierarchyAnalyzer analyzer;
+    private final ClassAnalyzer analyzer;
 
-    public Transformers(int targetVersion, boolean defaultMethodsEnabled, ClassHierarchyAnalyzer analyzer) {
+    public Transformers(int targetVersion, boolean defaultMethodsEnabled, ClassAnalyzer analyzer) {
         this.targetVersion = targetVersion;
         this.defaultMethodsEnabled = defaultMethodsEnabled;
         this.analyzer = analyzer;
@@ -49,7 +49,7 @@ public class Transformers {
                 next = new UpdateRelocatedMethodInvocations(next, analyzer);
                 next = new AddMethodDefaultImplementations(next, analyzer);
             }
-            next = new BackportLambdaInvocations(next);
+            next = new BackportLambdaInvocations(next, analyzer);
             return next;
         });
     }
@@ -60,7 +60,7 @@ public class Transformers {
         // the wrong one of them is written to disk last.
         ClassNode lambdasBackported = new ClassNode();
         ClassVisitor next = lambdasBackported;
-        next = new BackportLambdaInvocations(next);
+        next = new BackportLambdaInvocations(next, analyzer);
         reader.accept(next, 0);
 
         List<byte[]> results = new ArrayList<>();
