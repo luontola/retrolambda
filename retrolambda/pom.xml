@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.jakewharton.retrolambda</groupId>
         <artifactId>parent</artifactId>
-        <version>2.1.0-jake1</version>
+        <version>2.1.0-jake2-SNAPSHOT</version>
         <relativePath>../parent/pom.xml</relativePath>
     </parent>
 
