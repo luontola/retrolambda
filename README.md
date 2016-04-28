@@ -63,6 +63,12 @@ dependencies {
 Version History
 ---------------
 
-### Retrolambda 2.1.0-jake1 (2016-04-27)
+### Retrolambda 2.1.0-jake2 *(2016-04-27)*
+
+ * Fix: Do not generate accessor methods for protected method references in base classes when
+   the base class is in the same package.
+
+
+### Retrolambda 2.1.0-jake1 *(2016-04-27)*
 
 Initial release.
