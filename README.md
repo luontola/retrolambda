@@ -22,7 +22,7 @@ made upstream which are not yet merged and/or released:
     method, though, this accessor does not need to be generated.
 
     Additionally, when a protected method is referenced from a base class, an additional accessor
-    method needs to be generated. This allows the generated class to invoke the method though the
+    method needs to be generated. This allows the generated class to invoke the method through the
     accessor which is otherwise only visible to the subclass.
 
  *  [**Remove NEW, DUP instructions when changing NEWINVOKESPECIAL to INVOKESTATIC.**](https://github.com/orfjackal/retrolambda/pull/85)
