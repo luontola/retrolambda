@@ -153,14 +153,22 @@ public class LambdaTest extends SuperClass {
 
     @Test
     public void method_references_to_protected_supertype_methods() throws Exception {
-        Callable<String> ref = new SubclassInMyPackage().thing();
+        Callable<String> ref1 = new SubclassInMyPackage().thing();
+        assertThat(ref1.call(), equalTo("Hello"));
 
-        assertThat(ref.call(), equalTo("Hello"));
+        Callable<String> ref2 = new SubclassInSamePackage().thing();
+        assertThat(ref2.call(), equalTo("Hello"));
     }
 
     public static class SubclassInMyPackage extends DifferentPackageBase {
         public Callable<String> thing() {
             return DifferentPackageBase::value;
+        }
+    }
+
+    public static class SubclassInSamePackage extends SamePackageBase {
+        public Callable<String> thing() {
+            return SamePackageBase::value;
         }
     }
 

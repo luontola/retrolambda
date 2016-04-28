@@ -104,6 +104,12 @@ public class BackportLambdaInvocations extends ClassVisitor {
     }
 
     private boolean isNonOwnedMethodVisible(Handle implMethod) {
+        String classPackage = className.substring(0, className.lastIndexOf('/'));
+        String implPackage = implMethod.getOwner().substring(0, implMethod.getOwner().lastIndexOf('/'));
+        if (classPackage.equals(implPackage)) {
+            return true; // All method visibilities in the same package will be visible.
+        }
+
         MethodSignature implSignature = new MethodSignature(implMethod.getName(), implMethod.getDesc());
 
         Collection<MethodInfo> methods = analyzer.getMethods(Type.getObjectType(implMethod.getOwner()));
