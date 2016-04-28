@@ -55,7 +55,7 @@ This fork also integrates PRs from other contributors made upstream which are no
 To use this version of Retrolambda in your build (with Evan T's plugin) add the following:
 ```groovy
 dependencies {
-  retrolambdaConfig 'com.jakewharton.retrolambda:retrolambda:2.1.0-jake1'
+  retrolambdaConfig 'com.jakewharton.retrolambda:retrolambda:2.1.0-jake2'
 }
 ```
 
