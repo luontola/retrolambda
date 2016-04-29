@@ -6,13 +6,13 @@
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>9</version>
         <relativePath/>
     </parent>
 
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>parent</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.2.0</version>
     <packaging>pom</packaging>
 
     <description>Backport of Java 8 lambda expressions to Java 7</description>
