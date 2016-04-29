@@ -92,7 +92,7 @@ Retrolambda takes Java 8 classes and backports lambda expressions and
 some other language features to work on Java 7, 6 or 5.
 Web site: https://github.com/orfjackal/retrolambda
 
-Copyright (c) 2013-2015  Esko Luontola <www.orfjackal.net>
+Copyright (c) 2013-2016  Esko Luontola and other Retrolambda contributors
 This software is released under the Apache License 2.0.
 The license text is at http://www.apache.org/licenses/LICENSE-2.0
 

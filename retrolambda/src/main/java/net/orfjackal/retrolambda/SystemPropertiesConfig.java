@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -212,7 +212,7 @@ public class SystemPropertiesConfig implements Config {
                 "some other language features to work on Java 7, 6 or 5.\n" +
                 "Web site: https://github.com/orfjackal/retrolambda\n" +
                 "\n" +
-                "Copyright (c) 2013-2015  Esko Luontola <www.orfjackal.net>\n" +
+                "Copyright (c) 2013-2016  Esko Luontola and other Retrolambda contributors\n" +
                 "This software is released under the Apache License 2.0.\n" +
                 "The license text is at http://www.apache.org/licenses/LICENSE-2.0\n" +
                 "\n" +

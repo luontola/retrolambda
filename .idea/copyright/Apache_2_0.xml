@@ -1,6 +1,6 @@
 <component name="CopyrightManager">
   <copyright>
-    <option name="notice" value="Copyright © 2013-&amp;#36;today.year Esko Luontola &lt;www.orfjackal.net&gt;&#10;This software is released under the Apache License 2.0.&#10;The license text is at http://www.apache.org/licenses/LICENSE-2.0" />
+    <option name="notice" value="Copyright © 2013-&amp;#36;today.year Esko Luontola and other Retrolambda contributors&#10;This software is released under the Apache License 2.0.&#10;The license text is at http://www.apache.org/licenses/LICENSE-2.0" />
     <option name="keyword" value="Copyright" />
     <option name="allowReplaceKeyword" value="" />
     <option name="myName" value="Apache 2.0" />
