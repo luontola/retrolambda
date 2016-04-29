@@ -1,95 +1,56 @@
-// Copyright 2016 The Retrolambda Authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
+// This software is released under the Apache License 2.0.
+// The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda.test;
 
-import com.google.common.base.*;
-import com.google.common.io.ByteStreams;
-import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
-import org.objectweb.asm.*;
-import org.objectweb.asm.util.*;
 
-import java.io.*;
 import java.util.Objects;
 
-import static org.junit.Assert.assertEquals;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
 
 public class RequireNonNullTest {
 
-    static class Foo {
-        Object test(Object x) {
-            return Objects.requireNonNull(x);
-        }
+    @Test
+    public void requireNonNull__silent_when_non_null() {
+        Objects.requireNonNull(new Object());
+    }
+
+
+    @Test(expected = NullPointerException.class)
+    public void requireNonNull__throws_NPE_when_null() {
+        Objects.requireNonNull(null);
     }
 
     @Test
-    public void throwsNPE() throws Exception {
-        byte[] bytes;
-        String path = Foo.class.getName().replace('.', '/') + ".class";
-        try (InputStream is = getClass().getClassLoader().getResourceAsStream(path)) {
-            bytes = ByteStreams.toByteArray(is);
-        }
-        String actual = dumpMethod(bytes, "test");
-        if (SystemUtils.isJavaVersionAtLeast(1.7f)) {
-            assertEquals(
-                    "// access flags 0x0\n"
-                    + "test(Ljava/lang/Object;)Ljava/lang/Object;\n"
-                    + "ALOAD 1\n"
-                    + "INVOKESTATIC java/util/Objects.requireNonNull (Ljava/lang/Object;)Ljava/lang/Object;\n"
-                    + "ARETURN\n"
-                    + "MAXSTACK = 1\n"
-                    + "MAXLOCALS = 2",
-                    actual);
-        } else {
-             assertEquals(
-                    "// access flags 0x0\n"
-                    + "test(Ljava/lang/Object;)Ljava/lang/Object;\n"
-                    + "ALOAD 1\n"
-                    + "DUP\n"
-                    + "INVOKEVIRTUAL java/lang/Object.getClass ()Ljava/lang/Class;\n"
-                    + "POP\n"
-                    + "ARETURN\n"
-                    + "MAXSTACK = 2\n"
-                    + "MAXLOCALS = 2",
-                    actual);
-        }
+    public void requireNonNull__returns_the_argument() {
+        Object expected = new Object();
+
+        Object actual = Objects.requireNonNull(expected);
+
+        assertThat(actual, is(sameInstance(expected)));
     }
 
-    static String dumpMethod(byte[] bytes, final String methodName) throws Exception {
-        Textifier textifier = new Textifier();
-        StringWriter sw = new StringWriter();
-        final ClassVisitor tcv = new TraceClassVisitor(null, textifier, new PrintWriter(sw, true));
-        ClassVisitor cv =
-                new ClassVisitor(Opcodes.ASM5) {
-                    @Override
-                    public MethodVisitor visitMethod(
-                            int access,
-                            String name,
-                            String desc,
-                            String signature,
-                            String[] exceptions) {
-                        if (!name.equals(methodName)) {
-                            return super.visitMethod(access, name, desc, signature, exceptions);
-                        }
-                        return tcv.visitMethod(access, name, desc, signature, exceptions);
-                    }
-                };
-        ClassReader cr = new ClassReader(bytes);
-        cr.accept(cv, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
-        textifier.print(new PrintWriter(sw, true));
-        return Joiner.on('\n')
-                .join(Splitter.on('\n').omitEmptyStrings().trimResults().split(sw.toString()));
+    @Test
+    public void synthetic_null_check__silent_when_non_null() {
+        syntheticNullCheck(new MaybeNull());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void synthetic_null_check__throws_NPE_when_null() {
+        syntheticNullCheck(null);
+    }
+
+    @SuppressWarnings("unused")
+    private static void syntheticNullCheck(MaybeNull maybeNull) {
+        // Javac knows that the `foo` field is constant 0, so it generates a null check and the `iconst_0` instruction.
+        // The null check is a `obj.getClass()` call on older JDKs and `Objects.requireNonNull(obj)` on JDK 9 and above.
+        int foo = maybeNull.foo;
+    }
+
+    private static class MaybeNull {
+        final int foo = 0;
     }
 }
