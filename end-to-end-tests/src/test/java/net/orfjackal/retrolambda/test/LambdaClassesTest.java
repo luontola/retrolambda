@@ -1,4 +1,4 @@
-// Copyright © 2013-2016 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -12,7 +12,7 @@ import java.util.*;
 
 import static net.orfjackal.retrolambda.test.TestUtil.assertClassExists;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 public class LambdaClassesTest {
 
@@ -47,15 +47,9 @@ public class LambdaClassesTest {
 
     @Test
     public void capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Set<String> expected = new HashSet<>(Arrays.asList("lambdaFactory$", "run"));
-
         Class<?> lambdaClass = Class.forName(Capturing.class.getName() + "$$Lambda$1");
 
-        Set<String> actual = new HashSet<>();
-        for (Method method : lambdaClass.getDeclaredMethods()) {
-            actual.add(method.getName());
-        }
-        assertThat(actual, is(expected));
+        assertThat(getDeclaredMethodNames(lambdaClass), is(ImmutableSet.of("lambdaFactory$", "run")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -68,15 +62,9 @@ public class LambdaClassesTest {
 
     @Test
     public void non_capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Set<String> expected = new HashSet<>(Arrays.asList("lambdaFactory$", "run"));
-
         Class<?> lambdaClass = Class.forName(NonCapturing.class.getName() + "$$Lambda$1");
 
-        Set<String> actual = new HashSet<>();
-        for (Method method : lambdaClass.getDeclaredMethods()) {
-            actual.add(method.getName());
-        }
-        assertThat(actual, is(expected));
+        assertThat(getDeclaredMethodNames(lambdaClass), is(ImmutableSet.of("lambdaFactory$", "run")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -90,13 +78,7 @@ public class LambdaClassesTest {
 
     @Test
     public void lambda_bodies_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Set<String> expected = ImmutableSet.of("lambda$main$0", "main");
-
-        Set<String> actual = new HashSet<>();
-        for (Method method : HasLambdaBody.class.getDeclaredMethods()) {
-            actual.add(method.getName());
-        }
-        assertThat(actual, is(expected));
+        assertThat(getDeclaredMethodNames(HasLambdaBody.class), is(ImmutableSet.of("lambda$main$0", "main")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -105,5 +87,18 @@ public class LambdaClassesTest {
             Runnable lambda = () -> {
             };
         }
+    }
+
+
+    // helpers
+
+    private static Set<String> getDeclaredMethodNames(Class<?> clazz) {
+        Method[] methods = clazz.getDeclaredMethods();
+        Set<String> uniqueNames = new HashSet<>();
+        for (Method method : methods) {
+            uniqueNames.add(method.getName());
+        }
+        assertThat("unexpected overloaded methods", methods, arrayWithSize(uniqueNames.size()));
+        return uniqueNames;
     }
 }
