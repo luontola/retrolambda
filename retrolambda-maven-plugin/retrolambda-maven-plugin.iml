@@ -9,7 +9,10 @@
       <sourceFolder url="file://$MODULE_DIR$/src/main/java" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/test/java" isTestSource="true" />
       <excludeFolder url="file://$MODULE_DIR$/target/antrun" />
+      <excludeFolder url="file://$MODULE_DIR$/target/apidocs" />
       <excludeFolder url="file://$MODULE_DIR$/target/classes" />
+      <excludeFolder url="file://$MODULE_DIR$/target/invoker" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javadoc-bundle-options" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-archiver" />
       <excludeFolder url="file://$MODULE_DIR$/target/maven-status" />
       <excludeFolder url="file://$MODULE_DIR$/target/surefire-reports" />
