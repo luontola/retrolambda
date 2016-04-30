@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
+import net.orfjackal.retrolambda.lambdas.LambdaNaming;
 import org.objectweb.asm.*;
 import org.objectweb.asm.tree.MethodNode;
 
@@ -18,7 +19,8 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (isPrivateInstanceMethod(access)) { // lambda impl methods which capture `this` are private instance methods
+        if (LambdaNaming.isBodyMethod(access, name)) {
+            // lambda impl methods which capture `this` are synthetic instance methods
             return null;
         }
         if (isDefaultMethod(access)) {
@@ -27,10 +29,6 @@ public class RemoveDefaultMethodBodies extends ClassVisitor {
         } else {
             return super.visitMethod(access, name, desc, signature, exceptions);
         }
-    }
-
-    private static boolean isPrivateInstanceMethod(int access) {
-        return isPrivateMethod(access) && isInstanceMethod(access);
     }
 
     private static boolean isDefaultMethod(int access) {

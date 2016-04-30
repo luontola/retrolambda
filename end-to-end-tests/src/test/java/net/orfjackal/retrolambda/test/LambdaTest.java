@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.test;
 
+import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
 import org.objectweb.asm.*;
@@ -148,6 +149,27 @@ public class LambdaTest extends SuperClass {
         Callable<List<String>> ref = ArrayList<String>::new;
 
         assertThat(ref.call(), is(instanceOf(ArrayList.class)));
+    }
+
+    @Test
+    public void method_references_to_protected_supertype_methods() throws Exception {
+        Callable<String> ref1 = new SubclassInMyPackage().thing();
+        assertThat(ref1.call(), equalTo("Hello"));
+
+        Callable<String> ref2 = new SubclassInSamePackage().thing();
+        assertThat(ref2.call(), equalTo("Hello"));
+    }
+
+    public static class SubclassInMyPackage extends DifferentPackageBase {
+        public Callable<String> thing() {
+            return DifferentPackageBase::value;
+        }
+    }
+
+    public static class SubclassInSamePackage extends SamePackageBase {
+        public Callable<String> thing() {
+            return SamePackageBase::value;
+        }
     }
 
     /**
