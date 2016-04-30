@@ -47,9 +47,8 @@ public class LambdaClassesTest {
 
     @Test
     public void capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Class<?> lambdaClass = Class.forName(Capturing.class.getName() + "$$Lambda$1");
-
-        assertThat(getDeclaredMethodNames(lambdaClass), is(ImmutableSet.of("lambdaFactory$", "run")));
+        assertThat(getMethodsNames(findLambdaClass(Capturing.class)),
+                is(ImmutableSet.of("lambdaFactory$", "run")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -62,9 +61,8 @@ public class LambdaClassesTest {
 
     @Test
     public void non_capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        Class<?> lambdaClass = Class.forName(NonCapturing.class.getName() + "$$Lambda$1");
-
-        assertThat(getDeclaredMethodNames(lambdaClass), is(ImmutableSet.of("lambdaFactory$", "run")));
+        assertThat(getMethodsNames(findLambdaClass(NonCapturing.class)),
+                is(ImmutableSet.of("lambdaFactory$", "run")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -78,7 +76,8 @@ public class LambdaClassesTest {
 
     @Test
     public void lambda_bodies_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        assertThat(getDeclaredMethodNames(HasLambdaBody.class), containsInAnyOrder(startsWith("lambda$main$"), equalTo("main")));
+        assertThat(getMethodsNames(HasLambdaBody.class),
+                containsInAnyOrder(startsWith("lambda$main$"), equalTo("main")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
@@ -92,7 +91,11 @@ public class LambdaClassesTest {
 
     // helpers
 
-    private static Set<String> getDeclaredMethodNames(Class<?> clazz) {
+    private static Class<?> findLambdaClass(Class<?> clazz) throws ClassNotFoundException {
+        return Class.forName(clazz.getName() + "$$Lambda$1");
+    }
+
+    private static Set<String> getMethodsNames(Class<?> clazz) {
         Method[] methods = clazz.getDeclaredMethods();
         Set<String> uniqueNames = new HashSet<>();
         for (Method method : methods) {
