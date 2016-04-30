@@ -75,17 +75,9 @@ public class LambdaClassesTest {
 
 
     @Test
-    public void lambda_bodies_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        assertThat(getMethodsNames(HasLambdaBody.class),
-                containsInAnyOrder(startsWith("lambda$main$"), equalTo("main")));
-    }
-
-    @SuppressWarnings("UnusedDeclaration")
-    private class HasLambdaBody {
-        private void main() {
-            Runnable lambda = () -> {
-            };
-        }
+    public void enclosing_classes_contain_no_unnecessary_methods_in_addition_to_the_lambda_body() throws ClassNotFoundException {
+        assertThat("non-capturing lambda", getMethodsNames(NonCapturing.class), contains(startsWith("lambda$new$")));
+        assertThat("capturing lambda", getMethodsNames(Capturing.class), contains(startsWith("lambda$new$")));
     }
 
 
