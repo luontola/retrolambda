@@ -78,7 +78,7 @@ public class LambdaClassesTest {
 
     @Test
     public void lambda_bodies_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        assertThat(getDeclaredMethodNames(HasLambdaBody.class), is(ImmutableSet.of("lambda$main$0", "main")));
+        assertThat(getDeclaredMethodNames(HasLambdaBody.class), containsInAnyOrder(startsWith("lambda$main$"), equalTo("main")));
     }
 
     @SuppressWarnings("UnusedDeclaration")
