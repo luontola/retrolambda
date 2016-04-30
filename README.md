@@ -224,10 +224,29 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Optimize generated code to reduce method count
+  ([Issue #81](https://github.com/orfjackal/retrolambda/issues/81))
+    - Alter when accessor methods are generated
+      ([Pull request #84](https://github.com/orfjackal/retrolambda/pull/84))
+    - Remove NEW, DUP instructions when changing NEWINVOKESPECIAL to INVOKESTATIC
+      ([Pull request #85](https://github.com/orfjackal/retrolambda/pull/85))
+    - Skip access method when lambda body method can be promoted
+      ([Pull request #86](https://github.com/orfjackal/retrolambda/pull/86))
+- Fix method reference to protected method in base class in other package
+  failing with IllegalAccessError
+  ([Issue #89](https://github.com/orfjackal/retrolambda/issues/89))
+
 ### Retrolambda 2.2.0 (2016-04-29)
 
 - Backports calls to `Objects.requireNonNull`, improving JDK 9 support
   ([Issue #75](https://github.com/orfjackal/retrolambda/issues/75))
+- Optimize generated code to reduce method count
+  ([Issue #81](https://github.com/orfjackal/retrolambda/issues/81))
+    - Detect and omit the JVM's lambda factory method
+      ([Pull request #82](https://github.com/orfjackal/retrolambda/pull/82))
+
 
 ### Retrolambda 2.1.0 (2015-12-19)
 
