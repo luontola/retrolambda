@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -30,7 +30,7 @@ public class TypesTest {
 
     @Test
     public void asmToJdkType_MethodHandle() throws Exception {
-        Handle input = new Handle(Opcodes.H_INVOKESTATIC, "java/lang/String", "valueOf", "(I)Ljava/lang/String;");
+        Handle input = new Handle(Opcodes.H_INVOKESTATIC, "java/lang/String", "valueOf", "(I)Ljava/lang/String;", false);
         MethodHandle output = lookup.findStatic(String.class, "valueOf", MethodType.methodType(String.class, int.class));
 
         assertThat(asmToJdkType(input, classLoader, lookup).toString(), is(output.toString()));
