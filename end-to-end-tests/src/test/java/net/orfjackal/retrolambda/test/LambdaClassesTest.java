@@ -8,11 +8,16 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Set;
 
 import static net.orfjackal.retrolambda.test.TestUtil.assertClassExists;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.arrayWithSize;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
+import static org.junit.Assert.assertNotEquals;
 
 public class LambdaClassesTest {
 
@@ -80,11 +85,47 @@ public class LambdaClassesTest {
         assertThat("capturing lambda", getMethodsNames(Capturing.class), contains(startsWith("lambda$new$")));
     }
 
+    private class Parent {
+        protected void foo() {
+            Runnable lambda = () -> {
+                System.out.println("parent");
+            };
+        }
+    }
+
+    private class Child extends Parent {
+        @Override
+        protected void foo() {
+            super.foo();
+            Runnable lambda = () -> {
+                System.out.println("child");
+            };
+        }
+    }
+
+    @Test
+    public void child_class_lambda_doesnt_hide_parent_class_lambda() throws ClassNotFoundException {
+        Set<String> parentLambdas = getLambdaMethodNames(Parent.class);
+        Set<String> childLambdas = getLambdaMethodNames(Child.class);
+        assertNotEquals("child lambda hides parent lambda", parentLambdas, childLambdas);
+    }
+
 
     // helpers
 
     private static Class<?> findLambdaClass(Class<?> clazz) throws ClassNotFoundException {
         return Class.forName(clazz.getName() + "$$Lambda$1");
+    }
+
+    private static Set<String> getLambdaMethodNames(Class<?> clazz) {
+        Method[] methods = clazz.getDeclaredMethods();
+        Set<String> uniqueNames = new HashSet<>();
+        for (Method method : methods) {
+            if (method.getName().startsWith("lambda$")) {
+                uniqueNames.add(method.getName());
+            }
+        }
+        return uniqueNames;
     }
 
     private static Set<String> getMethodsNames(Class<?> clazz) {
