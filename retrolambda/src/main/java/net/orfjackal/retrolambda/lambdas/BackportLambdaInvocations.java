@@ -51,7 +51,8 @@ public class BackportLambdaInvocations extends ClassVisitor {
 
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
-        if (LambdaNaming.isBodyMethod(access, name)) {
+        if (LambdaNaming.isBodyMethod(access, name)
+                && !analyzer.isMethodInSuperClass(Type.getObjectType(className), new MethodSignature(name, desc))) {
             // Ensure our generated lambda class is able to call this method.
             access &= ~ACC_PRIVATE;
         }
@@ -75,7 +76,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
                 // The method is visible to the companion class and therefore doesn't need an accessor.
                 return implMethod;
             }
-            if (LambdaNaming.isBodyMethodName(implMethod.getName())) {
+            if (LambdaNaming.isBodyMethodName(implMethod.getName()) && !isMethodInSuperClass(implMethod)) {
                 if (implMethod.getTag() == H_INVOKESPECIAL) {
                     // The private body method is now package so switch its invocation from special to virtual.
                     return new Handle(H_INVOKEVIRTUAL, implMethod.getOwner(), implMethod.getName(), implMethod.getDesc(), false);
@@ -101,6 +102,11 @@ public class BackportLambdaInvocations extends ClassVisitor {
             }
         }
         throw new IllegalStateException("Non-analyzed method " + implMethod + ". Report this as a bug.");
+    }
+
+    private boolean isMethodInSuperClass(Handle implMethod) {
+        MethodSignature implSignature = new MethodSignature(implMethod.getName(), implMethod.getDesc());
+        return analyzer.isMethodInSuperClass(Type.getObjectType(implMethod.getOwner()), implSignature);
     }
 
     private boolean isNonOwnedMethodVisible(Handle implMethod) {

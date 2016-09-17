@@ -186,6 +186,19 @@ public class ClassAnalyzer {
         return methods.values();
     }
 
+    public boolean isMethodInSuperClass(Type type, MethodSignature methodSignature) {
+        ClassInfo c = getClass(type);
+        if (c.superclass != null) {
+            Collection<MethodInfo> superClassMethods = getMethods(c.superclass);
+            for (MethodInfo superClassMethod : superClassMethods) {
+                if (superClassMethod.signature.equals(methodSignature)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private boolean isAlreadyInherited(MethodInfo subject, Map<MethodSignature, MethodInfo> existingMethods) {
         MethodInfo existing = existingMethods.get(subject.signature);
         return existing != null && getAllInterfaces(existing.owner).contains(subject.owner);
