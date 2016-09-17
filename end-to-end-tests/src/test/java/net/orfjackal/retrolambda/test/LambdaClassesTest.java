@@ -8,6 +8,7 @@ import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static net.orfjackal.retrolambda.test.TestUtil.assertClassExists;
@@ -80,6 +81,34 @@ public class LambdaClassesTest {
         assertThat("capturing lambda", getMethodsNames(Capturing.class), contains(startsWith("lambda$new$")));
     }
 
+    private class Parent {
+        protected void foo() {
+            Runnable lambda = () -> {
+                System.out.println("parent");
+            };
+        }
+    }
+
+    private class Child extends Parent {
+        @Override
+        protected void foo() {
+            super.foo();
+            Runnable lambda = () -> {
+                System.out.println("child");
+            };
+        }
+    }
+
+    @Test
+    public void child_class_lambda_doesnt_hide_parent_class_lambda() {
+        Method[] methods = Child.class.getDeclaredMethods();
+        Set<String> parentMethods = getMethodsNames(Parent.class);
+        for (Method method : methods) {
+            if (method.getName().startsWith("lambda$") && !Modifier.isPrivate(method.getModifiers())) {
+                assertThat("child lambda " + method.getName() + " overrides parent", parentMethods, not(hasItem(method.getName())));
+            }
+        }
+    }
 
     // helpers
 
