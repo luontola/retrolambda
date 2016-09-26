@@ -30,7 +30,7 @@ public class ClassInfo {
         this.reader = cr;
         this.access = cr.getAccess();
         this.type = Type.getObjectType(cr.getClassName());
-        this.superclass = Type.getObjectType(cr.getSuperName());
+        this.superclass = cr.getSuperName() != null ? Type.getObjectType(cr.getSuperName()) : null;
         for (String iface : cr.getInterfaces()) {
             this.interfaces.add(Type.getObjectType(iface));
         }
