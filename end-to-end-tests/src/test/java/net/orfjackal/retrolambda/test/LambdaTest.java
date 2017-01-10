@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda.test;
 
 import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
 import org.apache.commons.lang.SystemUtils;
-import org.junit.Test;
+import org.junit.*;
 import org.objectweb.asm.*;
 import org.objectweb.asm.Type;
 
@@ -306,6 +306,49 @@ public class LambdaTest extends SuperClass {
 
         assertThat(((Parent) child).privateMethod(), is("parent version"));
         assertThat(child.parentRef().call(), is("parent version"));
+    }
+
+    /**
+     * If the lambda impl method is generated as a private instance method,
+     * we cannot just make it package-private for the lambda class to call them,
+     * because a subclass may override the lambda by overriding its enclosing method
+     * and declaring another lambda expression there.
+     */
+    @Ignore // TODO: fix issue #109
+    @Test
+    public void will_not_cause_lambda_expressions_to_be_overridable() {
+        List<String> spy = new ArrayList<>();
+        class Parent {
+            @SuppressWarnings("unused")
+            private int i;
+
+            public void foo() {
+                Runnable lambda = () -> { // generates a private "lambda$foo$0" method
+                    i++; // causes this lambda to be generated as an instance method
+                    spy.add("parent");
+                };
+                lambda.run();
+            }
+        }
+        class Child extends Parent {
+            @SuppressWarnings("unused")
+            private int i;
+
+            @Override
+            public void foo() {
+                super.foo();
+                Runnable lambda = () -> { // generates a private "lambda$foo$0" method
+                    i++; // causes this lambda to be generated as an instance method
+                    spy.add("child");
+                };
+                lambda.run();
+            }
+        }
+
+        Child c = new Child();
+        c.foo();
+
+        assertThat(spy, is(Arrays.asList("parent", "child")));
     }
 
     @Test

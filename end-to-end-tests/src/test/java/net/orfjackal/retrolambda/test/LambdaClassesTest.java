@@ -10,7 +10,6 @@ import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 
 import static net.orfjackal.retrolambda.test.TestUtil.assertClassExists;
@@ -50,7 +49,7 @@ public class LambdaClassesTest {
 
     @Test
     public void capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        assertThat(getMethodsNames(findLambdaClass(Capturing.class)),
+        assertThat(getMethodNames(findLambdaClass(Capturing.class)),
                 is(ImmutableSet.of("lambdaFactory$", "run")));
     }
 
@@ -64,7 +63,7 @@ public class LambdaClassesTest {
 
     @Test
     public void non_capturing_lambda_classes_contain_no_unnecessary_methods() throws ClassNotFoundException {
-        assertThat(getMethodsNames(findLambdaClass(NonCapturing.class)),
+        assertThat(getMethodNames(findLambdaClass(NonCapturing.class)),
                 is(ImmutableSet.of("lambdaFactory$", "run")));
     }
 
@@ -76,40 +75,10 @@ public class LambdaClassesTest {
         }
     }
 
-
     @Test
     public void enclosing_classes_contain_no_unnecessary_methods_in_addition_to_the_lambda_body() throws ClassNotFoundException {
-        assertThat("non-capturing lambda", getMethodsNames(NonCapturing.class), contains(startsWith("lambda$new$")));
-        assertThat("capturing lambda", getMethodsNames(Capturing.class), contains(startsWith("lambda$new$")));
-    }
-
-    private class Parent {
-        protected void foo() {
-            Runnable lambda = () -> {
-                System.out.println("parent");
-            };
-        }
-    }
-
-    private class Child extends Parent {
-        @Override
-        protected void foo() {
-            super.foo();
-            Runnable lambda = () -> {
-                System.out.println("child");
-            };
-        }
-    }
-
-    @Test
-    public void child_class_lambda_doesnt_hide_parent_class_lambda() {
-        Method[] methods = Child.class.getDeclaredMethods();
-        Set<String> parentMethods = getMethodsNames(Parent.class);
-        for (Method method : methods) {
-            if (method.getName().startsWith("lambda$") && !Modifier.isPrivate(method.getModifiers())) {
-                assertThat("child lambda " + method.getName() + " overrides parent", parentMethods, not(hasItem(method.getName())));
-            }
-        }
+        assertThat("non-capturing lambda", getMethodNames(NonCapturing.class), contains(startsWith("lambda$new$")));
+        assertThat("capturing lambda", getMethodNames(Capturing.class), contains(startsWith("lambda$new$")));
     }
 
     @Test
@@ -131,7 +100,7 @@ public class LambdaClassesTest {
         return Class.forName(clazz.getName() + "$$Lambda$1");
     }
 
-    private static Set<String> getMethodsNames(Class<?> clazz) {
+    private static Set<String> getMethodNames(Class<?> clazz) {
         Method[] methods = clazz.getDeclaredMethods();
         Set<String> uniqueNames = new HashSet<>();
         for (Method method : methods) {
