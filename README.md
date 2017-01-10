@@ -231,6 +231,8 @@ Version History
   ([Pull request #118](https://github.com/orfjackal/retrolambda/pull/118))
 - Fixed backporting classes in the default package
   ([Issue #105](https://github.com/orfjackal/retrolambda/issues/105))
+- Fixed backporting `java.lang.Object` itself
+  ([Pull request #113](https://github.com/orfjackal/retrolambda/pull/113))
 
 ### Retrolambda 2.3.0 (2016-04-30)
 
