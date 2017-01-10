@@ -116,6 +116,7 @@ public class Transformers {
             if (targetVersion < Opcodes.V1_7) {
                 next = new SwallowSuppressedExceptions(next);
                 next = new RemoveMethodHandlesLookupReferences(next);
+                next = new RemoveLambdaHiddenReferences(next);
                 next = new RequireNonNull(next);
             }
             next = new FixInvokeStaticOnInterfaceMethod(next);
