@@ -1,4 +1,4 @@
-// Copyright © 2013-2016 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -313,24 +313,12 @@ public class LambdaTest extends SuperClass {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.7f)));
 
         ClassReader cr = new ClassReader(getClass().getName().replace('.', '/'));
-        char[] buf = new char[cr.getMaxStringLength()];
-
-        for (int item = 0; item < cr.getItemCount(); item++) {
-            Object constant = readConstant(item, buf, cr);
+        TestUtil.visitConstantPool(cr, (item, constant) -> {
             if (constant instanceof Type) {
                 Type type = (Type) constant;
                 assertThat("constant #" + item, type.getDescriptor(), not(containsString("java/lang/invoke")));
             }
-        }
-    }
-
-    private static Object readConstant(int item, char[] buf, ClassReader cr) {
-        try {
-            return cr.readConst(item, buf);
-        } catch (Exception e) {
-            // XXX: constant pool entry which is a Methodref, InvokeDynamic or similar non-plain constant
-            return null;
-        }
+        });
     }
 }
 
