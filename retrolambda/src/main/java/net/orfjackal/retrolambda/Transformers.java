@@ -118,7 +118,6 @@ public class Transformers {
                 next = new RemoveMethodHandlesLookupReferences(next);
                 next = new RequireNonNull(next);
             }
-            next = new RemoveLambdaHiddenReferences(next);
             next = new FixInvokeStaticOnInterfaceMethod(next);
             next = chain.wrap(next);
 
