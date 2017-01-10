@@ -229,6 +229,8 @@ Version History
 - Removes `java/lang/invoke/LambdaForm$Hidden` annotations from the generated 
   lambda classes to avoid issues with ProGuard 
   ([Pull request #118](https://github.com/orfjackal/retrolambda/pull/118))
+- Fixed backporting classes in the default package
+  ([Issue #105](https://github.com/orfjackal/retrolambda/issues/105))
 
 ### Retrolambda 2.3.0 (2016-04-30)
 
