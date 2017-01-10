@@ -1,4 +1,4 @@
-// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -104,9 +104,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
     }
 
     private boolean isNonOwnedMethodVisible(Handle implMethod) {
-        String classPackage = className.substring(0, className.lastIndexOf('/'));
-        String implPackage = implMethod.getOwner().substring(0, implMethod.getOwner().lastIndexOf('/'));
-        if (classPackage.equals(implPackage)) {
+        if (getPackage(className).equals(getPackage(implMethod.getOwner()))) {
             return true; // All method visibilities in the same package will be visible.
         }
 
@@ -120,6 +118,11 @@ public class BackportLambdaInvocations extends ClassVisitor {
             }
         }
         return true;
+    }
+
+    private static String getPackage(String className) {
+        int lastSlash = className.lastIndexOf('/');
+        return lastSlash == -1 ? "" : className.substring(0, lastSlash);
     }
 
     private String getLambdaAccessMethodDesc(Handle implMethod) {

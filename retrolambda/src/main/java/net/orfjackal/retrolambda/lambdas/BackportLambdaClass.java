@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -50,6 +50,7 @@ public class BackportLambdaClass extends ClassVisitor {
             return null; // remove the JVM's factory method which will not be unused
         }
         MethodVisitor next = super.visitMethod(access, name, desc, signature, exceptions);
+        next = new RemoveLambdaFormHiddenAnnotation(next);
         next = new RemoveMagicLambdaConstructorCall(next);
         next = new CallPrivateImplMethodsViaAccessMethods(access, name, desc, signature, exceptions, next);
         return next;

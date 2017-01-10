@@ -1,8 +1,10 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda.test;
+
+import org.objectweb.asm.ClassReader;
 
 public class TestUtil {
 
@@ -29,5 +31,23 @@ public class TestUtil {
 
     public static String companionNameOf(Class<?> itf) {
         return itf.getName() + "$";
+    }
+
+    public static void visitConstantPool(ClassReader reader, ConstantPoolVisitor visitor) {
+        char[] buf = new char[reader.getMaxStringLength()];
+        for (int item = 0; item < reader.getItemCount(); item++) {
+            try {
+                Object constant = reader.readConst(item, buf);
+                visitor.visit(item, constant);
+            } catch (Exception e) {
+                // XXX: constant pool entry which is a Methodref, InvokeDynamic or similar non-plain constant
+                // FIXME: readConst throws ArrayIndexOutOfBoundsException nearly all the time; how to use it???
+                //e.printStackTrace();
+            }
+        }
+    }
+
+    public interface ConstantPoolVisitor {
+        void visit(int item, Object constant);
     }
 }
