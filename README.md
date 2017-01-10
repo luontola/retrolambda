@@ -224,6 +224,12 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Removes `java/lang/invoke/LambdaForm$Hidden` annotations from the generated 
+  lambda classes to avoid issues with ProGuard 
+  ([Pull request #118](https://github.com/orfjackal/retrolambda/pull/118))
+
 ### Retrolambda 2.3.0 (2016-04-30)
 
 - Optimize generated code to reduce method count
