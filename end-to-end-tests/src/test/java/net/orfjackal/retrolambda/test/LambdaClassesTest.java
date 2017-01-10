@@ -1,4 +1,4 @@
-// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -6,7 +6,9 @@ package net.orfjackal.retrolambda.test;
 
 import com.google.common.collect.ImmutableSet;
 import org.junit.Test;
+import org.objectweb.asm.ClassReader;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -78,6 +80,18 @@ public class LambdaClassesTest {
     public void enclosing_classes_contain_no_unnecessary_methods_in_addition_to_the_lambda_body() throws ClassNotFoundException {
         assertThat("non-capturing lambda", getMethodsNames(NonCapturing.class), contains(startsWith("lambda$new$")));
         assertThat("capturing lambda", getMethodsNames(Capturing.class), contains(startsWith("lambda$new$")));
+    }
+
+    @Test
+    public void does_not_contain_references_to_JDK_lambda_classes() throws IOException {
+        ClassReader cr = new ClassReader("net/orfjackal/retrolambda/test/LambdaClassesTest$Dummy1$$Lambda$1");
+
+        // XXX: fix visitConstantPool and assert the constant pool entries instead of this hack
+//        TestUtil.visitConstantPool(cr, (item, constant) -> {
+//        });
+
+        String bytecode = new String(cr.b);
+        assertThat(bytecode, not(containsString("java/lang/invoke/LambdaForm")));
     }
 
 

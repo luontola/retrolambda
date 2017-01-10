@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -116,9 +116,9 @@ public class Transformers {
             if (targetVersion < Opcodes.V1_7) {
                 next = new SwallowSuppressedExceptions(next);
                 next = new RemoveMethodHandlesLookupReferences(next);
-                next = new RemoveLambdaHiddenReferences(next);
                 next = new RequireNonNull(next);
             }
+            next = new RemoveLambdaHiddenReferences(next);
             next = new FixInvokeStaticOnInterfaceMethod(next);
             next = chain.wrap(next);
 
