@@ -24,6 +24,11 @@ public class Retrolambda {
         Path outputDir = config.getOutputDir();
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
+        if (config.isQuiet()) {
+            Log.WARN();
+        } else {
+            Log.INFO();
+        }
         Log.info("Bytecode version: " + bytecodeVersion + " (" + Bytecode.getJavaVersion(bytecodeVersion) + ")");
         Log.info("Default methods:  " + defaultMethodsEnabled);
         Log.info("Input directory:  " + inputDir);

@@ -1,4 +1,4 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -79,6 +79,14 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     public boolean defaultMethods;
 
     /**
+     * Reduces the amount of logging.
+     *
+     * @since 2.4.0
+     */
+    @Parameter(defaultValue = "false", property = "retrolambdaQuiet", required = true)
+    public boolean quiet;
+
+    /**
      * Forces Retrolambda to run in a separate process. The default is not to fork,
      * in which case Maven has to run under Java 8, or this plugin will fall back
      * to forking. The forked process uses a Java agent hook for capturing the lambda
@@ -128,6 +136,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
             Properties p = new Properties();
             p.setProperty(SystemPropertiesConfig.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
             p.setProperty(SystemPropertiesConfig.DEFAULT_METHODS, "" + defaultMethods);
+            p.setProperty(SystemPropertiesConfig.QUIET, "" + quiet);
             p.setProperty(SystemPropertiesConfig.INPUT_DIR, getInputDir().getAbsolutePath());
             p.setProperty(SystemPropertiesConfig.OUTPUT_DIR, getOutputDir().getAbsolutePath());
             p.setProperty(SystemPropertiesConfig.CLASSPATH, getClasspath());
@@ -159,6 +168,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                             attribute("failonerror", "true")),
                                     element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
                                     element("arg", attribute("value", "-Dretrolambda.defaultMethods=" + defaultMethods)),
+                                    element("arg", attribute("value", "-Dretrolambda.quiet=" + quiet)),
                                     element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
                                     element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
                                     element("arg", attribute("value", "-Dretrolambda.classpathFile=" + classpathFile)),

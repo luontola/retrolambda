@@ -1,4 +1,4 @@
-// Copyright © 2013-2016 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -22,6 +22,7 @@ public class SystemPropertiesConfig implements Config {
     public static final String CLASSPATH_FILE = CLASSPATH + "File";
     public static final String INCLUDED_FILES = PREFIX + "includedFiles";
     public static final String INCLUDED_FILES_FILE = INCLUDED_FILES + "File";
+    public static final String QUIET = PREFIX + "quiet";
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final Map<String, String> alternativeProperties = new HashMap<>();
@@ -199,6 +200,21 @@ public class SystemPropertiesConfig implements Config {
     }
 
 
+    // quiet
+
+    static {
+        optionalParameterHelp(QUIET,
+                "Reduces the amount of logging.",
+                "Disabled by default. Enable by setting to \"true\"");
+
+    }
+
+    @Override
+    public boolean isQuiet() {
+        return Boolean.parseBoolean(p.getProperty(QUIET, "false"));
+    }
+
+
     // help
 
     public String getHelp() {
@@ -212,7 +228,7 @@ public class SystemPropertiesConfig implements Config {
                 "some other language features to work on Java 7, 6 or 5.\n" +
                 "Web site: https://github.com/orfjackal/retrolambda\n" +
                 "\n" +
-                "Copyright (c) 2013-2016  Esko Luontola and other Retrolambda contributors\n" +
+                "Copyright (c) 2013-2017  Esko Luontola and other Retrolambda contributors\n" +
                 "This software is released under the Apache License 2.0.\n" +
                 "The license text is at http://www.apache.org/licenses/LICENSE-2.0\n" +
                 "\n" +
