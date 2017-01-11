@@ -25,6 +25,11 @@
             <artifactId>guava</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.esotericsoftware</groupId>
+            <artifactId>minlog</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -99,6 +104,10 @@
                             <pattern>com.google</pattern>
                             <shadedPattern>net.orfjackal.retrolambda.google</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>com.esotericsoftware.minlog</pattern>
+                            <shadedPattern>net.orfjackal.retrolambda.minlog</shadedPattern>
+                        </relocation>
                     </relocations>
                     <filters>
                         <filter>
@@ -111,6 +120,12 @@
                         </filter>
                         <filter>
                             <artifact>com.google.guava:guava</artifact>
+                            <excludes>
+                                <exclude>META-INF/**</exclude>
+                            </excludes>
+                        </filter>
+                        <filter>
+                            <artifact>com.esotericsoftware:minlog</artifact>
                             <excludes>
                                 <exclude>META-INF/**</exclude>
                             </excludes>

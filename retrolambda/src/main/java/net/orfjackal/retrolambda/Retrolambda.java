@@ -1,9 +1,10 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda;
 
+import com.esotericsoftware.minlog.Log;
 import net.orfjackal.retrolambda.files.*;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
@@ -23,16 +24,16 @@ public class Retrolambda {
         Path outputDir = config.getOutputDir();
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
-        System.out.println("Bytecode version: " + bytecodeVersion + " (" + Bytecode.getJavaVersion(bytecodeVersion) + ")");
-        System.out.println("Default methods:  " + defaultMethodsEnabled);
-        System.out.println("Input directory:  " + inputDir);
-        System.out.println("Output directory: " + outputDir);
-        System.out.println("Classpath:        " + classpath);
-        System.out.println("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
-        System.out.println("Agent enabled:    " + PreMain.isAgentLoaded());
+        Log.info("Bytecode version: " + bytecodeVersion + " (" + Bytecode.getJavaVersion(bytecodeVersion) + ")");
+        Log.info("Default methods:  " + defaultMethodsEnabled);
+        Log.info("Input directory:  " + inputDir);
+        Log.info("Output directory: " + outputDir);
+        Log.info("Classpath:        " + classpath);
+        Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
+        Log.info("Agent enabled:    " + PreMain.isAgentLoaded());
 
         if (!Files.isDirectory(inputDir)) {
-            System.out.println("Nothing to do; not a directory: " + inputDir);
+            Log.info("Nothing to do; not a directory: " + inputDir);
             return;
         }
 

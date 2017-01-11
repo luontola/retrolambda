@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
+import com.esotericsoftware.minlog.Log;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.util.Bytecode;
 import org.objectweb.asm.*;
@@ -42,10 +43,8 @@ public class BackportLambdaInvocations extends ClassVisitor {
             AtomicInteger counter = (AtomicInteger) counterField.get(null);
             counter.set(0);
         } catch (Throwable t) {
-            // print to stdout to keep in sync with other log output
-            System.out.println("WARNING: Failed to start class numbering from one. Don't worry, it's cosmetic, " +
-                    "but please file a bug report and tell on which JDK version this happened.");
-            t.printStackTrace(System.out);
+            Log.warn("Failed to start class numbering from one. Don't worry, it's cosmetic, " +
+                    "but please file a bug report and tell on which JDK version this happened.", t);
         }
     }
 

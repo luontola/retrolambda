@@ -1,8 +1,10 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda;
+
+import com.esotericsoftware.minlog.Log;
 
 import java.io.*;
 import java.util.Properties;
@@ -13,7 +15,7 @@ public class Main {
         System.out.println("Retrolambda " + getVersion());
 
         if (!isRunningJava8()) {
-            System.out.println("Error! Not running under Java 8");
+            Log.error("Not running under Java 8");
             System.exit(1);
         }
 
@@ -25,8 +27,7 @@ public class Main {
         try {
             Retrolambda.run(config);
         } catch (Throwable t) {
-            System.out.println("Error! Failed to run Retrolambda");
-            t.printStackTrace(System.out);
+            Log.error("Failed to run Retrolambda", t);
             System.exit(1);
         }
     }
