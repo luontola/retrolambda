@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda.lambdas;
 
 import com.esotericsoftware.minlog.Log;
 import net.orfjackal.retrolambda.interfaces.*;
-import net.orfjackal.retrolambda.util.Bytecode;
+import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
 import java.lang.reflect.Field;
@@ -51,8 +51,19 @@ public class BackportLambdaInvocations extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
         if (LambdaNaming.isBodyMethod(access, name)) {
-            // Ensure our generated lambda class is able to call this method.
-            access &= ~ACC_PRIVATE;
+
+            // Ensure the generated lambda class is able to call this method.
+            if (Flags.isPrivateMethod(access)) {
+                access &= ~ACC_PRIVATE; // make non-private
+
+                // Making private instance methods non-private is dangerous, because subclasses
+                // may then override them. That's why we will also make them static, so that they
+                // will not be overridable.
+                if (Flags.isInstanceMethod(access)) {
+                    access |= ACC_STATIC; // make static
+                    desc = Types.prependArgumentType(Type.getObjectType(className), desc); // add 'this' as first parameter
+                }
+            }
         }
         if (LambdaNaming.isDeserializationHook(access, name, desc)) {
             return null; // remove serialization hooks; we serialize lambda instances as-is
@@ -76,8 +87,10 @@ public class BackportLambdaInvocations extends ClassVisitor {
             }
             if (LambdaNaming.isBodyMethodName(implMethod.getName())) {
                 if (implMethod.getTag() == H_INVOKESPECIAL) {
-                    // The private body method is now package so switch its invocation from special to virtual.
-                    return new Handle(H_INVOKEVIRTUAL, implMethod.getOwner(), implMethod.getName(), implMethod.getDesc(), false);
+                    // The private body method was changed from a private instance method into
+                    // a non-private static method, so change its invocation from special to static.
+                    String desc = Types.prependArgumentType(Type.getObjectType(implMethod.getOwner()), implMethod.getDesc());
+                    return new Handle(H_INVOKESTATIC, implMethod.getOwner(), implMethod.getName(), desc, false);
                 }
                 return implMethod;
             }

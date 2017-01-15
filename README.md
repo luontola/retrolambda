@@ -228,6 +228,13 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed lambda expressions in subclasses accidentally overriding lambda
+  expressions in their parent. If you are using version 2.2.0 or greater,
+  it is strongly recommended to upgrade to this version.
+  ([Issue #109](https://github.com/orfjackal/retrolambda/issues/109))
+
 ### Retrolambda 2.4.0 (2017-01-11)
 
 - Added an option to reduce the amount of logging

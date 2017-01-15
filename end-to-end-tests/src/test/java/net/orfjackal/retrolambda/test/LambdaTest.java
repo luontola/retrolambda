@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda.test;
 
 import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
 import org.apache.commons.lang.SystemUtils;
-import org.junit.*;
+import org.junit.Test;
 import org.objectweb.asm.*;
 import org.objectweb.asm.Type;
 
@@ -314,7 +314,6 @@ public class LambdaTest extends SuperClass {
      * because a subclass may override the lambda by overriding its enclosing method
      * and declaring another lambda expression there.
      */
-    @Ignore // TODO: fix issue #109
     @Test
     public void will_not_cause_lambda_expressions_to_be_overridable() {
         List<String> spy = new ArrayList<>();
