@@ -33,6 +33,10 @@ projects that have backported some of them:
 * [streamsupport](http://sourceforge.net/projects/streamsupport/) backports the `java.util.stream` API
 * [ThreeTen](http://www.threeten.org/) backports the `java.time` API
 
+Additionally [Animal Sniffer](http://www.mojohaus.org/animal-sniffer/) and 
+[IntelliJ IDEA](https://www.jetbrains.com/idea/) can warn about the use of
+Java 8 APIs.
+
 
 User Guide
 ----------
