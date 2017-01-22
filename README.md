@@ -55,7 +55,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.4.0</version>
+    <version>2.5.0</version>
     <executions>
         <execution>
             <goals>
@@ -232,7 +232,7 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.5.0 (2017-01-22)
 
 - Fixed lambda expressions in subclasses accidentally overriding lambda
   expressions in their parent. If you are using version 2.2.0 or greater,
