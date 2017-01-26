@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda.test;
 
 import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
 import org.apache.commons.lang.SystemUtils;
-import org.junit.Test;
+import org.junit.*;
 import org.objectweb.asm.*;
 import org.objectweb.asm.Type;
 
@@ -245,6 +245,18 @@ public class LambdaTest extends SuperClass {
 
     private static String privateClassMethod() {
         return "foo";
+    }
+
+
+    @Test
+    @Ignore // TODO: fix issue #121
+    public void enclosing_method_of_anonymous_class_inside_lambda_expression() throws Exception {
+        Callable<Object> lambda = () -> new Object() {
+        };
+        Class<?> anonymousClass = lambda.call().getClass();
+
+        assertThat(anonymousClass.getEnclosingMethod().getName(),
+                startsWith("lambda$enclosing_method_of_anonymous_class_inside_lambda_expression$"));
     }
 
     /**
