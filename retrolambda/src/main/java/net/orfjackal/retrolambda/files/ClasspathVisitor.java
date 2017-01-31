@@ -38,6 +38,7 @@ public abstract class ClasspathVisitor extends SimpleFileVisitor<Path> {
     protected abstract void visitResource(Path relativePath, byte[] content) throws IOException;
 
     private static boolean isJavaClass(Path file) {
-        return file.getFileName().toString().endsWith(".class");
+        String fileName = file.getFileName().toString();
+        return fileName.endsWith(".class") && !fileName.equals("module-info.class");
     }
 }
