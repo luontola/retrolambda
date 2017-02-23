@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda.lambdas;
 
 import com.esotericsoftware.minlog.Log;
+import net.orfjackal.retrolambda.ClassAnalyzer;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
