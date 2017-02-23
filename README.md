@@ -232,6 +232,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fix anonymous classes inside lambda expressions
+  ([Issue #121](https://github.com/orfjackal/retrolambda/issues/121))
+
 ### Retrolambda 2.5.0 (2017-01-22)
 
 - Fixed lambda expressions in subclasses accidentally overriding lambda

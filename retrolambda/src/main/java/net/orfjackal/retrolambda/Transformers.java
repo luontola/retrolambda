@@ -119,6 +119,7 @@ public class Transformers {
                 next = new RequireNonNull(next);
             }
             next = new FixInvokeStaticOnInterfaceMethod(next);
+            next = new UpdateRenamedEnclosingMethods(next, analyzer);
             next = chain.wrap(next);
 
             reader.accept(next);

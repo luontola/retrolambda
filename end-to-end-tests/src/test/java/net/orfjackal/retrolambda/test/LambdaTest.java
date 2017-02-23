@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda.test;
 
 import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
 import org.apache.commons.lang.SystemUtils;
-import org.junit.*;
+import org.junit.Test;
 import org.objectweb.asm.*;
 import org.objectweb.asm.Type;
 
@@ -249,7 +249,6 @@ public class LambdaTest extends SuperClass {
 
 
     @Test
-    @Ignore // TODO: fix issue #121
     public void enclosing_method_of_anonymous_class_inside_lambda_expression() throws Exception {
         Callable<Object> lambda = () -> new Object() {
         };

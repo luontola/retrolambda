@@ -5,8 +5,8 @@
 package net.orfjackal.retrolambda;
 
 import net.orfjackal.retrolambda.interfaces.*;
-import net.orfjackal.retrolambda.lambdas.Handles;
-import net.orfjackal.retrolambda.util.Bytecode;
+import net.orfjackal.retrolambda.lambdas.*;
+import net.orfjackal.retrolambda.util.*;
 import org.objectweb.asm.*;
 
 import java.util.*;
@@ -19,6 +19,7 @@ public class ClassAnalyzer {
 
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
+    private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
 
     public void analyze(byte[] bytecode) {
         analyze(new ClassReader(bytecode));
@@ -33,6 +34,7 @@ public class ClassAnalyzer {
         } else {
             analyzeClass(c, cr);
         }
+        analyzeClassOrInterface(c, cr);
     }
 
     private void analyzeClass(ClassInfo c, ClassReader cr) {
@@ -98,7 +100,33 @@ public class ClassAnalyzer {
         }, ClassReader.SKIP_CODE);
     }
 
-    public static boolean isDefaultMethod(int access) {
+    private void analyzeClassOrInterface(ClassInfo c, ClassReader cr) {
+        cr.accept(new ClassVisitor(ASM5) {
+            private String owner;
+
+            @Override
+            public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                this.owner = name;
+            }
+
+            @Override
+            public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+                MethodRef method = new MethodRef(Handles.accessToTag(access, true), owner, name, desc);
+
+                // XXX: duplicates code in net.orfjackal.retrolambda.lambdas.BackportLambdaInvocations.visitMethod()
+                if (LambdaNaming.isBodyMethod(access, name)
+                        && Flags.isPrivateMethod(access)
+                        && Flags.isInstanceMethod(access)) {
+                    desc = Types.prependArgumentType(Type.getObjectType(owner), desc); // add 'this' as first parameter
+                    renamedLambdaMethods.put(method, new MethodRef(H_INVOKESTATIC, owner, name, desc));
+                }
+
+                return null;
+            }
+        }, ClassReader.SKIP_CODE);
+    }
+
+    private static boolean isDefaultMethod(int access) {
         return !isAbstractMethod(access)
                 && !isStaticMethod(access)
                 && isPublicMethod(access);
@@ -137,6 +165,10 @@ public class ClassAnalyzer {
             }
         }
         return relocatedMethods.getOrDefault(original, original);
+    }
+
+    public MethodRef getRenamedLambdaMethod(MethodRef original) {
+        return renamedLambdaMethods.getOrDefault(original, original);
     }
 
     public MethodRef getMethodDefaultImplementation(MethodRef interfaceMethod) {
