@@ -96,7 +96,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
                 return implMethod;
             }
         }
-        String name = "access$lambda$" + lambdaAccessToImplMethods.size();
+        String name = "access$lambda$" + implMethod.getName() + "$" + lambdaAccessToImplMethods.size();
         String desc = getLambdaAccessMethodDesc(implMethod);
         Handle accessMethod = new Handle(H_INVOKESTATIC, className, name, desc, false);
         lambdaAccessToImplMethods.put(accessMethod, implMethod);
