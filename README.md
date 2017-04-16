@@ -140,6 +140,16 @@ Configurable system properties:
       Alternative to retrolambda.includedFiles for avoiding the command line
       length limit. The file must list one file per line with UTF-8 encoding.
 
+  retrolambda.jars
+      List of jars to process.
+      This is useful for including libraries.
+      Uses ; or : as the path separator, see java.io.File#pathSeparatorChar
+
+  retrolambda.jarsFile (alternative)
+      File listing the jars to process.
+      Alternative to retrolambda.jars for avoiding the command line
+      length limit. The file must list one file per line with UTF-8 encoding.
+
   retrolambda.quiet
       Reduces the amount of logging.
       Disabled by default. Enable by setting to "true"

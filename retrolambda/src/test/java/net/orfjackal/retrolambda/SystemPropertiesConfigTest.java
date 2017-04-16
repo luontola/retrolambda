@@ -148,4 +148,36 @@ public class SystemPropertiesConfigTest {
         systemProperties.setProperty(SystemPropertiesConfig.INCLUDED_FILES_FILE, file.toString());
         assertThat("multiple values", config().getIncludedFiles(), is(Arrays.asList(Paths.get("one.class"), Paths.get("two.class"))));
     }
+
+    @Test
+    public void jars() throws IOException {
+        assertThat("not set", config().getJars(), is(nullValue()));
+
+        systemProperties.setProperty(SystemPropertiesConfig.JARS, "");
+        assertThat("zero values", config().getJars(), is(empty()));
+
+        systemProperties.setProperty(SystemPropertiesConfig.JARS, "/foo/one.jar");
+        assertThat("one value", config().getJars(), is(Arrays.asList(Paths.get("/foo/one.jar"))));
+
+        systemProperties.setProperty(SystemPropertiesConfig.JARS, "/foo/one.jar" + File.pathSeparator + "/foo/two.jar");
+        assertThat("multiple values", config().getJars(), is(Arrays.asList(Paths.get("/foo/one.jar"), Paths.get("/foo/two.jar"))));
+    }
+
+    @Test
+    public void jars_file() throws IOException {
+        Path file = tempDir.newFile("jars.txt").toPath();
+        assertThat("not set", config().getJars(), is(nullValue()));
+
+        Files.write(file, Arrays.asList("", "", "")); // empty lines are ignored
+        systemProperties.setProperty(SystemPropertiesConfig.JARS_FILE, file.toString());
+        assertThat("zero values", config().getJars(), is(empty()));
+
+        Files.write(file, Arrays.asList("one.jar"));
+        systemProperties.setProperty(SystemPropertiesConfig.JARS_FILE, file.toString());
+        assertThat("one value", config().getJars(), is(Arrays.asList(Paths.get("one.jar"))));
+
+        Files.write(file, Arrays.asList("one.jar", "two.jar"));
+        systemProperties.setProperty(SystemPropertiesConfig.JARS_FILE, file.toString());
+        assertThat("multiple values", config().getJars(), is(Arrays.asList(Paths.get("one.jar"), Paths.get("two.jar"))));
+    }
 }

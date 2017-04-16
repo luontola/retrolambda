@@ -22,6 +22,8 @@ public class SystemPropertiesConfig implements Config {
     public static final String CLASSPATH_FILE = CLASSPATH + "File";
     public static final String INCLUDED_FILES = PREFIX + "includedFiles";
     public static final String INCLUDED_FILES_FILE = INCLUDED_FILES + "File";
+    public static final String JARS = PREFIX + "jars";
+    public static final String JARS_FILE = JARS + "File";
     public static final String QUIET = PREFIX + "quiet";
 
     private static final List<String> requiredProperties = new ArrayList<>();
@@ -143,13 +145,9 @@ public class SystemPropertiesConfig implements Config {
 
     @Override
     public List<Path> getClasspath() {
-        String classpath = p.getProperty(CLASSPATH);
+        List<Path> classpath = getFiles(CLASSPATH, CLASSPATH_FILE);
         if (classpath != null) {
-            return parsePathList(classpath);
-        }
-        String classpathFile = p.getProperty(CLASSPATH_FILE);
-        if (classpathFile != null) {
-            return readPathList(Paths.get(classpathFile));
+            return classpath;
         }
         throw new IllegalArgumentException("Missing required property: " + CLASSPATH);
     }
@@ -188,17 +186,26 @@ public class SystemPropertiesConfig implements Config {
 
     @Override
     public List<Path> getIncludedFiles() {
-        String files = p.getProperty(INCLUDED_FILES);
-        if (files != null) {
-            return parsePathList(files);
-        }
-        String filesFile = p.getProperty(INCLUDED_FILES_FILE);
-        if (filesFile != null) {
-            return readPathList(Paths.get(filesFile));
-        }
-        return null;
+        return getFiles(INCLUDED_FILES, INCLUDED_FILES_FILE);
     }
 
+    // jars
+
+    static {
+        optionalParameterHelp(JARS,
+                "List of jars to process.",
+                "This is useful for including libraries.",
+                "Uses ; or : as the path separator, see java.io.File#pathSeparatorChar");
+        alternativeParameterHelp(JARS_FILE, JARS,
+                "File listing the files to process, instead of processing all files.",
+                "Alternative to " + JARS + " for avoiding the command line",
+                "length limit. The file must list one file per line with UTF-8 encoding.");
+    }
+
+    @Override
+    public List<Path> getJars() {
+        return getFiles(JARS, JARS_FILE);
+    }
 
     // quiet
 
@@ -264,4 +271,17 @@ public class SystemPropertiesConfig implements Config {
         }
         return help;
     }
+
+    private List<Path> getFiles(String property, String filesProperty) {
+        String files = p.getProperty(property);
+        if (files != null) {
+            return parsePathList(files);
+        }
+        String filesFile = p.getProperty(filesProperty);
+        if (filesFile != null) {
+            return readPathList(Paths.get(filesFile));
+        }
+        return null;
+    }
+
 }

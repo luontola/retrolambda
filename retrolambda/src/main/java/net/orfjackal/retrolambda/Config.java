@@ -21,5 +21,7 @@ public interface Config {
 
     List<Path> getIncludedFiles();
 
+    List<Path> getJars();
+
     boolean isQuiet();
 }
