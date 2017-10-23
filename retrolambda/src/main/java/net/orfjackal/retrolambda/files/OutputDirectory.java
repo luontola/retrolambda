@@ -8,10 +8,12 @@ import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.function.Predicate;
 
 public class OutputDirectory {
 
     private final Path outputDir;
+    private Predicate<String> classNamePredicate;
 
     public OutputDirectory(Path outputDir) {
         this.outputDir = outputDir;
@@ -22,13 +24,20 @@ public class OutputDirectory {
             return;
         }
         ClassReader cr = new ClassReader(bytecode);
-        Path relativePath = outputDir.getFileSystem().getPath(cr.getClassName() + ".class");
-        writeFile(relativePath, bytecode);
+        String classname = cr.getClassName();
+        if (classNamePredicate == null || classNamePredicate.test(classname)) {
+            Path relativePath = outputDir.getFileSystem().getPath(classname + ".class");
+            writeFile(relativePath, bytecode);
+        }
     }
 
     public void writeFile(Path relativePath, byte[] content) throws IOException {
         Path outputFile = outputDir.resolve(relativePath);
         Files.createDirectories(outputFile.getParent());
         Files.write(outputFile, content);
+    }
+
+    public void setClassNamePredicate(Predicate<String> classNamePredicate) {
+        this.classNamePredicate = classNamePredicate;
     }
 }
