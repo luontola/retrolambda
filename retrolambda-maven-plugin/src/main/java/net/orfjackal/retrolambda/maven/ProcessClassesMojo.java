@@ -109,10 +109,19 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     public void execute() throws MojoExecutionException {
         validateTarget();
         validateFork();
+
+        Properties config = new Properties();
+        config.setProperty(RetrolambdaApi.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
+        config.setProperty(RetrolambdaApi.DEFAULT_METHODS, "" + defaultMethods);
+        config.setProperty(RetrolambdaApi.QUIET, "" + quiet);
+        config.setProperty(RetrolambdaApi.INPUT_DIR, getInputDir().getAbsolutePath());
+        config.setProperty(RetrolambdaApi.OUTPUT_DIR, getOutputDir().getAbsolutePath());
+        config.setProperty(RetrolambdaApi.CLASSPATH, getClasspath());
+
         if (fork) {
-            processClassesInForkedProcess();
+            processClassesInForkedProcess(config);
         } else {
-            processClassesInCurrentProcess();
+            processClassesInCurrentProcess(config);
         }
     }
 
@@ -131,27 +140,20 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         }
     }
 
-    private void processClassesInCurrentProcess() throws MojoExecutionException {
+    private void processClassesInCurrentProcess(Properties config) throws MojoExecutionException {
         getLog().info("Processing classes with Retrolambda");
         try {
-            Properties p = new Properties();
-            p.setProperty(RetrolambdaApi.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
-            p.setProperty(RetrolambdaApi.DEFAULT_METHODS, "" + defaultMethods);
-            p.setProperty(RetrolambdaApi.QUIET, "" + quiet);
-            p.setProperty(RetrolambdaApi.INPUT_DIR, getInputDir().getAbsolutePath());
-            p.setProperty(RetrolambdaApi.OUTPUT_DIR, getOutputDir().getAbsolutePath());
-            p.setProperty(RetrolambdaApi.CLASSPATH, getClasspath());
             // XXX: Retrolambda is compiled for Java 8, but this Maven plugin is compiled for Java 6,
             // so we need to break the compile-time dependency using reflection
             Class.forName("net.orfjackal.retrolambda.Retrolambda")
                     .getMethod("run", Properties.class)
-                    .invoke(null, p);
+                    .invoke(null, config);
         } catch (Throwable t) {
             throw new MojoExecutionException("Failed to run Retrolambda", t);
         }
     }
 
-    private void processClassesInForkedProcess() throws MojoExecutionException {
+    private void processClassesInForkedProcess(Properties config) throws MojoExecutionException {
         String version = getRetrolambdaVersion();
         getLog().info("Retrieving Retrolambda " + version);
         retrieveRetrolambdaJar(version);
@@ -160,6 +162,14 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         String retrolambdaJar = getRetrolambdaJarPath();
         File classpathFile = getClasspathFile();
         try {
+            List<Element> args = new ArrayList<Element>();
+            for (Object key : config.keySet()) {
+                Object value = config.get(key);
+                args.add(element("arg", attribute("value", "-D" + key + "=" + value)));
+            }
+            args.add(element("arg", attribute("value", "-javaagent:" + retrolambdaJar)));
+            args.add(element("arg", attribute("value", "-jar")));
+            args.add(element("arg", attribute("value", retrolambdaJar)));
             executeMojo(
                     plugin(groupId("org.apache.maven.plugins"),
                             artifactId("maven-antrun-plugin"),
@@ -171,15 +181,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
                                     attributes(
                                             attribute("executable", getJavaCommand()),
                                             attribute("failonerror", "true")),
-                                    element("arg", attribute("value", "-Dretrolambda.bytecodeVersion=" + targetBytecodeVersions.get(target))),
-                                    element("arg", attribute("value", "-Dretrolambda.defaultMethods=" + defaultMethods)),
-                                    element("arg", attribute("value", "-Dretrolambda.quiet=" + quiet)),
-                                    element("arg", attribute("value", "-Dretrolambda.inputDir=" + getInputDir().getAbsolutePath())),
-                                    element("arg", attribute("value", "-Dretrolambda.outputDir=" + getOutputDir().getAbsolutePath())),
-                                    element("arg", attribute("value", "-Dretrolambda.classpathFile=" + classpathFile)),
-                                    element("arg", attribute("value", "-javaagent:" + retrolambdaJar)),
-                                    element("arg", attribute("value", "-jar")),
-                                    element("arg", attribute("value", retrolambdaJar))))),
+                                    args.toArray(new Element[0])))),
                     executionEnvironment(project, session, pluginManager));
         } finally {
             if (!classpathFile.delete()) {
