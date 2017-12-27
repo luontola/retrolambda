@@ -11,7 +11,7 @@ current_path := $(dir $(mkfile_path))
 
 # Builds the development docker file
 docker-build:
-	docker build --tag=$(TAG) ./dev
+	rocker build --var Tag=$(TAG) --file dev/Rockerfile
 
 # Clean this docker image
 docker-clean:
