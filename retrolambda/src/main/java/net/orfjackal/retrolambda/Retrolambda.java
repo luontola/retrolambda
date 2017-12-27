@@ -6,7 +6,7 @@ package net.orfjackal.retrolambda;
 
 import com.esotericsoftware.minlog.Log;
 import net.orfjackal.retrolambda.files.*;
-import net.orfjackal.retrolambda.interfaces.*;
+import net.orfjackal.retrolambda.interfaces.ClassInfo;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.util.Bytecode;
 
@@ -35,6 +35,7 @@ public class Retrolambda {
         Log.info("Output directory: " + outputDir);
         Log.info("Classpath:        " + classpath);
         Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
+        Log.info("JVM version:      " + System.getProperty("java.version"));
         Log.info("Agent enabled:    " + PreMain.isAgentLoaded());
 
         if (!Files.isDirectory(inputDir)) {
