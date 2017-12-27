@@ -232,6 +232,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Fixed running Retrolambda under Java 9 
+  ([Issue #137](https://github.com/orfjackal/retrolambda/issues/137))
+
 ### Retrolambda 2.5.1 (2017-02-23)
 
 - Fixed the enclosing method attribute of anonymous classes declared inside
