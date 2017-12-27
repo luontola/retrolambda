@@ -17,6 +17,14 @@ import java.util.*;
 
 public class Retrolambda {
 
+    public static void run(Properties systemProperties) throws Throwable {
+        SystemPropertiesConfig config = new SystemPropertiesConfig(systemProperties);
+        if (!config.isFullyConfigured()) {
+            throw new IllegalArgumentException("not fully configured");
+        }
+        run(config);
+    }
+
     public static void run(Config config) throws Throwable {
         int bytecodeVersion = config.getBytecodeVersion();
         boolean defaultMethodsEnabled = config.isDefaultMethodsEnabled();

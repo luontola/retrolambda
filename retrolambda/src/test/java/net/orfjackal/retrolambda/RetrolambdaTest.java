@@ -1,9 +1,10 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.api.RetrolambdaApi;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
@@ -77,11 +78,11 @@ public class RetrolambdaTest {
     @Test
     public void copies_resources_to_output_directory() throws Throwable {
         Properties p = new Properties();
-        p.setProperty(SystemPropertiesConfig.INPUT_DIR, inputDir.toString());
-        p.setProperty(SystemPropertiesConfig.OUTPUT_DIR, outputDir.toString());
-        p.setProperty(SystemPropertiesConfig.CLASSPATH, "");
+        p.setProperty(RetrolambdaApi.INPUT_DIR, inputDir.toString());
+        p.setProperty(RetrolambdaApi.OUTPUT_DIR, outputDir.toString());
+        p.setProperty(RetrolambdaApi.CLASSPATH, "");
 
-        Retrolambda.run(new SystemPropertiesConfig(p));
+        Retrolambda.run(p);
 
         assertIsFile(outputDir.resolve("file1.txt"));
         assertIsFile(outputDir.resolve("subdir/file.txt"));

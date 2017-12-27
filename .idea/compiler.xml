@@ -1,22 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <option name="DEFAULT_COMPILER" value="Javac" />
-    <resourceExtensions />
     <wildcardResourcePatterns>
       <entry name="!?*.class" />
     </wildcardResourcePatterns>
     <annotationProcessing>
-      <profile default="true" name="Default" enabled="false">
-        <processorPath useClasspath="true" />
-      </profile>
-      <profile default="false" name="Maven default annotation processors profile" enabled="true">
+      <profile name="Maven default annotation processors profile" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="true" />
         <module name="end-to-end-tests" />
         <module name="retrolambda" />
+        <module name="retrolambda-api" />
         <module name="retrolambda-maven-plugin" />
         <module name="retrolambda-runtime (1)" />
       </profile>
@@ -26,6 +21,7 @@
       <module name="parent" target="1.8" />
       <module name="project" target="1.8" />
       <module name="retrolambda" target="1.8" />
+      <module name="retrolambda-api" target="1.6" />
       <module name="retrolambda-maven-plugin" target="1.6" />
     </bytecodeTargetLevel>
   </component>

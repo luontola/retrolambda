@@ -7,7 +7,8 @@ package net.orfjackal.retrolambda.maven;
 import com.google.common.base.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
-import net.orfjackal.retrolambda.*;
+import net.orfjackal.retrolambda.api.RetrolambdaApi;
+import org.apache.commons.lang3.*;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.*;
@@ -124,7 +125,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     }
 
     private void validateFork() {
-        if (!fork && !Main.isRunningJava8()) {
+        if (!fork && !SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_1_8)) {
             getLog().warn("Maven is not running under Java 8 - forced to fork the process");
             fork = true;
         }
@@ -134,13 +135,17 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         getLog().info("Processing classes with Retrolambda");
         try {
             Properties p = new Properties();
-            p.setProperty(SystemPropertiesConfig.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
-            p.setProperty(SystemPropertiesConfig.DEFAULT_METHODS, "" + defaultMethods);
-            p.setProperty(SystemPropertiesConfig.QUIET, "" + quiet);
-            p.setProperty(SystemPropertiesConfig.INPUT_DIR, getInputDir().getAbsolutePath());
-            p.setProperty(SystemPropertiesConfig.OUTPUT_DIR, getOutputDir().getAbsolutePath());
-            p.setProperty(SystemPropertiesConfig.CLASSPATH, getClasspath());
-            Retrolambda.run(new SystemPropertiesConfig(p));
+            p.setProperty(RetrolambdaApi.BYTECODE_VERSION, "" + targetBytecodeVersions.get(target));
+            p.setProperty(RetrolambdaApi.DEFAULT_METHODS, "" + defaultMethods);
+            p.setProperty(RetrolambdaApi.QUIET, "" + quiet);
+            p.setProperty(RetrolambdaApi.INPUT_DIR, getInputDir().getAbsolutePath());
+            p.setProperty(RetrolambdaApi.OUTPUT_DIR, getOutputDir().getAbsolutePath());
+            p.setProperty(RetrolambdaApi.CLASSPATH, getClasspath());
+            // XXX: Retrolambda is compiled for Java 8, but this Maven plugin is compiled for Java 6,
+            // so we need to break the compile-time dependency using reflection
+            Class.forName("net.orfjackal.retrolambda.Retrolambda")
+                    .getMethod("run", Properties.class)
+                    .invoke(null, p);
         } catch (Throwable t) {
             throw new MojoExecutionException("Failed to run Retrolambda", t);
         }

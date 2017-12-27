@@ -336,7 +336,7 @@
 
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.3</version>
+                    <version>3.1.0</version>
                     <configuration>
                         <!-- Keep the generated POM file out of the base directory -->
                         <dependencyReducedPomLocation>
