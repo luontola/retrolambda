@@ -34,4 +34,5 @@ COPY toolchains.xml /root/.m2/
 
 RUN mkdir /project
 WORKDIR /project
-TAG {{ .Tag }}
+TAG {{ .Tag }}:{{ .Date }}
+TAG {{ .Tag }}:latest
