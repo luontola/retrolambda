@@ -236,6 +236,8 @@ Version History
 
 - Fixed running Retrolambda under Java 9 
   ([Issue #137](https://github.com/orfjackal/retrolambda/issues/137))
+- Consider `module-info.class` as a resource and do not try backporting it
+  ([Issue #122](https://github.com/orfjackal/retrolambda/issues/122))
 
 ### Retrolambda 2.5.1 (2017-02-23)
 
