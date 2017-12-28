@@ -55,7 +55,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.5.2</version>
+    <version>2.5.3</version>
     <executions>
         <execution>
             <goals>
@@ -232,7 +232,7 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.5.3 (2017-12-28)
 
 - Copy the `SourceFile` attribute of the enclosing class into the lambda class
   ([Issue #131](https://github.com/orfjackal/retrolambda/issues/131))
