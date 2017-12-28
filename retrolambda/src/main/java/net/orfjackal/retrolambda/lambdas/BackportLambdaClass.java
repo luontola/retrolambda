@@ -39,7 +39,18 @@ public class BackportLambdaClass extends ClassVisitor {
         if (superName.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)) {
             superName = JAVA_LANG_OBJECT;
         }
+        if (lambdaClass.equals("com/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity$$Lambda$1")) {
+            access = ACC_SUPER;// remove FINAL and SYNTHETIC
+        }
         super.visit(version, access, name, signature, superName, interfaces);
+
+        if (lambdaClass.equals("com/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity$$Lambda$1")) {
+            super.visitField(ACC_FINAL | ACC_SYNTHETIC, "this$0",
+                    "Lcom/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity;", null, null);
+            super.visitOuterClass("com/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity", "onCreate", "(Landroid/os/Bundle;)V");
+            super.visitInnerClass("com/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity$$Lambda$1", null, null, 0);
+            super.visitInnerClass("OnClickListener", "android/view/View$OnClickListener", "android/view/View", ACC_PUBLIC | ACC_STATIC);
+        }
     }
 
     @Override
@@ -66,6 +77,31 @@ public class BackportLambdaClass extends ClassVisitor {
         next = new RemoveLambdaFormHiddenAnnotation(next);
         next = new RemoveMagicLambdaConstructorCall(next);
         next = new CallPrivateImplMethodsViaAccessMethods(access, name, desc, signature, exceptions, next);
+        if (lambdaClass.equals("com/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity$$Lambda$1")
+                && name.equals("<init>")) {
+            next = new MethodVisitor(ASM5, next) {
+                Label start = new Label();
+                Label end = new Label();
+
+                @Override
+                public void visitCode() {
+                    super.visitCode();
+                    super.visitLabel(start);
+                    super.visitVarInsn(Opcodes.ALOAD, 0);
+                    super.visitVarInsn(Opcodes.ALOAD, 1);
+                    super.visitFieldInsn(Opcodes.PUTFIELD, "com/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity$$Lambda$1",
+                            "this$0", "Lcom/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity;");
+                }
+
+                @Override
+                public void visitEnd() {
+                    super.visitLabel(end);
+                    super.visitLocalVariable("this", "Lcom/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity$$Lambda$1;", null, start, end, 0);
+                    super.visitLocalVariable("this$0", "Lcom/example/retrolambda/retrolambadebuggerreducedtestcase/MainActivity;", null, start, end, 0);
+                    super.visitEnd();
+                }
+            };
+        }
         return next;
     }
 
