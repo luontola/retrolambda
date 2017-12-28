@@ -7,6 +7,8 @@ package net.orfjackal.retrolambda.test;
 import com.google.common.collect.ImmutableSet;
 import org.apache.bcel.classfile.*;
 import org.junit.Test;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.tree.ClassNode;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -93,6 +95,15 @@ public class LambdaClassesTest {
         }
     }
 
+    @Test
+    public void has_the_same_source_file_attribute_as_the_enclosing_class() throws IOException {
+        ClassNode enclosing = readClass("net/orfjackal/retrolambda/test/LambdaClassesTest");
+        ClassNode lambda = readClass("net/orfjackal/retrolambda/test/LambdaClassesTest$Dummy1$$Lambda$1");
+
+        assertThat(lambda.sourceFile, is(notNullValue()));
+        assertThat(lambda.sourceFile, is(enclosing.sourceFile));
+    }
+
 
     // helpers
 
@@ -108,5 +119,12 @@ public class LambdaClassesTest {
         }
         assertThat("unexpected overloaded methods", methods, arrayWithSize(uniqueNames.size()));
         return uniqueNames;
+    }
+
+    private static ClassNode readClass(String name) throws IOException {
+        ClassReader cr = new ClassReader(name);
+        ClassNode cls = new ClassNode();
+        cr.accept(cls, ClassReader.SKIP_CODE);
+        return cls;
     }
 }

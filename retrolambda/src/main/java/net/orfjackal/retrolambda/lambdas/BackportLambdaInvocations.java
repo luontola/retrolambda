@@ -23,6 +23,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
     private String className;
     private final ClassAnalyzer analyzer;
     private final Map<Handle, Handle> lambdaAccessToImplMethods = new LinkedHashMap<>();
+    private final EnclosingClass enclosingClass = new EnclosingClass();
 
     public BackportLambdaInvocations(ClassVisitor next, ClassAnalyzer analyzer) {
         super(ASM5, next);
@@ -35,6 +36,12 @@ public class BackportLambdaInvocations extends ClassVisitor {
         this.classAccess = access;
         this.className = name;
         super.visit(version, access, name, signature, superName, interfaces);
+    }
+
+    @Override
+    public void visitSource(String source, String debug) {
+        enclosingClass.sourceFile = source;
+        super.visitSource(source, debug);
     }
 
     private static void resetLambdaClassSequenceNumber() {
@@ -184,7 +191,7 @@ public class BackportLambdaInvocations extends ClassVisitor {
             Handle implMethod = (Handle) bsmArgs[1];
             Handle accessMethod = getLambdaAccessMethod(implMethod);
 
-            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(implMethod, accessMethod,
+            LambdaFactoryMethod factory = LambdaReifier.reifyLambdaClass(enclosingClass, implMethod, accessMethod,
                     invoker, invokedName, invokedType, bsm, bsmArgs);
             super.visitMethodInsn(INVOKESTATIC, factory.getOwner(), factory.getName(), factory.getDesc(), false);
         }

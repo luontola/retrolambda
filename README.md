@@ -232,6 +232,11 @@ optimizations to that mechanism may break Retrolambda.
 Version History
 ---------------
 
+### Upcoming
+
+- Copy the `SourceFile` attribute of the enclosing class into the lambda class
+  ([Issue #131](https://github.com/orfjackal/retrolambda/issues/131))
+
 ### Retrolambda 2.5.2 (2017-12-28)
 
 - Fixed running Retrolambda under Java 9
