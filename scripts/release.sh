@@ -52,7 +52,7 @@ function next-snapshot-version() {
 APP_NAME="Retrolambda"
 NEXT_VERSION=`next-snapshot-version $RELEASE_VERSION`
 
-demand-file-contains-line README.md "### $APP_NAME $RELEASE_VERSION (`date --iso-8601`)"
+demand-file-contains-line README.md "### $APP_NAME $RELEASE_VERSION (`date +%Y-%m-%d`)"
 
 set -x
 
