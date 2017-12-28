@@ -90,6 +90,13 @@
                 <version>5.2</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.apache.bcel</groupId>
+                <artifactId>bcel</artifactId>
+                <!-- last version to support Java 5-->
+                <version>5.2</version>
+            </dependency>
+
             <!-- Testing -->
 
             <dependency>

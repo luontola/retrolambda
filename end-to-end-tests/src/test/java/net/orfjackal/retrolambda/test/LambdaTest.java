@@ -5,12 +5,13 @@
 package net.orfjackal.retrolambda.test;
 
 import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.*;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
-import org.objectweb.asm.*;
-import org.objectweb.asm.Type;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -365,13 +366,15 @@ public class LambdaTest extends SuperClass {
     public void bytecode_constant_pool_will_not_contain_dangling_references_to_MethodHandles() throws IOException {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.7f)));
 
-        ClassReader cr = new ClassReader(getClass().getName().replace('.', '/'));
-        TestUtil.visitConstantPool(cr, (item, constant) -> {
-            if (constant instanceof Type) {
-                Type type = (Type) constant;
-                assertThat("constant #" + item, type.getDescriptor(), not(containsString("java/lang/invoke")));
+        ConstantPool constantPool = TestUtil.getConstantPool(getClass().getName().replace('.', '/'));
+
+        for (Constant constant : constantPool.getConstantPool()) {
+            if (constant != null && constant.getTag() == Constants.CONSTANT_Class) {
+                String s = constantPool.constantToString(constant);
+                assertThat(s, not(containsString("java/lang/invoke")));
+                assertThat(s, not(containsString("java.lang.invoke")));
             }
-        });
+        }
     }
 }
 

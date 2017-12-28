@@ -5,8 +5,8 @@
 package net.orfjackal.retrolambda.test;
 
 import com.google.common.collect.ImmutableSet;
+import org.apache.bcel.classfile.*;
 import org.junit.Test;
-import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
@@ -83,14 +83,14 @@ public class LambdaClassesTest {
 
     @Test
     public void does_not_contain_references_to_JDK_lambda_classes() throws IOException {
-        ClassReader cr = new ClassReader("net/orfjackal/retrolambda/test/LambdaClassesTest$Dummy1$$Lambda$1");
+        ConstantPool constantPool = TestUtil.getConstantPool("net/orfjackal/retrolambda/test/LambdaClassesTest$Dummy1$$Lambda$1");
 
-        // XXX: fix visitConstantPool and assert the constant pool entries instead of this hack
-//        TestUtil.visitConstantPool(cr, (item, constant) -> {
-//        });
-
-        String bytecode = new String(cr.b);
-        assertThat(bytecode, not(containsString("java/lang/invoke/LambdaForm")));
+        for (Constant constant : constantPool.getConstantPool()) {
+            if (constant != null) {
+                String s = constantPool.constantToString(constant);
+                assertThat(s, not(containsString("java/lang/invoke/LambdaForm")));
+            }
+        }
     }
 
 

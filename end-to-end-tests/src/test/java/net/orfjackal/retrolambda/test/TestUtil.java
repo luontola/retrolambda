@@ -4,7 +4,9 @@
 
 package net.orfjackal.retrolambda.test;
 
-import org.objectweb.asm.ClassReader;
+import org.apache.bcel.classfile.*;
+
+import java.io.*;
 
 public class TestUtil {
 
@@ -33,21 +35,12 @@ public class TestUtil {
         return itf.getName() + "$";
     }
 
-    public static void visitConstantPool(ClassReader reader, ConstantPoolVisitor visitor) {
-        char[] buf = new char[reader.getMaxStringLength()];
-        for (int item = 0; item < reader.getItemCount(); item++) {
-            try {
-                Object constant = reader.readConst(item, buf);
-                visitor.visit(item, constant);
-            } catch (Exception e) {
-                // XXX: constant pool entry which is a Methodref, InvokeDynamic or similar non-plain constant
-                // FIXME: readConst throws ArrayIndexOutOfBoundsException nearly all the time; how to use it???
-                //e.printStackTrace();
-            }
+    public static ConstantPool getConstantPool(String className) throws IOException {
+        String fileName = className + ".class";
+        try (InputStream in = TestUtil.class.getResourceAsStream("/" + fileName)) {
+            ClassParser parser = new ClassParser(in, className);
+            JavaClass javaClass = parser.parse();
+            return javaClass.getConstantPool();
         }
-    }
-
-    public interface ConstantPoolVisitor {
-        void visit(int item, Object constant);
     }
 }
