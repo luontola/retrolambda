@@ -228,6 +228,11 @@ May break if a future JDK 8 build stops generating a new class for each
 that `java.lang.invoke.LambdaMetafactory` generates dynamically, so
 optimizations to that mechanism may break Retrolambda.
 
+Java 9 and higher are not supported; just build your project with Java 8. The
+new JDKs mostly just add new APIs, which you anyways wouldn't be able to use on
+on older JREs. To backport new language features, create a new tool for it
+yourself or pay someone to do it, if you think it's worth the effort. ;)
+
 
 Version History
 ---------------
