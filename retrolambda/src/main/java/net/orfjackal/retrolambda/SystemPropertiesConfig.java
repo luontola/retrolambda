@@ -146,7 +146,7 @@ public class SystemPropertiesConfig implements Config {
     }
 
     private static List<Path> parsePathList(String paths) {
-        return Stream.of(paths.split(File.pathSeparator))
+        return Stream.of(paths.split(File.pathSeparator)).parallel()
                 .filter(path -> !path.isEmpty())
                 .map(Paths::get)
                 .collect(Collectors.toList());
@@ -154,7 +154,7 @@ public class SystemPropertiesConfig implements Config {
 
     private static List<Path> readPathList(Path file) {
         try {
-            return Files.readAllLines(file).stream()
+            return Files.readAllLines(file).parallelStream()
                     .filter(line -> !line.isEmpty())
                     .map(Paths::get)
                     .collect(Collectors.toList());

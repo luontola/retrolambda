@@ -108,7 +108,7 @@ public class Retrolambda {
     }
 
     private static URL[] asUrls(List<Path> classpath) {
-        return classpath.stream()
+        return classpath.parallelStream()
                 .map(Path::toUri)
                 .map(Retrolambda::uriToUrl)
                 .toArray(URL[]::new);

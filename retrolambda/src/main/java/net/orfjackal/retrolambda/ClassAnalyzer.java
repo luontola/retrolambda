@@ -140,14 +140,14 @@ public class ClassAnalyzer {
 
     public List<ClassInfo> getInterfaces() {
         return classes.values()
-                .stream()
+                .parallelStream()
                 .filter(ClassInfo::isInterface)
                 .collect(toList());
     }
 
     public List<ClassInfo> getClasses() {
         return classes.values()
-                .stream()
+                .parallelStream()
                 .filter(ClassInfo::isClass)
                 .collect(toList());
     }
@@ -186,7 +186,7 @@ public class ClassAnalyzer {
     }
 
     public List<MethodInfo> getDefaultMethods(Type type) {
-        return getMethods(type).stream()
+        return getMethods(type).parallelStream()
                 .filter(m -> m.kind instanceof MethodKind.Default)
                 .collect(toList());
     }
