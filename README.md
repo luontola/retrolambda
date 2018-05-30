@@ -55,7 +55,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.5.3</version>
+    <version>2.5.4</version>
     <executions>
         <execution>
             <goals>
@@ -237,7 +237,7 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.5.4 (2018-05-30)
 
 - Fix regression in Maven plugin; use classpathFile
   ([Issue #141](https://github.com/orfjackal/retrolambda/issues/141))
