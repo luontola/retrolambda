@@ -1,4 +1,4 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -165,6 +165,10 @@ abstract class ProcessClassesMojo extends AbstractMojo {
             List<Element> args = new ArrayList<Element>();
             for (Object key : config.keySet()) {
                 Object value = config.get(key);
+                if (key.equals(RetrolambdaApi.CLASSPATH)) {
+                    key = RetrolambdaApi.CLASSPATH_FILE;
+                    value = classpathFile.getAbsolutePath();
+                }
                 args.add(element("arg", attribute("value", "-D" + key + "=" + value)));
             }
             args.add(element("arg", attribute("value", "-javaagent:" + retrolambdaJar)));

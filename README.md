@@ -237,6 +237,11 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
+### Upcoming
+
+- Fix regression in Maven plugin; use classpathFile
+  ([Issue #141](https://github.com/orfjackal/retrolambda/issues/141))
+
 ### Retrolambda 2.5.3 (2017-12-28)
 
 - Copy the `SourceFile` attribute of the enclosing class into the lambda class
