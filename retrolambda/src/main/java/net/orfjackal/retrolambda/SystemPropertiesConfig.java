@@ -217,7 +217,7 @@ public class SystemPropertiesConfig implements Config {
                 "\n" +
                 "Retrolambda takes Java 8 classes and backports lambda expressions and\n" +
                 "some other language features to work on Java 7, 6 or 5.\n" +
-                "Web site: https://github.com/orfjackal/retrolambda\n" +
+                "Web site: https://github.com/luontola/retrolambda\n" +
                 "\n" +
                 "Copyright (c) 2013-2017  Esko Luontola and other Retrolambda contributors\n" +
                 "This software is released under the Apache License 2.0.\n" +

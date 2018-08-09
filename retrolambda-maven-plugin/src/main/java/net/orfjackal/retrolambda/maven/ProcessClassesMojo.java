@@ -60,7 +60,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
      * The Java version targeted by the bytecode processing. Possible values are
      * 1.5, 1.6, 1.7 and 1.8. After processing the classes will be compatible
      * with the target JVM provided the known limitations are considered. See
-     * <a href="https://github.com/orfjackal/retrolambda">project documentation</a>
+     * <a href="https://github.com/luontola/retrolambda">project documentation</a>
      * for more details.
      *
      * @since 1.2.0
