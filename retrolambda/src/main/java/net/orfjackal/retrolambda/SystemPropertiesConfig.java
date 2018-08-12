@@ -191,6 +191,21 @@ public class SystemPropertiesConfig implements Config {
     }
 
 
+    // useJavac8ReadLabelHack
+
+    static {
+        optionalParameterHelp(JAVAC_HACKS,
+                "Attempts to fix javac bugs (type-annotation emission for local variables).",
+                "Disabled by default. Enable by setting to \"true\"");
+
+    }
+
+    @Override
+    public boolean isJavacHacksEnabled() {
+        return Boolean.parseBoolean(p.getProperty(JAVAC_HACKS, "false"));
+    }
+
+
     // quiet
 
     static {

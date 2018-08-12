@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda.interfaces;
 
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
@@ -11,7 +12,7 @@ import java.util.*;
 
 public class ClassInfo {
 
-    public final ClassReader reader;
+    public final EnhancedClassReader reader;
     private final int access;
     public final Type type;
     public final Type superclass;
@@ -26,7 +27,7 @@ public class ClassInfo {
         this.superclass = null;
     }
 
-    public ClassInfo(ClassReader cr) {
+    public ClassInfo(EnhancedClassReader cr) {
         this.reader = cr;
         this.access = cr.getAccess();
         this.type = Type.getObjectType(cr.getClassName());

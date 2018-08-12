@@ -22,7 +22,7 @@ public class PreMain {
         return agentLoaded;
     }
 
-    public static void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver) {
-        agent.setLambdaClassSaver(lambdaClassSaver);
+    public static void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver, boolean isJavacHacksEnabled) {
+        agent.setLambdaClassSaver(lambdaClassSaver, isJavacHacksEnabled);
     }
 }

@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.util.*;
@@ -21,11 +22,11 @@ public class ClassAnalyzer {
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
 
-    public void analyze(byte[] bytecode) {
-        analyze(new ClassReader2(bytecode));
+    public void analyze(byte[] bytecode, boolean isJavacHacksEnabled) {
+        analyze(new EnhancedClassReader(bytecode, isJavacHacksEnabled));
     }
 
-    public void analyze(ClassReader cr) {
+    public void analyze(EnhancedClassReader cr) {
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
 
@@ -37,7 +38,7 @@ public class ClassAnalyzer {
         analyzeClassOrInterface(c, cr);
     }
 
-    private void analyzeClass(ClassInfo c, ClassReader cr) {
+    private void analyzeClass(ClassInfo c, EnhancedClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
 
@@ -64,7 +65,7 @@ public class ClassAnalyzer {
         }, ClassReader.SKIP_CODE);
     }
 
-    private void analyzeInterface(ClassInfo c, ClassReader cr) {
+    private void analyzeInterface(ClassInfo c, EnhancedClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
             private String companion;
@@ -100,7 +101,7 @@ public class ClassAnalyzer {
         }, ClassReader.SKIP_CODE);
     }
 
-    private void analyzeClassOrInterface(ClassInfo c, ClassReader cr) {
+    private void analyzeClassOrInterface(ClassInfo c, EnhancedClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
 

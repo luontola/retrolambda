@@ -16,4 +16,5 @@ public class RetrolambdaApi {
     public static final String INPUT_DIR = PREFIX + "inputDir";
     public static final String DEFAULT_METHODS = PREFIX + "defaultMethods";
     public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
+    public static final String JAVAC_HACKS = PREFIX + "javacHacks";
 }

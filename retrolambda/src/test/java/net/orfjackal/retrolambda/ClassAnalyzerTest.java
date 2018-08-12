@@ -513,7 +513,7 @@ public class ClassAnalyzerTest {
         Collections.shuffle(inAnyOrder);
         for (Class<?> clazz : inAnyOrder) {
             byte[] bytecode = readBytecode(clazz);
-            analyzer.analyze(bytecode);
+            analyzer.analyze(bytecode, false);
         }
     }
 

@@ -32,6 +32,7 @@ public class Retrolambda {
         Path outputDir = config.getOutputDir();
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
+        boolean isJavacHacksEnabled = config.isJavacHacksEnabled();
         if (config.isQuiet()) {
             Log.WARN();
         } else {
@@ -45,6 +46,9 @@ public class Retrolambda {
         Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
         Log.info("JVM version:      " + System.getProperty("java.version"));
         Log.info("Agent enabled:    " + PreMain.isAgentLoaded());
+        if (isJavacHacksEnabled) {
+            Log.info("javac hacks:      " + isJavacHacksEnabled);
+        }
 
         if (!Files.isDirectory(inputDir)) {
             Log.info("Nothing to do; not a directory: " + inputDir);
@@ -56,11 +60,11 @@ public class Retrolambda {
         ClassAnalyzer analyzer = new ClassAnalyzer();
         OutputDirectory outputDirectory = new OutputDirectory(outputDir);
         Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
-        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers);
+        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers, isJavacHacksEnabled);
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {
             if (PreMain.isAgentLoaded()) {
-                PreMain.setLambdaClassSaver(lambdaClassSaver);
+                PreMain.setLambdaClassSaver(lambdaClassSaver, isJavacHacksEnabled);
             } else {
                 dumper.install();
             }
@@ -68,7 +72,7 @@ public class Retrolambda {
             visitFiles(inputDir, includedFiles, new ClasspathVisitor() {
                 @Override
                 protected void visitClass(byte[] bytecode) {
-                    analyzer.analyze(bytecode);
+                    analyzer.analyze(bytecode, isJavacHacksEnabled);
                 }
 
                 @Override
@@ -95,7 +99,7 @@ public class Retrolambda {
             // We need to load some of the classes (for calling the lambda metafactory)
             // so we need to take care not to modify any bytecode before loading them.
             for (byte[] bytecode : transformed) {
-                outputDirectory.writeClass(bytecode);
+                outputDirectory.writeClass(bytecode, isJavacHacksEnabled);
             }
         }
     }
