@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda.lambdas;
 
 import org.objectweb.asm.ClassReader;
+import net.orfjackal.retrolambda.ClassReader2;
 
 import java.lang.instrument.*;
 import java.security.ProtectionDomain;
@@ -22,7 +23,7 @@ public class LambdaClassSaverAgent implements ClassFileTransformer {
         if (className == null) {
             // Since JDK 8 build b121 or so, lambda classes have a null class name,
             // but we can read it from the bytecode where the name still exists.
-            className = new ClassReader(classfileBuffer).getClassName();
+            className = new ClassReader2(classfileBuffer).getClassName();
         }
         if (lambdaClassSaver != null) {
             lambdaClassSaver.saveIfLambda(className, classfileBuffer);

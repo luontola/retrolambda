@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda.files;
 
 import org.objectweb.asm.ClassReader;
+import net.orfjackal.retrolambda.ClassReader2;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -21,7 +22,7 @@ public class OutputDirectory {
         if (bytecode == null) {
             return;
         }
-        ClassReader cr = new ClassReader(bytecode);
+        ClassReader cr = new ClassReader2(bytecode);
         Path relativePath = outputDir.getFileSystem().getPath(cr.getClassName() + ".class");
         writeFile(relativePath, bytecode);
     }

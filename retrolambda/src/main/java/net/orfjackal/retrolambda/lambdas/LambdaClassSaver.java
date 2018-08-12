@@ -7,7 +7,9 @@ package net.orfjackal.retrolambda.lambdas;
 import com.esotericsoftware.minlog.Log;
 import net.orfjackal.retrolambda.Transformers;
 import net.orfjackal.retrolambda.files.OutputDirectory;
+
 import org.objectweb.asm.ClassReader;
+import net.orfjackal.retrolambda.ClassReader2;
 
 import java.io.IOException;
 
@@ -29,7 +31,7 @@ public class LambdaClassSaver {
 
     private void reifyLambdaClass(String className, byte[] bytecode) {
         Log.info("Saving lambda class: " + className);
-        bytecode = transformers.backportLambdaClass(new ClassReader(bytecode));
+        bytecode = transformers.backportLambdaClass(new ClassReader2(bytecode));
         try {
             saver.writeClass(bytecode);
         } catch (IOException e) {

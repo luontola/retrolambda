@@ -22,7 +22,7 @@ public class ClassAnalyzer {
     private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
 
     public void analyze(byte[] bytecode) {
-        analyze(new ClassReader(bytecode));
+        analyze(new ClassReader2(bytecode));
     }
 
     public void analyze(ClassReader cr) {
