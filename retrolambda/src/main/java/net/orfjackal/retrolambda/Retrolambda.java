@@ -55,6 +55,7 @@ public class Retrolambda {
 
         ClassAnalyzer analyzer = new ClassAnalyzer();
         OutputDirectory outputDirectory = new OutputDirectory(outputDir);
+        outputDirectory.setClassNamePredicate(analyzer.getLibraryInterfaces().getAcceptedPredicate());
         Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
         LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers);
 
@@ -76,6 +77,8 @@ public class Retrolambda {
                     outputDirectory.writeFile(relativePath, content);
                 }
             });
+            for(byte[] interf : analyzer.getLibraryInterfaces().getMissingInterfaces(classpath))
+                analyzer.analyze(interf);
 
             // Because Transformers.backportLambdaClass() analyzes the lambda class,
             // adding it to the analyzer's list of classes, we must take care to

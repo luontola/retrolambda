@@ -20,6 +20,7 @@ public class ClassAnalyzer {
     private final Map<Type, ClassInfo> classes = new HashMap<>();
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
+    private final LibraryInterfaces libraryInterfaces = new LibraryInterfaces();
 
     public void analyze(byte[] bytecode) {
         analyze(new ClassReader(bytecode));
@@ -43,6 +44,7 @@ public class ClassAnalyzer {
 
             @Override
             public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+                libraryInterfaces.addRequiredInterfaces(interfaces);
                 this.owner = name;
             }
 
@@ -73,6 +75,7 @@ public class ClassAnalyzer {
             public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                 this.owner = name;
                 this.companion = name + "$";
+                libraryInterfaces.addFoundInterface(name);
             }
 
             @Override
@@ -124,6 +127,10 @@ public class ClassAnalyzer {
                 return null;
             }
         }, ClassReader.SKIP_CODE);
+    }
+
+    public LibraryInterfaces getLibraryInterfaces() {
+        return libraryInterfaces;
     }
 
     private static boolean isDefaultMethod(int access) {
