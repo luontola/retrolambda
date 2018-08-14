@@ -12,7 +12,7 @@
 
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>parent</artifactId>
-    <version>2.5.5</version>
+    <version>2.5.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <description>Backport of Java 8 lambda expressions to Java 7</description>
