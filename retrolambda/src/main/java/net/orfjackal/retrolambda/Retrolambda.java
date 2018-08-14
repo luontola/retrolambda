@@ -1,4 +1,4 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -46,9 +46,7 @@ public class Retrolambda {
         Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
         Log.info("JVM version:      " + System.getProperty("java.version"));
         Log.info("Agent enabled:    " + PreMain.isAgentLoaded());
-        if (isJavacHacksEnabled) {
-            Log.info("javac hacks:      " + isJavacHacksEnabled);
-        }
+        Log.info("javac hacks:      " + isJavacHacksEnabled);
 
         if (!Files.isDirectory(inputDir)) {
             Log.info("Nothing to do; not a directory: " + inputDir);
