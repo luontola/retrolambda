@@ -241,6 +241,14 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
+### Upcoming
+
+- Fix an `ArrayIndexOutOfBoundsException` crash in ASM due to incorrect bytecode 
+  produced by `javac` under some circumstances. See [JDK-8073658](https://bugs.openjdk.java.net/browse/JDK-8073658)
+  and [ASM-317845](https://gitlab.ow2.org/asm/asm/issues/317845).
+  Enable the `javacHacks` parameter for a workaround to this issue.
+  ([Pull request #143](https://github.com/luontola/retrolambda/pull/143))
+
 ### Retrolambda 2.5.4 (2018-05-30)
 
 - Fix regression in Maven plugin; use classpathFile
