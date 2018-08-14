@@ -55,7 +55,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.5.4</version>
+    <version>2.5.5</version>
     <executions>
         <execution>
             <goals>
@@ -241,7 +241,7 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.5.5 (2018-08-14)
 
 - Fix an `ArrayIndexOutOfBoundsException` crash in ASM due to incorrect bytecode 
   produced by `javac` under some circumstances. See [JDK-8073658](https://bugs.openjdk.java.net/browse/JDK-8073658)
