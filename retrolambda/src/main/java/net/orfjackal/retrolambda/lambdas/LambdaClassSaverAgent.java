@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -24,7 +24,7 @@ public class LambdaClassSaverAgent implements ClassFileTransformer {
         if (className == null) {
             // Since JDK 8 build b121 or so, lambda classes have a null class name,
             // but we can read it from the bytecode where the name still exists.
-            className = new EnhancedClassReader(classfileBuffer, isJavacHacksEnabled).getClassName();
+            className = EnhancedClassReader.create(classfileBuffer, isJavacHacksEnabled).getClassName();
         }
         if (lambdaClassSaver != null) {
             lambdaClassSaver.saveIfLambda(className, classfileBuffer);

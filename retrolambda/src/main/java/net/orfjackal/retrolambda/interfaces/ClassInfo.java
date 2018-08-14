@@ -1,10 +1,9 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda.interfaces;
 
-import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 import net.orfjackal.retrolambda.util.Flags;
 import org.objectweb.asm.*;
 
@@ -12,7 +11,7 @@ import java.util.*;
 
 public class ClassInfo {
 
-    public final EnhancedClassReader reader;
+    public final ClassReader reader;
     private final int access;
     public final Type type;
     public final Type superclass;
@@ -27,7 +26,7 @@ public class ClassInfo {
         this.superclass = null;
     }
 
-    public ClassInfo(EnhancedClassReader cr) {
+    public ClassInfo(ClassReader cr) {
         this.reader = cr;
         this.access = cr.getAccess();
         this.type = Type.getObjectType(cr.getClassName());

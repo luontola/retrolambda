@@ -1,4 +1,4 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -23,10 +23,10 @@ public class ClassAnalyzer {
     private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
 
     public void analyze(byte[] bytecode, boolean isJavacHacksEnabled) {
-        analyze(new EnhancedClassReader(bytecode, isJavacHacksEnabled));
+        analyze(EnhancedClassReader.create(bytecode, isJavacHacksEnabled));
     }
 
-    public void analyze(EnhancedClassReader cr) {
+    public void analyze(ClassReader cr) {
         ClassInfo c = new ClassInfo(cr);
         classes.put(c.type, c);
 
@@ -38,7 +38,7 @@ public class ClassAnalyzer {
         analyzeClassOrInterface(c, cr);
     }
 
-    private void analyzeClass(ClassInfo c, EnhancedClassReader cr) {
+    private void analyzeClass(ClassInfo c, ClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
 
@@ -65,7 +65,7 @@ public class ClassAnalyzer {
         }, ClassReader.SKIP_CODE);
     }
 
-    private void analyzeInterface(ClassInfo c, EnhancedClassReader cr) {
+    private void analyzeInterface(ClassInfo c, ClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
             private String companion;
@@ -101,7 +101,7 @@ public class ClassAnalyzer {
         }, ClassReader.SKIP_CODE);
     }
 
-    private void analyzeClassOrInterface(ClassInfo c, EnhancedClassReader cr) {
+    private void analyzeClassOrInterface(ClassInfo c, ClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
 
