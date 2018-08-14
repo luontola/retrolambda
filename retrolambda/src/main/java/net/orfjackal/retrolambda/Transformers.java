@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.requirenonnull.RequireNonNull;
@@ -26,7 +27,7 @@ public class Transformers {
         this.analyzer = analyzer;
     }
 
-    public byte[] backportLambdaClass(ClassReader reader) {
+    public byte[] backportLambdaClass(EnhancedClassReader reader) {
         return transform(reader, (next) -> {
             if (defaultMethodsEnabled) {
                 // Lambda classes are generated dynamically, so they were not
@@ -43,7 +44,7 @@ public class Transformers {
         });
     }
 
-    public byte[] backportClass(ClassReader reader) {
+    public byte[] backportClass(EnhancedClassReader reader) {
         return transform(reader, (next) -> {
             if (defaultMethodsEnabled) {
                 next = new UpdateRelocatedMethodInvocations(next, analyzer);
@@ -54,7 +55,7 @@ public class Transformers {
         });
     }
 
-    public List<byte[]> backportInterface(ClassReader reader) {
+    public List<byte[]> backportInterface(EnhancedClassReader reader) {
         // The lambdas must be backported only once, because bad things will happen if a lambda
         // is called by different class name in the interface and its companion class, and then
         // the wrong one of them is written to disk last.
@@ -103,7 +104,7 @@ public class Transformers {
         return transform(node.name, node::accept, chain);
     }
 
-    private byte[] transform(ClassReader reader, ClassVisitorChain chain) {
+    private byte[] transform(EnhancedClassReader reader, ClassVisitorChain chain) {
         return transform(reader.getClassName(), cv -> reader.accept(cv, 0), chain);
     }
 

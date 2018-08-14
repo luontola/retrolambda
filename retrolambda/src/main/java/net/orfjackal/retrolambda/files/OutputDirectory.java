@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.files;
 
-import org.objectweb.asm.ClassReader;
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 
 import java.io.IOException;
 import java.nio.file.*;
@@ -17,11 +17,11 @@ public class OutputDirectory {
         this.outputDir = outputDir;
     }
 
-    public void writeClass(byte[] bytecode) throws IOException {
+    public void writeClass(byte[] bytecode, boolean isJavacHacksEnabled) throws IOException {
         if (bytecode == null) {
             return;
         }
-        ClassReader cr = new ClassReader(bytecode);
+        EnhancedClassReader cr = new EnhancedClassReader(bytecode, isJavacHacksEnabled);
         Path relativePath = outputDir.getFileSystem().getPath(cr.getClassName() + ".class");
         writeFile(relativePath, bytecode);
     }

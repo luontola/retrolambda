@@ -4,7 +4,7 @@
 
 package net.orfjackal.retrolambda.lambdas;
 
-import org.objectweb.asm.ClassReader;
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 
 import java.lang.instrument.*;
 import java.security.ProtectionDomain;
@@ -12,9 +12,11 @@ import java.security.ProtectionDomain;
 public class LambdaClassSaverAgent implements ClassFileTransformer {
 
     private LambdaClassSaver lambdaClassSaver;
+    private boolean isJavacHacksEnabled;
 
-    public void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver) {
+    public void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver, boolean isJavacHacksEnabled) {
         this.lambdaClassSaver = lambdaClassSaver;
+        this.isJavacHacksEnabled = isJavacHacksEnabled;
     }
 
     @Override
@@ -22,7 +24,7 @@ public class LambdaClassSaverAgent implements ClassFileTransformer {
         if (className == null) {
             // Since JDK 8 build b121 or so, lambda classes have a null class name,
             // but we can read it from the bytecode where the name still exists.
-            className = new ClassReader(classfileBuffer).getClassName();
+            className = new EnhancedClassReader(classfileBuffer, isJavacHacksEnabled).getClassName();
         }
         if (lambdaClassSaver != null) {
             lambdaClassSaver.saveIfLambda(className, classfileBuffer);

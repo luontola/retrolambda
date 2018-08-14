@@ -80,6 +80,14 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     public boolean defaultMethods;
 
     /**
+     * Whether to apply experimental javac issues workarounds.
+     *
+     * @since 2.5.5
+     */
+    @Parameter(defaultValue = "false", property = "retrolambdaJavacHacks", required = true)
+    public boolean javacHacks;
+
+    /**
      * Reduces the amount of logging.
      *
      * @since 2.4.0
@@ -117,6 +125,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         config.setProperty(RetrolambdaApi.INPUT_DIR, getInputDir().getAbsolutePath());
         config.setProperty(RetrolambdaApi.OUTPUT_DIR, getOutputDir().getAbsolutePath());
         config.setProperty(RetrolambdaApi.CLASSPATH, getClasspath());
+        config.setProperty(RetrolambdaApi.JAVAC_HACKS, "" + javacHacks);
 
         if (fork) {
             processClassesInForkedProcess(config);

@@ -140,6 +140,10 @@ Configurable system properties:
       Alternative to retrolambda.includedFiles for avoiding the command line
       length limit. The file must list one file per line with UTF-8 encoding.
 
+  retrolambda.javacHacks
+      Attempts to fix javac bugs (type-annotation emission for local variables).
+      Disabled by default. Enable by setting to "true"
+
   retrolambda.quiet
       Reduces the amount of logging.
       Disabled by default. Enable by setting to "true"
