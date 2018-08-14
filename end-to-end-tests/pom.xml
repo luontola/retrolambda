@@ -118,6 +118,7 @@
                     <target>${testBytecodeTarget}</target>
                     <defaultMethods>${testDefaultMethods}</defaultMethods>
                     <fork>${testFork}</fork>
+                    <javacHacks>true</javacHacks>
                 </configuration>
             </plugin>
 

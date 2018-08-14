@@ -13,8 +13,10 @@
               <option value="clean" />
               <option value="verify" />
               <option value="-Dmaven.test.redirectTestOutputToFile=false" />
+              <option value="--errors" />
             </list>
           </option>
+          <option name="pomFileName" />
           <option name="profilesMap">
             <map />
           </option>
@@ -25,6 +27,6 @@
     </MavenSettings>
     <RunnerSettings RunnerId="Run" />
     <ConfigurationWrapper RunnerId="Run" />
-    <method />
+    <method v="2" />
   </configuration>
 </component>
