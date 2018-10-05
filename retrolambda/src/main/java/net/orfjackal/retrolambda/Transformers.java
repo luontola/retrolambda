@@ -4,6 +4,7 @@
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.api.*;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.requirenonnull.RequireNonNull;
@@ -19,11 +20,13 @@ public class Transformers {
     private final int targetVersion;
     private final boolean defaultMethodsEnabled;
     private final ClassAnalyzer analyzer;
+    private final ApiMappingSet mapping;
 
-    public Transformers(int targetVersion, boolean defaultMethodsEnabled, ClassAnalyzer analyzer) {
+    public Transformers(int targetVersion, boolean defaultMethodsEnabled, ClassAnalyzer analyzer, ApiMappingSet mapping) {
         this.targetVersion = targetVersion;
         this.defaultMethodsEnabled = defaultMethodsEnabled;
         this.analyzer = analyzer;
+        this.mapping = mapping;
     }
 
     public byte[] backportLambdaClass(ClassReader reader) {
@@ -50,6 +53,9 @@ public class Transformers {
                 next = new AddMethodDefaultImplementations(next, analyzer);
             }
             next = new BackportLambdaInvocations(next, analyzer);
+            if (mapping.isEnabled()) {
+                next = new RewriteApiReferences(next, mapping);
+            }
             return next;
         });
     }

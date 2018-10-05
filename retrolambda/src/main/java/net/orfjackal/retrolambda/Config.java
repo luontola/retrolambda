@@ -21,6 +21,8 @@ public interface Config {
 
     List<Path> getIncludedFiles();
 
+    List<String> getApiMappings();
+
     boolean isJavacHacksEnabled();
 
     boolean isQuiet();

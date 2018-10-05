@@ -200,6 +200,8 @@ public class SystemPropertiesConfig implements Config {
 
     }
 
+
+
     @Override
     public boolean isJavacHacksEnabled() {
         return Boolean.parseBoolean(p.getProperty(JAVAC_HACKS, "false"));
@@ -220,6 +222,27 @@ public class SystemPropertiesConfig implements Config {
         return Boolean.parseBoolean(p.getProperty(QUIET, "false"));
     }
 
+
+
+    // API Mappings
+
+    static {
+        optionalParameterHelp(API_MAPPINGS,
+                "Maps static field and method references to backported classes.",
+                        "Disabled by default.",
+                        "Provide a list of mapping files separated by '" + File.pathSeparator + "' to enable.");
+    }
+
+
+    @Override
+    public List<String> getApiMappings() {
+        String list = p.getProperty(API_MAPPINGS, "");
+        if(list.isEmpty()) {
+            return Collections.emptyList();
+        } else {
+            return Arrays.asList(list.split(File.pathSeparator));
+        }
+    }
 
     // help
 
