@@ -85,8 +85,14 @@
 
             <dependency>
                 <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-debug-all</artifactId>
-                <version>5.2</version>
+                <artifactId>asm</artifactId>
+                <version>7.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-tree</artifactId>
+                <version>7.0</version>
             </dependency>
 
             <dependency>
@@ -312,7 +318,7 @@
 
                 <plugin>
                     <artifactId>maven-plugin-plugin</artifactId>
-                    <version>3.4</version>
+                    <version>3.6.0</version>
                 </plugin>
 
                 <plugin>

@@ -45,7 +45,7 @@ public class Retrolambda {
         Log.info("Classpath:        " + classpath);
         Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
         Log.info("JVM version:      " + System.getProperty("java.version"));
-        Log.info("Agent enabled:    " + PreMain.isAgentLoaded());
+        Log.info("Agent enabled:    " + Agent.isEnabled());
         Log.info("javac hacks:      " + isJavacHacksEnabled);
 
         if (!Files.isDirectory(inputDir)) {
@@ -61,8 +61,8 @@ public class Retrolambda {
         LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers, isJavacHacksEnabled);
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {
-            if (PreMain.isAgentLoaded()) {
-                PreMain.setLambdaClassSaver(lambdaClassSaver, isJavacHacksEnabled);
+            if (Agent.isEnabled()) {
+                Agent.setLambdaClassSaver(lambdaClassSaver, isJavacHacksEnabled);
             } else {
                 dumper.install();
             }
