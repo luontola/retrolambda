@@ -23,7 +23,12 @@
 
         <dependency>
             <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-debug-all</artifactId>
+            <artifactId>asm</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
         </dependency>
 
         <dependency>
@@ -50,6 +55,7 @@
                             <mainClass>net.orfjackal.retrolambda.Main</mainClass>
                         </manifest>
                         <manifestEntries>
+                            <Can-Retransform-Classes>true</Can-Retransform-Classes>
                             <Premain-Class>net.orfjackal.retrolambda.PreMain</Premain-Class>
                         </manifestEntries>
                     </archive>
