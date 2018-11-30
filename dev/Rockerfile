@@ -5,6 +5,7 @@ MOUNT installers:/installers
 RUN cd /installers \
 	&& chmod u+x jdk-1_5_0_22-linux-amd64-rpm.bin \
 	&& echo yes | ./jdk-1_5_0_22-linux-amd64-rpm.bin
+ENV JAVA5_HOME=/usr/java/jdk1.5.0_22
 
 # Install JDK 6, 7, 8
 RUN yum -y install \
@@ -12,18 +13,25 @@ RUN yum -y install \
 		java-1.7.0-openjdk-devel \
 		java-1.8.0-openjdk-devel \
 	&& yum clean all
-
-# Install JDK 9
-RUN rpm -Uvh /installers/jdk-9.0.1_linux-x64_bin.rpm
-
-ENV JAVA5_HOME=/usr/java/jdk1.5.0_22
 ENV JAVA6_HOME=/usr/lib/jvm/java-1.6.0
 ENV JAVA7_HOME=/usr/lib/jvm/java-1.7.0
 ENV JAVA8_HOME=/usr/lib/jvm/java-1.8.0
-ENV JAVA9_HOME=/usr/java/jdk-9.0.1
+
+# Install JDK 9
+RUN rpm -Uvh /installers/jdk-9.0.4_linux-x64_bin.rpm
+ENV JAVA9_HOME=/usr/java/jdk-9.0.4
+
+# Install JDK 10
+RUN rpm -Uvh /installers/jdk-10.0.2_linux-x64_bin.rpm
+ENV JAVA10_HOME=/usr/java/jdk-10.0.2
+
+# Install JDK 11
+RUN rpm -Uvh /installers/jdk-11.0.1_linux-x64_bin.rpm
+ENV JAVA11_HOME=/usr/java/jdk-11.0.1
+
 ENV JAVA_HOME=$JAVA8_HOME
 
-# Install Maven
+# Install Maven 3.2.5 (the last version to support Java 6)
 RUN curl http://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.tar.gz \
 		-o apache-maven-3.2.5-bin.tar.gz \
 	&& tar -xzf apache-maven-3.2.5-bin.tar.gz -C /opt \
