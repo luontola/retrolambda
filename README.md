@@ -244,6 +244,8 @@ Version History
 ### Upcoming
 
 - Fix a `NullPointerException` crash in the Maven plugin on Java 10 & 11
+- Fix Java agent to work on Java 9+
+  ([Pull request #148](https://github.com/luontola/retrolambda/pull/148))
 
 ### Retrolambda 2.5.5 (2018-08-14)
 
