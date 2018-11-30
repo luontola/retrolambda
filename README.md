@@ -241,6 +241,10 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
+### Upcoming
+
+- Fix a `NullPointerException` crash in the Maven plugin on Java 10 & 11
+
 ### Retrolambda 2.5.5 (2018-08-14)
 
 - Fix an `ArrayIndexOutOfBoundsException` crash in ASM due to incorrect bytecode 

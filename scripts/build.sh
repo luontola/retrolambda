@@ -40,7 +40,11 @@ JAVA_HOME="$JAVA6_HOME" mvn clean verify \
     -P java6
 
 # Java 9 has stricter bytecode validation than Java 8,
-# so make sure that Retrolambda can run under Java 9 (without forking)
+# so make sure that Retrolambda can run under new Java versions (without forking)
 
 JAVA_HOME="$JAVA9_HOME" mvn clean verify \
+    --errors
+JAVA_HOME="$JAVA10_HOME" mvn clean verify \
+    --errors
+JAVA_HOME="$JAVA11_HOME" mvn clean verify \
     --errors
