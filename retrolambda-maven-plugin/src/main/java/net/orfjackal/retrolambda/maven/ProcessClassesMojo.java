@@ -8,7 +8,7 @@ import com.google.common.base.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
 import net.orfjackal.retrolambda.api.RetrolambdaApi;
-import org.apache.commons.lang3.*;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
 import org.apache.maven.execution.MavenSession;
 import org.apache.maven.plugin.*;
@@ -143,7 +143,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     }
 
     private void validateFork() {
-        if (!fork && !SystemUtils.isJavaVersionAtLeast(JavaVersion.JAVA_1_8)) {
+        if (!fork && !SystemUtils.isJavaVersionAtLeast(1.8f)) {
             getLog().warn("Maven is not running under Java 8 - forced to fork the process");
             fork = true;
         }
