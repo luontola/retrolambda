@@ -147,6 +147,22 @@
         </profile>
 
         <profile>
+            <id>noToolchain</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-toolchains-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
             <id>eclipse</id>
             <build>
                 <plugins>

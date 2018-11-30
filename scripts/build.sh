@@ -48,3 +48,15 @@ JAVA_HOME="$JAVA10_HOME" mvn clean verify \
     --errors
 JAVA_HOME="$JAVA11_HOME" mvn clean verify \
     --errors
+
+# Make sure that the Java agent works on all new Java versions
+
+JAVA_HOME="$JAVA9_HOME" mvn clean verify \
+    --errors \
+    -P fork,noToolchain
+JAVA_HOME="$JAVA10_HOME" mvn clean verify \
+    --errors \
+    -P fork,noToolchain
+JAVA_HOME="$JAVA11_HOME" mvn clean verify \
+    --errors \
+    -P fork,noToolchain
