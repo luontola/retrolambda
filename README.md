@@ -55,7 +55,7 @@ To run Retrolambda using Maven, add the following to your pom.xml:
 <plugin>
     <groupId>net.orfjackal.retrolambda</groupId>
     <artifactId>retrolambda-maven-plugin</artifactId>
-    <version>2.5.5</version>
+    <version>2.5.6</version>
     <executions>
         <execution>
             <goals>
@@ -241,7 +241,7 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
-### Upcoming
+### Retrolambda 2.5.6 (2018-11-30)
 
 - Fix a `NullPointerException` crash in the Maven plugin on Java 10 & 11
 - Fix Java agent to work on Java 9+
