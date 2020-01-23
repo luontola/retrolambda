@@ -241,6 +241,11 @@ yourself or pay someone to do it, if you think it's worth the effort. ;)
 Version History
 ---------------
 
+### Upcoming
+
+- Improved error messages for Java 12 and newer, which have been confirmed
+  to not work without the Java agent
+
 ### Retrolambda 2.5.6 (2018-11-30)
 
 - Fix a `NullPointerException` crash in the Maven plugin on Java 10 & 11

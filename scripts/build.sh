@@ -83,13 +83,7 @@ JAVA_HOME="$JAVA11_HOME" mvn clean verify \
     --errors \
     | tee build.log && check_build_log
 
-JAVA_HOME="$JAVA12_HOME" mvn clean verify \
-    --errors \
-    | tee build.log && check_build_log
-
-JAVA_HOME="$JAVA13_HOME" mvn clean verify \
-    --errors \
-    | tee build.log && check_build_log
+# (Java 12+ fails without forking because java.lang.invoke.InnerClassLambdaMetafactory#dumper cannot be made non-final)
 
 # Make sure that the Java agent works on all new Java versions
 
