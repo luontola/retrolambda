@@ -1,4 +1,4 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2020 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -255,8 +255,11 @@ public class LambdaTest extends SuperClass {
         };
         Class<?> anonymousClass = lambda.call().getClass();
 
+        // Before Java 13 the enclosing method is a bridge method
+        // whose name starts with "lambda$enclosing_method_of_anonymous_class_inside_lambda_expression$".
+        // Since Java 13 it's enclosed by the original method.
         assertThat(anonymousClass.getEnclosingMethod().getName(),
-                startsWith("lambda$enclosing_method_of_anonymous_class_inside_lambda_expression$"));
+                containsString("enclosing_method_of_anonymous_class_inside_lambda_expression"));
     }
 
     /**

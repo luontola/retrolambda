@@ -245,6 +245,9 @@ Version History
 
 - Improved error messages for Java 12 and newer, which have been confirmed
   to not work without the Java agent
+  ([Issue #154](https://github.com/luontola/retrolambda/issues/154))
+- Upgraded the ASM library to improve compatibility with Java 13
+  ([Issue #154](https://github.com/luontola/retrolambda/issues/154))
 
 ### Retrolambda 2.5.6 (2018-11-30)
 
