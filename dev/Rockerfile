@@ -29,6 +29,14 @@ ENV JAVA10_HOME=/usr/java/jdk-10.0.2
 RUN rpm -Uvh /installers/jdk-11.0.1_linux-x64_bin.rpm
 ENV JAVA11_HOME=/usr/java/jdk-11.0.1
 
+# Install JDK 12
+RUN rpm -Uvh /installers/jdk-12.0.2_linux-x64_bin.rpm
+ENV JAVA12_HOME=/usr/java/jdk-12.0.2
+
+# Install JDK 13
+RUN rpm -Uvh /installers/jdk-13.0.2_linux-x64_bin.rpm
+ENV JAVA13_HOME=/usr/java/jdk-13.0.2
+
 ENV JAVA_HOME=$JAVA8_HOME
 
 # Install Maven 3.2.5 (the last version to support Java 6)

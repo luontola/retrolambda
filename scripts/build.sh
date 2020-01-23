@@ -83,6 +83,14 @@ JAVA_HOME="$JAVA11_HOME" mvn clean verify \
     --errors \
     | tee build.log && check_build_log
 
+JAVA_HOME="$JAVA12_HOME" mvn clean verify \
+    --errors \
+    | tee build.log && check_build_log
+
+JAVA_HOME="$JAVA13_HOME" mvn clean verify \
+    --errors \
+    | tee build.log && check_build_log
+
 # Make sure that the Java agent works on all new Java versions
 
 JAVA_HOME="$JAVA9_HOME" mvn clean verify \
@@ -96,6 +104,16 @@ JAVA_HOME="$JAVA10_HOME" mvn clean verify \
     | tee build.log && check_build_log
 
 JAVA_HOME="$JAVA11_HOME" mvn clean verify \
+    --errors \
+    -P fork,noToolchain \
+    | tee build.log && check_build_log
+
+JAVA_HOME="$JAVA12_HOME" mvn clean verify \
+    --errors \
+    -P fork,noToolchain \
+    | tee build.log && check_build_log
+
+JAVA_HOME="$JAVA13_HOME" mvn clean verify \
     --errors \
     -P fork,noToolchain \
     | tee build.log && check_build_log
