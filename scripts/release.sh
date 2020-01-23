@@ -10,24 +10,28 @@ if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
 fi
 
 function contains-line() {
+    set -eu
     grep --line-regexp --quiet --fixed-strings -e "$1"
 }
 
 function demand-file-contains-line() {
-    local file="$1"
-    local expected="$2"
+    set -eu
+    file="$1"
+    expected="$2"
     cat "$file" | contains-line "$expected" || (echo "Add this line to $file and try again:"; echo "$expected"; exit 1)
 }
 
 function assert-file-contains-substring() {
-    local file="$1"
-    local expected="$2"
+    set -eu
+    file="$1"
+    expected="$2"
     cat "$file" | grep --quiet --fixed-strings -e "$expected" || (echo "Error: file $file did not contain $expected"; exit 1)
 }
 
 function set-project-version() {
-    local file="parent/pom.xml"
-    local version="$1"
+    set -eu
+    file="parent/pom.xml"
+    version="$1"
     mvn versions:set \
         -DgenerateBackupPoms=false \
         -DnewVersion="$version" \
@@ -36,15 +40,17 @@ function set-project-version() {
 }
 
 function set-documentation-version() {
-    local file="README.md"
-    local version="$1"
+    set -eu
+    file="README.md"
+    version="$1"
     gsed -i -r -e "s/^(\\s*<version>).+(<\\/version>)\$/\1$version\2/" "$file"
     assert-file-contains-substring "$file" "<version>$version</version>"
 }
 
 function next-snapshot-version() {
-    local prefix=$(echo $1 | gsed -n -r 's/([0-9]+\.[0-9]+\.)[0-9]+/\1/p')
-    local suffix=$(echo $1 | gsed -n -r 's/[0-9]+\.[0-9]+\.([0-9]+)/\1/p')
+    set -eu
+    prefix=$(echo $1 | gsed -n -r 's/([0-9]+\.[0-9]+\.)[0-9]+/\1/p')
+    suffix=$(echo $1 | gsed -n -r 's/[0-9]+\.[0-9]+\.([0-9]+)/\1/p')
     ((suffix++))
     echo "$prefix$suffix-SNAPSHOT"
 }
