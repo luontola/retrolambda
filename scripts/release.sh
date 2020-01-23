@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eu
 : ${1:? Usage: $0 RELEASE_VERSION}
-SCRIPTS=`dirname "$0"`
+SCRIPTS=$(dirname "$0")
 
 RELEASE_VERSION="$1"
 if [[ ! "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
@@ -38,21 +38,21 @@ function set-project-version() {
 function set-documentation-version() {
     local file="README.md"
     local version="$1"
-    sed -i -r -e "s/^(\\s*<version>).+(<\\/version>)\$/\1$version\2/" "$file"
+    gsed -i -r -e "s/^(\\s*<version>).+(<\\/version>)\$/\1$version\2/" "$file"
     assert-file-contains-substring "$file" "<version>$version</version>"
 }
 
 function next-snapshot-version() {
-    local prefix=`echo $1 | sed -n -r 's/([0-9]+\.[0-9]+\.)[0-9]+/\1/p'`
-    local suffix=`echo $1 | sed -n -r 's/[0-9]+\.[0-9]+\.([0-9]+)/\1/p'`
+    local prefix=$(echo $1 | gsed -n -r 's/([0-9]+\.[0-9]+\.)[0-9]+/\1/p')
+    local suffix=$(echo $1 | gsed -n -r 's/[0-9]+\.[0-9]+\.([0-9]+)/\1/p')
     ((suffix++))
     echo "$prefix$suffix-SNAPSHOT"
 }
 
 APP_NAME="Retrolambda"
-NEXT_VERSION=`next-snapshot-version $RELEASE_VERSION`
+NEXT_VERSION=$(next-snapshot-version $RELEASE_VERSION)
 
-demand-file-contains-line README.md "### $APP_NAME $RELEASE_VERSION (`date +%Y-%m-%d`)"
+demand-file-contains-line README.md "### $APP_NAME $RELEASE_VERSION ($(date +%Y-%m-%d))"
 
 set -x
 
