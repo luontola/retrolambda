@@ -23,5 +23,7 @@ public interface Config {
 
     List<Path> getJars();
 
+    boolean isJavacHacksEnabled();
+
     boolean isQuiet();
 }

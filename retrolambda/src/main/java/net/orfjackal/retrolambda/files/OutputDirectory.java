@@ -1,9 +1,10 @@
-// Copyright © 2013-2015 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda.files;
 
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 import org.objectweb.asm.ClassReader;
 
 import java.io.IOException;
@@ -17,11 +18,11 @@ public class OutputDirectory {
         this.outputDir = outputDir;
     }
 
-    public void writeClass(byte[] bytecode) throws IOException {
+    public void writeClass(byte[] bytecode, boolean isJavacHacksEnabled) throws IOException {
         if (bytecode == null) {
             return;
         }
-        ClassReader cr = new ClassReader(bytecode);
+        ClassReader cr = EnhancedClassReader.create(bytecode, isJavacHacksEnabled);
         Path relativePath = outputDir.getFileSystem().getPath(cr.getClassName() + ".class");
         writeFile(relativePath, bytecode);
     }

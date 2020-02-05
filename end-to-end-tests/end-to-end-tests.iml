@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module org.jetbrains.idea.maven.project.MavenProjectsManager.isMavenModule="true" type="JAVA_MODULE" version="4">
-  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8" inherit-compiler-output="false">
+  <component name="NewModuleRootManager" LANGUAGE_LEVEL="JDK_1_8">
     <output url="file://$MODULE_DIR$/target/classes" />
     <output-test url="file://$MODULE_DIR$/target/test-classes" />
     <content url="file://$MODULE_DIR$">
@@ -14,7 +14,10 @@
     <orderEntry type="library" name="Maven: com.google.guava:guava:11.0.2" level="project" />
     <orderEntry type="library" name="Maven: com.google.code.findbugs:jsr305:1.3.9" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: commons-lang:commons-lang:2.6" level="project" />
-    <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm-debug-all:5.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm:7.3.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.ow2.asm:asm-tree:7.3.1" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: org.apache.bcel:bcel:5.2" level="project" />
+    <orderEntry type="library" scope="TEST" name="Maven: jakarta-regexp:jakarta-regexp:1.4" level="project" />
     <orderEntry type="module-library">
       <library name="Maven: net.orfjackal.retrolambda:java-lang-dummies:1">
         <CLASSES>

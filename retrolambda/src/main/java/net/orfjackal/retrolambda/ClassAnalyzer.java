@@ -1,9 +1,10 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda;
 
+import net.orfjackal.retrolambda.ext.ow2asm.EnhancedClassReader;
 import net.orfjackal.retrolambda.interfaces.*;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.util.*;
@@ -21,8 +22,8 @@ public class ClassAnalyzer {
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
 
-    public void analyze(byte[] bytecode) {
-        analyze(new ClassReader(bytecode));
+    public void analyze(byte[] bytecode, boolean isJavacHacksEnabled) {
+        analyze(EnhancedClassReader.create(bytecode, isJavacHacksEnabled));
     }
 
     public void analyze(ClassReader cr) {

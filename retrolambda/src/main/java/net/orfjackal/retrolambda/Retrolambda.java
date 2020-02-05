@@ -1,4 +1,4 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2018 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -7,7 +7,7 @@ package net.orfjackal.retrolambda;
 import com.esotericsoftware.minlog.Log;
 import com.google.common.collect.ImmutableMap;
 import net.orfjackal.retrolambda.files.*;
-import net.orfjackal.retrolambda.interfaces.*;
+import net.orfjackal.retrolambda.interfaces.ClassInfo;
 import net.orfjackal.retrolambda.lambdas.*;
 import net.orfjackal.retrolambda.util.Bytecode;
 
@@ -18,6 +18,14 @@ import java.util.*;
 
 public class Retrolambda {
 
+    public static void run(Properties systemProperties) throws Throwable {
+        SystemPropertiesConfig config = new SystemPropertiesConfig(systemProperties);
+        if (!config.isFullyConfigured()) {
+            throw new IllegalArgumentException("not fully configured");
+        }
+        run(config);
+    }
+
     public static void run(Config config) throws Throwable {
         int bytecodeVersion = config.getBytecodeVersion();
         boolean defaultMethodsEnabled = config.isDefaultMethodsEnabled();
@@ -26,6 +34,7 @@ public class Retrolambda {
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
         List<Path> jars = config.getJars();
+        boolean isJavacHacksEnabled = config.isJavacHacksEnabled();
         if (config.isQuiet()) {
             Log.WARN();
         } else {
@@ -38,7 +47,9 @@ public class Retrolambda {
         Log.info("Classpath:        " + classpath);
         Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
         Log.info("Jars:             " + (jars != null ? jars.size() : 0));
-        Log.info("Agent enabled:    " + PreMain.isAgentLoaded());
+        Log.info("JVM version:      " + System.getProperty("java.version"));
+        Log.info("Agent enabled:    " + Agent.isEnabled());
+        Log.info("javac hacks:      " + isJavacHacksEnabled);
 
         if (!Files.isDirectory(inputDir)) {
             Log.info("Nothing to do; not a directory: " + inputDir);
@@ -50,11 +61,11 @@ public class Retrolambda {
         ClassAnalyzer analyzer = new ClassAnalyzer();
         OutputDirectory outputDirectory = new OutputDirectory(outputDir);
         Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
-        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers);
+        LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers, isJavacHacksEnabled);
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {
-            if (PreMain.isAgentLoaded()) {
-                PreMain.setLambdaClassSaver(lambdaClassSaver);
+            if (Agent.isEnabled()) {
+                Agent.setLambdaClassSaver(lambdaClassSaver, isJavacHacksEnabled);
             } else {
                 dumper.install();
             }
@@ -62,7 +73,7 @@ public class Retrolambda {
             visitFiles(inputDir, includedFiles, jars, new ClasspathVisitor() {
                 @Override
                 protected void visitClass(byte[] bytecode) {
-                    analyzer.analyze(bytecode);
+                    analyzer.analyze(bytecode, isJavacHacksEnabled);
                 }
 
                 @Override
@@ -89,7 +100,7 @@ public class Retrolambda {
             // We need to load some of the classes (for calling the lambda metafactory)
             // so we need to take care not to modify any bytecode before loading them.
             for (byte[] bytecode : transformed) {
-                outputDirectory.writeClass(bytecode);
+                outputDirectory.writeClass(bytecode, isJavacHacksEnabled);
             }
         }
     }

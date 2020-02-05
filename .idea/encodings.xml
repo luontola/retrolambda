@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="Encoding" useUTFGuessing="true" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="UTF-8">
+  <component name="Encoding" native2AsciiForPropertiesFiles="true" defaultCharsetForPropertiesFiles="UTF-8">
     <file url="file://$PROJECT_DIR$" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/end-to-end-tests" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/end-to-end-tests/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/parent" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/retrolambda" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/retrolambda-api" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/retrolambda-api/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/retrolambda-maven-plugin" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/retrolambda-maven-plugin/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/retrolambda/src/main/java" charset="UTF-8" />
     <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>
-

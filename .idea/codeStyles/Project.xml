@@ -1,0 +1,99 @@
+<component name="ProjectCodeStyleConfiguration">
+  <code_scheme name="Project" version="173">
+    <option name="OTHER_INDENT_OPTIONS">
+      <value>
+        <option name="TAB_SIZE" value="8" />
+      </value>
+    </option>
+    <option name="LINE_SEPARATOR" value="&#10;" />
+    <option name="IF_BRACE_FORCE" value="3" />
+    <option name="DOWHILE_BRACE_FORCE" value="3" />
+    <option name="WHILE_BRACE_FORCE" value="3" />
+    <option name="FOR_BRACE_FORCE" value="3" />
+    <option name="FIELD_ANNOTATION_WRAP" value="0" />
+    <HTMLCodeStyleSettings>
+      <option name="HTML_ATTRIBUTE_WRAP" value="0" />
+    </HTMLCodeStyleSettings>
+    <JavaCodeStyleSettings>
+      <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="2" />
+      <option name="NAMES_COUNT_TO_USE_IMPORT_ON_DEMAND" value="2" />
+    </JavaCodeStyleSettings>
+    <MarkdownNavigatorCodeStyleSettings>
+      <option name="RIGHT_MARGIN" value="72" />
+    </MarkdownNavigatorCodeStyleSettings>
+    <XML>
+      <option name="XML_LEGACY_SETTINGS_IMPORTED" value="true" />
+    </XML>
+    <ADDITIONAL_INDENT_OPTIONS fileType="txt">
+      <option name="INDENT_SIZE" value="2" />
+    </ADDITIONAL_INDENT_OPTIONS>
+    <codeStyleSettings language="ECMA Script Level 4">
+      <option name="IF_BRACE_FORCE" value="3" />
+      <option name="DOWHILE_BRACE_FORCE" value="3" />
+      <option name="WHILE_BRACE_FORCE" value="3" />
+      <option name="FOR_BRACE_FORCE" value="3" />
+    </codeStyleSettings>
+    <codeStyleSettings language="GSP">
+      <indentOptions>
+        <option name="INDENT_SIZE" value="2" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="Groovy">
+      <option name="IF_BRACE_FORCE" value="3" />
+      <option name="WHILE_BRACE_FORCE" value="3" />
+      <option name="FOR_BRACE_FORCE" value="3" />
+      <option name="FIELD_ANNOTATION_WRAP" value="0" />
+      <indentOptions>
+        <option name="INDENT_SIZE" value="2" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="JAVA">
+      <option name="IF_BRACE_FORCE" value="3" />
+      <option name="DOWHILE_BRACE_FORCE" value="3" />
+      <option name="WHILE_BRACE_FORCE" value="3" />
+      <option name="FOR_BRACE_FORCE" value="3" />
+      <option name="FIELD_ANNOTATION_WRAP" value="0" />
+      <indentOptions>
+        <option name="TAB_SIZE" value="8" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="JavaScript">
+      <option name="IF_BRACE_FORCE" value="3" />
+      <option name="DOWHILE_BRACE_FORCE" value="3" />
+      <option name="WHILE_BRACE_FORCE" value="3" />
+      <option name="FOR_BRACE_FORCE" value="3" />
+      <indentOptions>
+        <option name="TAB_SIZE" value="8" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="Scala">
+      <option name="IF_BRACE_FORCE" value="3" />
+      <option name="DOWHILE_BRACE_FORCE" value="3" />
+      <option name="WHILE_BRACE_FORCE" value="3" />
+      <option name="FOR_BRACE_FORCE" value="3" />
+      <option name="FIELD_ANNOTATION_WRAP" value="0" />
+      <indentOptions>
+        <option name="CONTINUATION_INDENT_SIZE" value="8" />
+        <option name="TAB_SIZE" value="8" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="TypeScript">
+      <option name="IF_BRACE_FORCE" value="3" />
+      <option name="DOWHILE_BRACE_FORCE" value="3" />
+      <option name="WHILE_BRACE_FORCE" value="3" />
+      <option name="FOR_BRACE_FORCE" value="3" />
+    </codeStyleSettings>
+    <codeStyleSettings language="XML">
+      <indentOptions>
+        <option name="TAB_SIZE" value="8" />
+      </indentOptions>
+    </codeStyleSettings>
+    <codeStyleSettings language="ruby">
+      <indentOptions>
+        <option name="CONTINUATION_INDENT_SIZE" value="8" />
+        <option name="TAB_SIZE" value="4" />
+        <option name="USE_RELATIVE_INDENTS" value="false" />
+      </indentOptions>
+    </codeStyleSettings>
+  </code_scheme>
+</component>

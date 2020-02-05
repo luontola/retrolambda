@@ -38,7 +38,7 @@
     <option name="LAST_EDITED_MODULE_NAME" />
     <option name="LAST_EDITED_TAB_NAME" />
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="false" project-jdk-name="1.8" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="VssConfiguration">

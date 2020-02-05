@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -22,14 +22,16 @@ public class LambdaReifier {
     private static final BlockingDeque<Class<?>> currentInvoker = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<Type> currentInvokedType = new LinkedBlockingDeque<>(1);
     private static final BlockingDeque<String> currentLambdaClass = new LinkedBlockingDeque<>(1);
+    private static final BlockingDeque<EnclosingClass> currentEnclosingClass = new LinkedBlockingDeque<>(1);
 
-    public static LambdaFactoryMethod reifyLambdaClass(Handle lambdaImplMethod, Handle lambdaAccessMethod,
+    public static LambdaFactoryMethod reifyLambdaClass(EnclosingClass enclosingClass, Handle lambdaImplMethod, Handle lambdaAccessMethod,
                                                        Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) {
         try {
             setLambdaImplMethod(lambdaImplMethod);
             setLambdaAccessMethod(lambdaAccessMethod);
             setInvoker(invoker);
             setInvokedType(invokedType);
+            setEnclosingClass(enclosingClass);
 
             // Causes the lambda class to be loaded. Retrolambda's Java agent
             // will detect it, save it to a file and tell us (via the globals
@@ -65,6 +67,10 @@ public class LambdaReifier {
         currentLambdaClass.push(lambdaClass);
     }
 
+    public static void setEnclosingClass(EnclosingClass enclosingClass) {
+        currentEnclosingClass.push(enclosingClass);
+    }
+
     public static boolean isLambdaClassToReify(String className) {
         Class<?> invoker = currentInvoker.peekFirst();
         return invoker != null
@@ -80,6 +86,10 @@ public class LambdaReifier {
         return currentLambdaAccessMethod.getFirst();
     }
 
+    public static EnclosingClass getEnclosingClass() {
+        return currentEnclosingClass.getFirst();
+    }
+
     public static LambdaFactoryMethod getLambdaFactoryMethod() {
         String lambdaClass = currentLambdaClass.getFirst();
         Type invokedType = currentInvokedType.getFirst();
@@ -92,6 +102,7 @@ public class LambdaReifier {
         currentInvoker.clear();
         currentInvokedType.clear();
         currentLambdaClass.clear();
+        currentEnclosingClass.clear();
     }
 
     private static CallSite callBootstrapMethod(Class<?> invoker, String invokedName, Type invokedType, Handle bsm, Object[] bsmArgs) throws Throwable {

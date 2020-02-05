@@ -30,7 +30,19 @@
 
         <dependency>
             <groupId>org.ow2.asm</groupId>
-            <artifactId>asm-debug-all</artifactId>
+            <artifactId>asm</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm-tree</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.bcel</groupId>
+            <artifactId>bcel</artifactId>
             <scope>test</scope>
         </dependency>
 
@@ -111,6 +123,7 @@
                     <target>${testBytecodeTarget}</target>
                     <defaultMethods>${testDefaultMethods}</defaultMethods>
                     <fork>${testFork}</fork>
+                    <javacHacks>true</javacHacks>
                 </configuration>
             </plugin>
 
@@ -133,6 +146,22 @@
                                 <pattern>**/InterfaceStaticMethodsTest.java</pattern>
                             </testExcludes>
                         </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>noToolchain</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-toolchains-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>none</phase>
+                            </execution>
+                        </executions>
                     </plugin>
                 </plugins>
             </build>

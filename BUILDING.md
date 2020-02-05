@@ -31,7 +31,9 @@ Using the Docker-based Development Environment
 To avoid having to install all the Java versions on your computer, there is a
 Docker image for building Retrolambda.
 
-The image is already in Docker Hub, but it can also be built locally with:
+The image is already in Docker Hub, but it can also be built locally with the
+following command. But first you need to download the JDK 5 and 9 installers
+into the `dev/installers` directory and install [Rocker](https://github.com/grammarly/rocker).
 
     make
 

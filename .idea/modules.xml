@@ -6,6 +6,7 @@
       <module fileurl="file://$PROJECT_DIR$/parent/parent.iml" filepath="$PROJECT_DIR$/parent/parent.iml" />
       <module fileurl="file://$PROJECT_DIR$/project.iml" filepath="$PROJECT_DIR$/project.iml" />
       <module fileurl="file://$PROJECT_DIR$/retrolambda/retrolambda.iml" filepath="$PROJECT_DIR$/retrolambda/retrolambda.iml" />
+      <module fileurl="file://$PROJECT_DIR$/retrolambda-api/retrolambda-api.iml" filepath="$PROJECT_DIR$/retrolambda-api/retrolambda-api.iml" />
       <module fileurl="file://$PROJECT_DIR$/retrolambda-maven-plugin/retrolambda-maven-plugin.iml" filepath="$PROJECT_DIR$/retrolambda-maven-plugin/retrolambda-maven-plugin.iml" />
     </modules>
   </component>

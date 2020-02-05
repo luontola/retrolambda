@@ -16,7 +16,7 @@
     <packaging>pom</packaging>
 
     <description>Backport of Java 8 lambda expressions to Java 7</description>
-    <url>https://github.com/orfjackal/retrolambda</url>
+    <url>https://github.com/luontola/retrolambda</url>
     <inceptionYear>2013</inceptionYear>
 
     <licenses>
@@ -28,15 +28,14 @@
 
     <developers>
         <developer>
-            <id>orfjackal</id>
             <name>Esko Luontola</name>
-            <url>http://www.orfjackal.net/</url>
+            <url>http://luontola.fi</url>
         </developer>
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/orfjackal/retrolambda.git</connection>
-        <url>https://github.com/orfjackal/retrolambda</url>
+        <connection>scm:git:git://github.com/luontola/retrolambda.git</connection>
+        <url>https://github.com/luontola/retrolambda</url>
     </scm>
 
     <properties>
@@ -86,7 +85,20 @@
 
             <dependency>
                 <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-debug-all</artifactId>
+                <artifactId>asm</artifactId>
+                <version>7.3.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm-tree</artifactId>
+                <version>7.3.1</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.bcel</groupId>
+                <artifactId>bcel</artifactId>
+                <!-- last version to support Java 5-->
                 <version>5.2</version>
             </dependency>
 
@@ -336,7 +348,7 @@
 
                 <plugin>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>2.3</version>
+                    <version>3.1.0</version>
                     <configuration>
                         <!-- Keep the generated POM file out of the base directory -->
                         <dependencyReducedPomLocation>

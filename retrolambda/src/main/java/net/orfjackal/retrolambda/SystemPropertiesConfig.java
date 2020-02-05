@@ -11,20 +11,9 @@ import java.nio.file.*;
 import java.util.*;
 import java.util.stream.*;
 
-public class SystemPropertiesConfig implements Config {
+import static net.orfjackal.retrolambda.api.RetrolambdaApi.*;
 
-    private static final String PREFIX = "retrolambda.";
-    public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
-    public static final String DEFAULT_METHODS = PREFIX + "defaultMethods";
-    public static final String INPUT_DIR = PREFIX + "inputDir";
-    public static final String OUTPUT_DIR = PREFIX + "outputDir";
-    public static final String CLASSPATH = PREFIX + "classpath";
-    public static final String CLASSPATH_FILE = CLASSPATH + "File";
-    public static final String INCLUDED_FILES = PREFIX + "includedFiles";
-    public static final String INCLUDED_FILES_FILE = INCLUDED_FILES + "File";
-    public static final String JARS = PREFIX + "jars";
-    public static final String JARS_FILE = JARS + "File";
-    public static final String QUIET = PREFIX + "quiet";
+public class SystemPropertiesConfig implements Config {
 
     private static final List<String> requiredProperties = new ArrayList<>();
     private static final Map<String, String> alternativeProperties = new HashMap<>();
@@ -145,9 +134,13 @@ public class SystemPropertiesConfig implements Config {
 
     @Override
     public List<Path> getClasspath() {
-        List<Path> classpath = getFiles(CLASSPATH, CLASSPATH_FILE);
+        String classpath = p.getProperty(CLASSPATH);
         if (classpath != null) {
-            return classpath;
+            return parsePathList(classpath);
+        }
+        String classpathFile = p.getProperty(CLASSPATH_FILE);
+        if (classpathFile != null) {
+            return readPathList(Paths.get(classpathFile));
         }
         throw new IllegalArgumentException("Missing required property: " + CLASSPATH);
     }
@@ -186,7 +179,15 @@ public class SystemPropertiesConfig implements Config {
 
     @Override
     public List<Path> getIncludedFiles() {
-        return getFiles(INCLUDED_FILES, INCLUDED_FILES_FILE);
+        String files = p.getProperty(INCLUDED_FILES);
+        if (files != null) {
+            return parsePathList(files);
+        }
+        String filesFile = p.getProperty(INCLUDED_FILES_FILE);
+        if (filesFile != null) {
+            return readPathList(Paths.get(filesFile));
+        }
+        return null;
     }
 
     // jars
@@ -204,8 +205,31 @@ public class SystemPropertiesConfig implements Config {
 
     @Override
     public List<Path> getJars() {
-        return getFiles(JARS, JARS_FILE);
+        String files = p.getProperty(JARS);
+        if (files != null) {
+            return parsePathList(files);
+        }
+        String filesFile = p.getProperty(JARS_FILE);
+        if (filesFile != null) {
+            return readPathList(Paths.get(filesFile));
+        }
+        return null;
     }
+
+    // useJavac8ReadLabelHack
+
+    static {
+        optionalParameterHelp(JAVAC_HACKS,
+                "Attempts to fix javac bugs (type-annotation emission for local variables).",
+                "Disabled by default. Enable by setting to \"true\"");
+
+    }
+
+    @Override
+    public boolean isJavacHacksEnabled() {
+        return Boolean.parseBoolean(p.getProperty(JAVAC_HACKS, "false"));
+    }
+
 
     // quiet
 
@@ -233,7 +257,7 @@ public class SystemPropertiesConfig implements Config {
                 "\n" +
                 "Retrolambda takes Java 8 classes and backports lambda expressions and\n" +
                 "some other language features to work on Java 7, 6 or 5.\n" +
-                "Web site: https://github.com/orfjackal/retrolambda\n" +
+                "Web site: https://github.com/luontola/retrolambda\n" +
                 "\n" +
                 "Copyright (c) 2013-2017  Esko Luontola and other Retrolambda contributors\n" +
                 "This software is released under the Apache License 2.0.\n" +
@@ -271,17 +295,4 @@ public class SystemPropertiesConfig implements Config {
         }
         return help;
     }
-
-    private List<Path> getFiles(String property, String filesProperty) {
-        String files = p.getProperty(property);
-        if (files != null) {
-            return parsePathList(files);
-        }
-        String filesFile = p.getProperty(filesProperty);
-        if (filesFile != null) {
-            return readPathList(Paths.get(filesFile));
-        }
-        return null;
-    }
-
 }

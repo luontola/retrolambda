@@ -4,6 +4,7 @@
 
 TAG=luontola/retrolambda-dev
 NAME=wrapping-retrolambda-shell
+DATE=$(shell date +"%Y-%m-%d")
 
 # Directory that this Makefile is in
 mkfile_path := $(abspath $(lastword $(MAKEFILE_LIST)))
@@ -11,7 +12,7 @@ current_path := $(dir $(mkfile_path))
 
 # Builds the development docker file
 docker-build:
-	docker build --tag=$(TAG) ./dev
+	rocker build --var Tag=$(TAG) --var Date=$(DATE) --file dev/Rockerfile
 
 # Clean this docker image
 docker-clean:

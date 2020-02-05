@@ -1,16 +1,17 @@
-// Copyright © 2013-2017 Esko Luontola and other Retrolambda contributors
+// Copyright © 2013-2020 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
 package net.orfjackal.retrolambda.test;
 
 import net.orfjackal.retrolambda.test.anotherpackage.DifferentPackageBase;
+import org.apache.bcel.Constants;
+import org.apache.bcel.classfile.*;
 import org.apache.commons.lang.SystemUtils;
 import org.junit.Test;
-import org.objectweb.asm.*;
-import org.objectweb.asm.Type;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -254,8 +255,11 @@ public class LambdaTest extends SuperClass {
         };
         Class<?> anonymousClass = lambda.call().getClass();
 
+        // Before Java 13 the enclosing method is a bridge method
+        // whose name starts with "lambda$enclosing_method_of_anonymous_class_inside_lambda_expression$".
+        // Since Java 13 it's enclosed by the original method.
         assertThat(anonymousClass.getEnclosingMethod().getName(),
-                startsWith("lambda$enclosing_method_of_anonymous_class_inside_lambda_expression$"));
+                containsString("enclosing_method_of_anonymous_class_inside_lambda_expression"));
     }
 
     /**
@@ -365,13 +369,15 @@ public class LambdaTest extends SuperClass {
     public void bytecode_constant_pool_will_not_contain_dangling_references_to_MethodHandles() throws IOException {
         assumeThat(SystemUtils.JAVA_VERSION_FLOAT, is(lessThan(1.7f)));
 
-        ClassReader cr = new ClassReader(getClass().getName().replace('.', '/'));
-        TestUtil.visitConstantPool(cr, (item, constant) -> {
-            if (constant instanceof Type) {
-                Type type = (Type) constant;
-                assertThat("constant #" + item, type.getDescriptor(), not(containsString("java/lang/invoke")));
+        ConstantPool constantPool = TestUtil.getConstantPool(getClass().getName().replace('.', '/'));
+
+        for (Constant constant : constantPool.getConstantPool()) {
+            if (constant != null && constant.getTag() == Constants.CONSTANT_Class) {
+                String s = constantPool.constantToString(constant);
+                assertThat(s, not(containsString("java/lang/invoke")));
+                assertThat(s, not(containsString("java.lang.invoke")));
             }
-        });
+        }
     }
 }
 

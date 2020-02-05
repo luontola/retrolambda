@@ -23,6 +23,11 @@
             <artifactId>retrolambda</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>net.orfjackal.retrolambda</groupId>
+            <artifactId>retrolambda-api</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.maven</groupId>
@@ -51,6 +56,11 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
         </dependency>
 
     </dependencies>

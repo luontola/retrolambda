@@ -19,6 +19,9 @@ public class BackportLambdaClass extends ClassVisitor {
     private Handle implMethod;
     private Handle accessMethod;
     private LambdaFactoryMethod factoryMethod;
+    private EnclosingClass enclosingClass;
+    private String sourceFile;
+    private String sourceDebug;
 
     public BackportLambdaClass(ClassVisitor next) {
         super(ASM5, next);
@@ -31,11 +34,21 @@ public class BackportLambdaClass extends ClassVisitor {
         implMethod = LambdaReifier.getLambdaImplMethod();
         accessMethod = LambdaReifier.getLambdaAccessMethod();
         factoryMethod = LambdaReifier.getLambdaFactoryMethod();
+        enclosingClass = LambdaReifier.getEnclosingClass();
 
         if (superName.equals(LambdaNaming.MAGIC_LAMBDA_IMPL)) {
             superName = JAVA_LANG_OBJECT;
         }
         super.visit(version, access, name, signature, superName, interfaces);
+    }
+
+    @Override
+    public void visitSource(String source, String debug) {
+        // This method will never be called if there is no debug information,
+        // so we won't call super.visitSource() here but only in visitEnd().
+        // (Probably this method is never called for any lambda, but never say never.)
+        sourceFile = source;
+        sourceDebug = debug;
     }
 
     @Override
@@ -62,6 +75,10 @@ public class BackportLambdaClass extends ClassVisitor {
             makeSingleton();
         }
         generateFactoryMethod();
+        if (sourceFile == null) {
+            sourceFile = enclosingClass.sourceFile;
+        }
+        super.visitSource(sourceFile, sourceDebug);
         super.visitEnd();
     }
 

@@ -6,23 +6,23 @@ package net.orfjackal.retrolambda;
 
 import net.orfjackal.retrolambda.lambdas.*;
 
+import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.net.URISyntaxException;
+import java.util.jar.JarFile;
 
 public class PreMain {
 
-    private static final LambdaClassSaverAgent agent = new LambdaClassSaverAgent();
-    private static boolean agentLoaded = false;
+    public static void premain(String agentArgs, Instrumentation inst) throws Exception {
+        // Append the agent JAR to the bootstrap search path so that the instrumented InnerClassLambdaMetaFactory
+        // could refer to Agent.
+        inst.appendToBootstrapClassLoaderSearch(new JarFile(getAgentJarFile()));
 
-    public static void premain(String agentArgs, Instrumentation inst) {
-        inst.addTransformer(agent);
-        agentLoaded = true;
+        inst.addTransformer(new InnerClassLambdaMetafactoryTransformer(), true);
+        inst.retransformClasses(Class.forName("java.lang.invoke.InnerClassLambdaMetafactory"));
     }
 
-    public static boolean isAgentLoaded() {
-        return agentLoaded;
-    }
-
-    public static void setLambdaClassSaver(LambdaClassSaver lambdaClassSaver) {
-        agent.setLambdaClassSaver(lambdaClassSaver);
+    private static File getAgentJarFile() throws URISyntaxException {
+        return new File(PreMain.class.getProtectionDomain().getCodeSource().getLocation().toURI());
     }
 }

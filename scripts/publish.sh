@@ -19,6 +19,6 @@ mvn nexus-staging:release \
 git push origin HEAD
 git push origin --tags
 
-cd ../retrolambda.pages
+cd ../retrolambda-site
 ./update-maven-site.sh "$VERSION"
 git push

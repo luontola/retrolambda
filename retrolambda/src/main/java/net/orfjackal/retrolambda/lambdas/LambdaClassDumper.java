@@ -1,4 +1,4 @@
-// Copyright © 2013-2014 Esko Luontola <www.orfjackal.net>
+// Copyright © 2013-2020 Esko Luontola and other Retrolambda contributors
 // This software is released under the Apache License 2.0.
 // The license text is at http://www.apache.org/licenses/LICENSE-2.0
 
@@ -56,10 +56,16 @@ public class LambdaClassDumper implements AutoCloseable {
     }
 
     private static void makeNonFinal(Field field) throws Exception {
-        Field modifiers = field.getClass().getDeclaredField("modifiers");
-        modifiers.setAccessible(true);
-        int mod = modifiers.getInt(field);
-        modifiers.setInt(field, mod & ~Modifier.FINAL);
+        try {
+            Field modifiers = field.getClass().getDeclaredField("modifiers");
+            modifiers.setAccessible(true);
+            int mod = modifiers.getInt(field);
+            modifiers.setInt(field, mod & ~Modifier.FINAL);
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException("Failed to make a field non-final (" + field + "). " +
+                    "This known to fail on Java 12 and newer. Prefer using Java 8 or try using the Java agent " +
+                    "(fork=true in the Maven plugin).", e);
+        }
     }
 
     private static Object newProxyClassesDumper(Path dumpDir) throws Exception {
