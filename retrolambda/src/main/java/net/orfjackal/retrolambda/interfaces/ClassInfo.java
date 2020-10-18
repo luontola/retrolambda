@@ -52,8 +52,8 @@ public class ClassInfo {
         return companionClass;
     }
 
-    public void enableCompanionClass() {
-        this.companionClass = Optional.of(Type.getObjectType(type.getInternalName() + "$"));
+    public void enableCompanionClass(String name) {
+        this.companionClass = Optional.of(Type.getObjectType(name));
     }
 
     public boolean isClass() {
