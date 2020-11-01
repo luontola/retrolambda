@@ -122,8 +122,8 @@ public class LambdaReifier {
     }
 
     private static MethodHandles.Lookup getLookup(Class<?> targetClass) throws Exception {
-        Constructor<MethodHandles.Lookup> ctor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class);
+        Constructor<MethodHandles.Lookup> ctor = MethodHandles.Lookup.class.getDeclaredConstructor(Class.class, int.class);
         ctor.setAccessible(true);
-        return ctor.newInstance(targetClass);
+        return ctor.newInstance(targetClass, 0x1f);
     }
 }
