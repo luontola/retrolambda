@@ -22,9 +22,10 @@ for adventurous developers there are [other backporting
 tools](http://en.wikipedia.org/wiki/Java_backporting_tools) that may let
 you go from Java 5 down to Java 1.4.
 
-Android developers may use Retrolambda to take advantage of the Java 8
-features on Android. Serge Zaitsev has written [an article about
-it](http://zserge.com/blog/android-lambda.html) and there is a [Gradle
+Nowadays Android Studio has [built-in support for Java 8 features](https://developer.android.com/studio/write/java8-support),
+so that is probably the first thing to try out. Otherwise, Retrolambda
+works also for Android: Serge Zaitsev has written [an article about
+it](https://zserge.com/posts/android-lambda/) and there is a [Gradle
 plugin](#gradle-plugin) which makes it easy.
 
 Retrolambda does not backport the new Java 8 APIs, but there are other
