@@ -22,7 +22,7 @@ public abstract class ClasspathVisitor extends SimpleFileVisitor<Path> {
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        Path relativePath = baseDir.relativize(file);
+        Path relativePath = safeRelativize(baseDir, file);
         byte[] content = Files.readAllBytes(file);
 
         if (isJavaClass(relativePath)) {
@@ -31,6 +31,18 @@ public abstract class ClasspathVisitor extends SimpleFileVisitor<Path> {
             visitResource(relativePath, content);
         }
         return FileVisitResult.CONTINUE;
+    }
+
+    /**
+     * The path might point into a jar which will throw an IllegalArgumentException. In that case, just return a path
+     * relative to the root of the jar.
+     */
+    private static Path safeRelativize(Path baseDir, Path file) {
+        try {
+            return baseDir.relativize(file);
+        } catch (IllegalArgumentException e) {
+            return file.subpath(1, file.getNameCount());
+        }
     }
 
     protected abstract void visitClass(byte[] bytecode) throws IOException;

@@ -28,7 +28,7 @@ public class OutputDirectory {
     }
 
     public void writeFile(Path relativePath, byte[] content) throws IOException {
-        Path outputFile = outputDir.resolve(relativePath);
+        Path outputFile = outputDir.resolve(relativePath.toString());
         Files.createDirectories(outputFile.getParent());
         Files.write(outputFile, content);
     }

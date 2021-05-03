@@ -12,6 +12,8 @@ public class RetrolambdaApi {
     public static final String INCLUDED_FILES_FILE = INCLUDED_FILES + "File";
     public static final String CLASSPATH = PREFIX + "classpath";
     public static final String CLASSPATH_FILE = CLASSPATH + "File";
+    public static final String JARS = "jars";
+    public static final String JARS_FILE = JARS + "File";
     public static final String OUTPUT_DIR = PREFIX + "outputDir";
     public static final String INPUT_DIR = PREFIX + "inputDir";
     public static final String DEFAULT_METHODS = PREFIX + "defaultMethods";

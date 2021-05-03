@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda;
 
 import com.esotericsoftware.minlog.Log;
+import com.google.common.collect.ImmutableMap;
 import net.orfjackal.retrolambda.files.*;
 import net.orfjackal.retrolambda.interfaces.ClassInfo;
 import net.orfjackal.retrolambda.lambdas.*;
@@ -32,6 +33,7 @@ public class Retrolambda {
         Path outputDir = config.getOutputDir();
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
+        List<Path> jars = config.getJars();
         boolean isJavacHacksEnabled = config.isJavacHacksEnabled();
         if (config.isQuiet()) {
             Log.WARN();
@@ -44,6 +46,7 @@ public class Retrolambda {
         Log.info("Output directory: " + outputDir);
         Log.info("Classpath:        " + classpath);
         Log.info("Included files:   " + (includedFiles != null ? includedFiles.size() : "all"));
+        Log.info("Jars:             " + (jars != null ? jars.size() : 0));
         Log.info("JVM version:      " + System.getProperty("java.version"));
         Log.info("Agent enabled:    " + Agent.isEnabled());
         Log.info("javac hacks:      " + isJavacHacksEnabled);
@@ -67,7 +70,7 @@ public class Retrolambda {
                 dumper.install();
             }
 
-            visitFiles(inputDir, includedFiles, new ClasspathVisitor() {
+            visitFiles(inputDir, includedFiles, jars, new ClasspathVisitor() {
                 @Override
                 protected void visitClass(byte[] bytecode) {
                     analyzer.analyze(bytecode, isJavacHacksEnabled);
@@ -102,9 +105,17 @@ public class Retrolambda {
         }
     }
 
-    static void visitFiles(Path inputDir, List<Path> includedFiles, FileVisitor<Path> visitor) throws IOException {
+    static void visitFiles(Path inputDir, List<Path> includedFiles, List<Path> jars, FileVisitor<Path> visitor) throws IOException {
         if (includedFiles != null) {
             visitor = new FilteringFileVisitor(includedFiles, visitor);
+        }
+        if (jars != null) {
+            for (Path jar : jars) {
+                URI uri = URI.create("jar:file:" + jar.toUri().getPath());
+                try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+                    Files.walkFileTree(fileSystem.getPath("/"), visitor);
+                }
+            }
         }
         Files.walkFileTree(inputDir, visitor);
     }

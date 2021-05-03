@@ -4,14 +4,18 @@
 
 package net.orfjackal.retrolambda;
 
+import com.google.common.collect.ImmutableMap;
 import net.orfjackal.retrolambda.api.RetrolambdaApi;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.IOException;
+import java.io.*;
+import java.net.URI;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.*;
+import java.util.jar.*;
+import java.util.stream.Collectors;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -37,6 +41,8 @@ public class RetrolambdaTest {
     private Path file2;
     private Path fileInSubdir;
     private Path outsider;
+    private Path jar;
+    private Path fileInJar;
 
     @Before
     public void setup() throws IOException {
@@ -48,11 +54,15 @@ public class RetrolambdaTest {
         Files.createDirectory(subdir);
         fileInSubdir = Files.createFile(subdir.resolve("file.txt"));
         outsider = tempDir.newFile("outsider.txt").toPath();
+        jar = new File(tempDir.getRoot(), "file.jar").toPath();
+        try (FileSystem jarFileSystem = FileSystems.newFileSystem(URI.create("jar:file:" + jar.toUri().getPath()), ImmutableMap.of("create", "true"))) {
+            fileInJar = Files.createFile(jarFileSystem.getPath("/").resolve("file.txt"));
+        }
     }
 
     @Test
     public void by_default_visits_all_files_recursively() throws IOException {
-        Retrolambda.visitFiles(inputDir, null, visitor);
+        Retrolambda.visitFiles(inputDir, null, null, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1, file2, fileInSubdir));
     }
@@ -61,7 +71,7 @@ public class RetrolambdaTest {
     public void when_included_files_is_set_then_visits_only_those_files() throws IOException {
         List<Path> includedFiles = Arrays.asList(file1, fileInSubdir);
 
-        Retrolambda.visitFiles(inputDir, includedFiles, visitor);
+        Retrolambda.visitFiles(inputDir, includedFiles, null, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1, fileInSubdir));
     }
@@ -70,9 +80,19 @@ public class RetrolambdaTest {
     public void ignores_included_files_that_are_outside_the_input_directory() throws IOException {
         List<Path> includedFiles = Arrays.asList(file1, outsider);
 
-        Retrolambda.visitFiles(inputDir, includedFiles, visitor);
+        Retrolambda.visitFiles(inputDir, includedFiles, null, visitor);
 
         assertThat(visitedFiles, containsInAnyOrder(file1));
+    }
+
+    @Test
+    public void visits_files_in_jar() throws IOException {
+        List<Path> jars = Arrays.asList(jar);
+
+        Retrolambda.visitFiles(inputDir, null, jars, visitor);
+        List<URI> uris = visitedFiles.stream().map(Path::toUri).collect(Collectors.toList());
+
+        assertThat(uris, containsInAnyOrder(file1.toUri(), file2.toUri(), fileInSubdir.toUri(), fileInJar.toUri()));
     }
 
     @Test

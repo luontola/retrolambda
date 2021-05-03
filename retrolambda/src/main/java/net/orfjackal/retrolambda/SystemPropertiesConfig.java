@@ -190,6 +190,31 @@ public class SystemPropertiesConfig implements Config {
         return null;
     }
 
+    // jars
+
+    static {
+        optionalParameterHelp(JARS,
+                "List of jars to process.",
+                "This is useful for including libraries.",
+                "Uses ; or : as the path separator, see java.io.File#pathSeparatorChar");
+        alternativeParameterHelp(JARS_FILE, JARS,
+                "File listing the files to process, instead of processing all files.",
+                "Alternative to " + JARS + " for avoiding the command line",
+                "length limit. The file must list one file per line with UTF-8 encoding.");
+    }
+
+    @Override
+    public List<Path> getJars() {
+        String files = p.getProperty(JARS);
+        if (files != null) {
+            return parsePathList(files);
+        }
+        String filesFile = p.getProperty(JARS_FILE);
+        if (filesFile != null) {
+            return readPathList(Paths.get(filesFile));
+        }
+        return null;
+    }
 
     // useJavac8ReadLabelHack
 

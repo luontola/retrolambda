@@ -21,6 +21,8 @@ public interface Config {
 
     List<Path> getIncludedFiles();
 
+    List<Path> getJars();
+
     boolean isJavacHacksEnabled();
 
     boolean isQuiet();
