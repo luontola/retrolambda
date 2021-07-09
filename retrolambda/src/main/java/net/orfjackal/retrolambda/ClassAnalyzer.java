@@ -22,6 +22,10 @@ public class ClassAnalyzer {
     private final Map<MethodRef, MethodRef> relocatedMethods = new HashMap<>();
     private final Map<MethodRef, MethodRef> renamedLambdaMethods = new HashMap<>();
 
+    protected String companionClassName(String name) {
+        return name + "$";
+    }
+
     public void analyze(byte[] bytecode, boolean isJavacHacksEnabled) {
         analyze(EnhancedClassReader.create(bytecode, isJavacHacksEnabled));
     }
@@ -68,12 +72,14 @@ public class ClassAnalyzer {
     private void analyzeInterface(ClassInfo c, ClassReader cr) {
         cr.accept(new ClassVisitor(ASM5) {
             private String owner;
-            private String companion;
 
             @Override
             public void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
                 this.owner = name;
-                this.companion = name + "$";
+            }
+
+            private String companionName() {
+                return companionClassName(owner);
             }
 
             @Override
@@ -84,17 +90,19 @@ public class ClassAnalyzer {
                     c.addMethod(access, method, new MethodKind.Abstract());
 
                 } else if (isDefaultMethod(access)) {
+                    String companion = companionName();
                     MethodRef defaultImpl = new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner)));
-                    c.enableCompanionClass();
+                    c.enableCompanionClass(companion);
                     c.addMethod(access, method, new MethodKind.Default(defaultImpl));
 
                 } else if (isInstanceLambdaImplMethod(access)) {
+                    String companion = companionName();
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, Bytecode.prependArgumentType(desc, Type.getObjectType(owner))));
-                    c.enableCompanionClass();
-
+                    c.enableCompanionClass(companion);
                 } else if (isStaticMethod(access) && !isStaticInitializer(name, desc, access)) {
+                    String companion = companionName();
                     relocatedMethods.put(method, new MethodRef(H_INVOKESTATIC, companion, name, desc));
-                    c.enableCompanionClass();
+                    c.enableCompanionClass(companion);
                 }
                 return null;
             }
