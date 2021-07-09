@@ -39,7 +39,6 @@ public class Types {
 
     public static MethodHandle toMethodHandle(Handle handle, ClassLoader classLoader, MethodHandles.Lookup lookup) throws Exception {
         MethodType type = MethodType.fromMethodDescriptorString(handle.getDesc(), classLoader);
-        Class<?> owner = classLoader.loadClass(handle.getOwner().replace('/', '.'));
         final String className = handle.getOwner().replace('/', '.');
         Class<?> owner = Class.forName(className, false, classLoader);
         switch (handle.getTag()) {
