@@ -7,6 +7,7 @@ package net.orfjackal.retrolambda.maven;
 import com.google.common.base.*;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.io.Files;
+import net.orfjackal.retrolambda.Retrolambda;
 import net.orfjackal.retrolambda.api.RetrolambdaApi;
 import org.apache.commons.lang.SystemUtils;
 import org.apache.maven.artifact.DependencyResolutionRequiredException;
@@ -107,6 +108,9 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     @Parameter(defaultValue = "false")
     public boolean fork;
 
+    @Parameter
+    public List<String> apiMappings;
+
     protected abstract File getInputDir();
 
     protected abstract File getOutputDir();
@@ -126,12 +130,26 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         config.setProperty(RetrolambdaApi.OUTPUT_DIR, getOutputDir().getAbsolutePath());
         config.setProperty(RetrolambdaApi.CLASSPATH, getClasspath());
         config.setProperty(RetrolambdaApi.JAVAC_HACKS, "" + javacHacks);
+        config.setProperty(RetrolambdaApi.API_MAPPINGS, apiMappingsList());
 
         if (fork) {
             processClassesInForkedProcess(config);
         } else {
             processClassesInCurrentProcess(config);
         }
+    }
+
+    private String apiMappingsList() {
+        StringBuilder list = new StringBuilder();
+        if(apiMappings != null) {
+            for (String apiMapping : apiMappings) {
+                if(list.length() > 0) {
+                    list.append(File.pathSeparator);
+                }
+                list.append(apiMapping);
+            }
+        }
+        return list.toString();
     }
 
     private void validateTarget() throws MojoExecutionException {

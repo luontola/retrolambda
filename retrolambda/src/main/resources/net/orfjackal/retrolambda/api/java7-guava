@@ -1,0 +1,14 @@
+
+# Work-in-progress!
+# More can be added
+
+INVOKESTATIC   java/lang/Integer.toUnsignedLong(I)J                       com/google/common/primitives/UnsignedInts.toLong
+INVOKESTATIC   java/lang/Integer.toUnsignedString(I)Ljava/lang/String;    com/google/common/primitives/UnsignedInts.toString
+
+INVOKESTATIC   java/lang/Long.toUnsignedString(J)Ljava/lang/String;       com/google/common/primitives/UnsignedLongs.toString
+INVOKESTATIC   java/lang/Long.toUnsignedString(JI)Ljava/lang/String;      com/google/common/primitives/UnsignedLongs.toString
+
+INVOKESTATIC   java/lang/Double.isFinite(D)Z                              com/google/common/primitives/Doubles.isFinite
+
+INVOKESTATIC   java/lang/Long.parseUnsignedLong(Ljava/lang/String;I)J     com/google/common/primitives/UnsignedLongs.parseUnsignedLong
+

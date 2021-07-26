@@ -5,6 +5,7 @@
 package net.orfjackal.retrolambda;
 
 import com.esotericsoftware.minlog.Log;
+import net.orfjackal.retrolambda.api.ApiMappingSet;
 import net.orfjackal.retrolambda.files.*;
 import net.orfjackal.retrolambda.interfaces.ClassInfo;
 import net.orfjackal.retrolambda.lambdas.*;
@@ -33,6 +34,7 @@ public class Retrolambda {
         List<Path> classpath = config.getClasspath();
         List<Path> includedFiles = config.getIncludedFiles();
         boolean isJavacHacksEnabled = config.isJavacHacksEnabled();
+        List<String> apiMappings = config.getApiMappings();
         if (config.isQuiet()) {
             Log.WARN();
         } else {
@@ -57,7 +59,8 @@ public class Retrolambda {
 
         ClassAnalyzer analyzer = new ClassAnalyzer();
         OutputDirectory outputDirectory = new OutputDirectory(outputDir);
-        Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer);
+        ApiMappingSet apiMappingSet = new ApiMappingSet(config.getApiMappings());
+        Transformers transformers = new Transformers(bytecodeVersion, defaultMethodsEnabled, analyzer, apiMappingSet);
         LambdaClassSaver lambdaClassSaver = new LambdaClassSaver(outputDirectory, transformers, isJavacHacksEnabled);
 
         try (LambdaClassDumper dumper = new LambdaClassDumper(lambdaClassSaver)) {

@@ -12,6 +12,8 @@
         <module name="end-to-end-tests" />
         <module name="retrolambda" />
         <module name="retrolambda-api" />
+        <module name="retrolambda-backports6" />
+        <module name="retrolambda-backports7" />
         <module name="retrolambda-maven-plugin" />
         <module name="retrolambda-runtime (1)" />
       </profile>
@@ -22,6 +24,8 @@
       <module name="project" target="1.8" />
       <module name="retrolambda" target="1.8" />
       <module name="retrolambda-api" target="1.6" />
+      <module name="retrolambda-backports6" target="1.6" />
+      <module name="retrolambda-backports7" target="1.7" />
       <module name="retrolambda-maven-plugin" target="1.6" />
     </bytecodeTargetLevel>
   </component>

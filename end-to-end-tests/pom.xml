@@ -55,6 +55,12 @@
             <systemPath>${basedir}/src/test/lib/java-lang-dummies.jar</systemPath>
         </dependency>
 
+        <dependency>
+            <groupId>net.sourceforge.streamsupport</groupId>
+            <artifactId>streamsupport</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -125,6 +131,10 @@
                     <defaultMethods>${testDefaultMethods}</defaultMethods>
                     <fork>${testFork}</fork>
                     <javacHacks>true</javacHacks>
+                    <apiMappings>
+                        <mapping>java7-guava</mapping>
+                        <mapping>streamsupport</mapping>
+                    </apiMappings>
                 </configuration>
             </plugin>
 
