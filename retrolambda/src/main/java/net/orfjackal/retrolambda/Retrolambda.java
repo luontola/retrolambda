@@ -38,6 +38,21 @@ public class Retrolambda {
         } else {
             Log.INFO();
         }
+
+        if (config.isFixJava8Classpath()) {
+          List<Path> classpathNew = new ArrayList<>();
+          for(Path p : classpath) {
+            if (p.toString().endsWith("/classes") && Files.isDirectory(p)) {
+              Path p2 = p.getParent().resolve("classes-java8");
+              if (Files.isDirectory(p2)) {
+                p = p2;
+              }
+            }
+            classpathNew.add(p);
+          }
+          classpath = classpathNew;
+        }
+
         Log.info("Bytecode version: " + bytecodeVersion + " (" + Bytecode.getJavaVersion(bytecodeVersion) + ")");
         Log.info("Default methods:  " + defaultMethodsEnabled);
         Log.info("Input directory:  " + inputDir);
@@ -47,6 +62,7 @@ public class Retrolambda {
         Log.info("JVM version:      " + System.getProperty("java.version"));
         Log.info("Agent enabled:    " + Agent.isEnabled());
         Log.info("javac hacks:      " + isJavacHacksEnabled);
+        Log.info("Fix classpath:    " + config.isFixJava8Classpath());
 
         if (!Files.isDirectory(inputDir)) {
             Log.info("Nothing to do; not a directory: " + inputDir);

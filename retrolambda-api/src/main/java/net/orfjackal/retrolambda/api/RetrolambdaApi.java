@@ -17,4 +17,5 @@ public class RetrolambdaApi {
     public static final String DEFAULT_METHODS = PREFIX + "defaultMethods";
     public static final String BYTECODE_VERSION = PREFIX + "bytecodeVersion";
     public static final String JAVAC_HACKS = PREFIX + "javacHacks";
+    public static final String FIX_JAVA8_CLASSPATH = PREFIX + "fixJava8Classpath";
 }

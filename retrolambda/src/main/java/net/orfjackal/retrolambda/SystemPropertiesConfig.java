@@ -132,6 +132,20 @@ public class SystemPropertiesConfig implements Config {
                 "length limit. The file must list one file per line with UTF-8 encoding.");
     }
 
+
+    // fix Java 8 classpath
+
+    static {
+        optionalParameterHelp(FIX_JAVA8_CLASSPATH,
+                "Whether to replace occurrences of classpath entries ending in /classes",
+                "with entries ending in /classes-java8 if such directory is available.",
+                "Disabled by default. Enable by setting to \"true\"");
+    }
+
+    @Override
+    public boolean isFixJava8Classpath() {
+        return Boolean.parseBoolean(p.getProperty(FIX_JAVA8_CLASSPATH, "false"));
+    }
     @Override
     public List<Path> getClasspath() {
         String classpath = p.getProperty(CLASSPATH);

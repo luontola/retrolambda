@@ -107,6 +107,14 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     @Parameter(defaultValue = "false")
     public boolean fork;
 
+    /**
+     * Whether to replace occurrences of classpath entries ending in {@code /classes}
+     * with entries ending in {@code /classes-java8} if such directory is available.
+     * @since 2.5.8
+     */
+    @Parameter(defaultValue = "false", property = "fixJava8Classpath", required = false)
+    public boolean fixJava8Classpath;
+
     protected abstract File getInputDir();
 
     protected abstract File getOutputDir();
@@ -126,6 +134,7 @@ abstract class ProcessClassesMojo extends AbstractMojo {
         config.setProperty(RetrolambdaApi.OUTPUT_DIR, getOutputDir().getAbsolutePath());
         config.setProperty(RetrolambdaApi.CLASSPATH, getClasspath());
         config.setProperty(RetrolambdaApi.JAVAC_HACKS, "" + javacHacks);
+        config.setProperty(RetrolambdaApi.FIX_JAVA8_CLASSPATH, "" + fixJava8Classpath);
 
         if (fork) {
             processClassesInForkedProcess(config);

@@ -24,4 +24,6 @@ public interface Config {
     boolean isJavacHacksEnabled();
 
     boolean isQuiet();
+
+    boolean isFixJava8Classpath();
 }
