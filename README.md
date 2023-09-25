@@ -131,6 +131,11 @@ Configurable system properties:
       Alternative to retrolambda.classpath for avoiding the command line
       length limit. The file must list one file per line with UTF-8 encoding.
 
+  retrolambda.fixJava8Classpath
+      Whether to replace occurrences of classpath entries ending in /classes
+      with entries ending in /classes-java8 if such directory is available.
+      Disabled by default. Enable by setting to "true"
+
   retrolambda.includedFiles
       List of files to process, instead of processing all files.
       This is useful for a build tool to support incremental compilation.
