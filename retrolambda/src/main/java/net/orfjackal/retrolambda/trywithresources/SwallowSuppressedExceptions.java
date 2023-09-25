@@ -21,9 +21,11 @@ public class SwallowSuppressedExceptions extends ClassVisitor {
             @Override
             public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
                 if (opcode == Opcodes.INVOKEVIRTUAL
-                        && owner.equals("java/lang/Throwable")
                         && name.equals("addSuppressed")
-                        && desc.equals("(Ljava/lang/Throwable;)V")) {
+                        && desc.equals("(Ljava/lang/Throwable;)V")
+                        && (owner.equals("java/lang/Throwable")
+                                || owner.endsWith("Exception")
+                                || owner.endsWith("Error"))) {
                     super.visitInsn(Opcodes.POP); // the suppressed exception
                     super.visitInsn(Opcodes.POP); // the original exception
                 } else {
