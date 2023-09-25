@@ -15,7 +15,7 @@ public class FilteringFileVisitor implements FileVisitor<Path> {
     private final FileVisitor<? super Path> target;
 
     public FilteringFileVisitor(Collection<Path> fileFilter, FileVisitor<Path> target) {
-        this.fileFilter = new HashSet<>(fileFilter);
+        this.fileFilter = fileFilter == null ? null : new HashSet<>(fileFilter);
         this.target = target;
     }
 
@@ -26,12 +26,15 @@ public class FilteringFileVisitor implements FileVisitor<Path> {
 
     @Override
     public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+        if (dir.toString().endsWith("/META-INF/versions")) {
+            return FileVisitResult.SKIP_SUBTREE;
+        }
         return target.preVisitDirectory(dir, attrs);
     }
 
     @Override
     public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-        if (fileFilter.contains(file)) {
+        if (fileFilter == null || fileFilter.contains(file)) {
             return target.visitFile(file, attrs);
         } else {
             return FileVisitResult.CONTINUE;

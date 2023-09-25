@@ -103,9 +103,7 @@ public class Retrolambda {
     }
 
     static void visitFiles(Path inputDir, List<Path> includedFiles, FileVisitor<Path> visitor) throws IOException {
-        if (includedFiles != null) {
-            visitor = new FilteringFileVisitor(includedFiles, visitor);
-        }
+        visitor = new FilteringFileVisitor(includedFiles, visitor);
         Files.walkFileTree(inputDir, visitor);
     }
 
