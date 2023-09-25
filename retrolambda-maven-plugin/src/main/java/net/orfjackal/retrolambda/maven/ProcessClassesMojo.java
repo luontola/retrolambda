@@ -43,6 +43,14 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     protected MavenProject project;
 
     /**
+     * Whether to skip execution of this plugin.
+     * 
+     * @since 2.5.8
+     */
+    @Parameter(defaultValue = "false", property = "skip", required = false)
+    public boolean skip;
+
+    /**
      * Directory of the Java 8 installation for running Retrolambda.
      * The JRE to be used will be determined in priority order:
      * <ol>
@@ -115,6 +123,11 @@ abstract class ProcessClassesMojo extends AbstractMojo {
 
     @Override
     public void execute() throws MojoExecutionException {
+        if (skip) {
+            getLog().info("Skipping execution (skip=true)");
+            return;
+        }
+
         validateTarget();
         validateFork();
 
