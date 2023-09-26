@@ -4,11 +4,14 @@
 
 package net.orfjackal.retrolambda.maven;
 
-import org.apache.maven.artifact.DependencyResolutionRequiredException;
-import org.apache.maven.plugins.annotations.*;
-
 import java.io.File;
 import java.util.List;
+
+import org.apache.maven.artifact.DependencyResolutionRequiredException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.plugins.annotations.ResolutionScope;
 
 /**
  * Processes test classes compiled with Java 8 so that they will be compatible with
