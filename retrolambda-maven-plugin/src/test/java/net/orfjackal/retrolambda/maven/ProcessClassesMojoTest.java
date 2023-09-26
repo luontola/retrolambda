@@ -76,8 +76,19 @@ public class ProcessClassesMojoTest {
             return toolChainsByType.get(type);
         }
 
-        public void setJdkToolChain(JavaToolChain toolChain) {
+        public void setJdkToolChain(JavaToolchain toolChain) {
             toolChainsByType.put("jdk", toolChain);
+        }
+
+        @Override
+        public List<Toolchain> getToolchains(MavenSession session, String type,
+            Map<String, String> requirements) {
+          Toolchain tc = toolChainsByType.get("jdk");
+          if(tc == null) {
+            return Collections.emptyList();
+          } else {
+            return Collections.singletonList(tc);
+          }
         }
     }
 

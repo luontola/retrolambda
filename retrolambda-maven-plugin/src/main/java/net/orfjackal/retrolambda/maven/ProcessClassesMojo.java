@@ -222,21 +222,37 @@ abstract class ProcessClassesMojo extends AbstractMojo {
     }
 
     String getJavaCommand() {
-        String javaCommand = getJavaCommand(new File(System.getProperty("java.home")));
+      String javaCommand = null;
 
-        Toolchain tc = toolchainManager.getToolchainFromBuildContext("jdk", session);
-        if (tc != null) {
-            getLog().info("Toolchain in retrolambda-maven-plugin: " + tc);
-            javaCommand = tc.findTool("java");
-        }
+      List<Toolchain> tcCandidates = toolchainManager.getToolchains(session, "jdk", Collections
+          .singletonMap("version", "1.8"));
+      for (Toolchain tc : tcCandidates) {
+          String cmd = tc.findTool("java");
+          if (cmd != null) {
+              getLog().info("Toolchain in retrolambda-maven-plugin: " + tc);
+              javaCommand = cmd;
+              break;
+          }
+      }
 
-        if (java8home != null) {
-            if (tc != null) {
-                getLog().warn("Toolchains are ignored, 'java8home' parameter is set to " + java8home);
-            }
-            javaCommand = getJavaCommand(java8home);
-        }
-        return javaCommand;
+      Toolchain tc = toolchainManager.getToolchainFromBuildContext("jdk", session);
+      if (javaCommand == null && tc != null) {
+          getLog().info("Toolchain in retrolambda-maven-plugin: " + tc);
+          javaCommand = tc.findTool("java");
+      }
+
+      if (java8home != null) {
+          if (tc != null) {
+              getLog().warn("Toolchains are ignored, 'java8home' parameter is set to " + java8home);
+          }
+          javaCommand = getJavaCommand(java8home);
+      }
+
+      if (javaCommand == null) {
+          javaCommand = getJavaCommand(new File(System.getProperty("java.home")));
+      }
+
+      return javaCommand;
     }
 
     private static String getJavaCommand(File javaHome) {
